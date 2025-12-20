@@ -2,15 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePremium } from '@/hooks/usePremium';
+import { PremiumPromo } from '@/components/PremiumPromo';
 
 export default function TravelModePage() {
   const router = useRouter();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [isActive, setIsActive] = useState(false);
   const [city, setCity] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showCitySearch, setShowCitySearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Show promo for non-premium users
+  if (!premiumLoading && !isPremium) {
+    return <PremiumPromo feature="Travel Mode" fullPage />;
+  }
 
   const popularCities = [
     { name: 'New York, NY', country: 'USA', icon: '🗽' },

@@ -564,7 +564,25 @@ export default function PremiumPage() {
           {loading ? 'Processing...' : 'Continue'}
         </button>
 
-        {/* Disclaimer */}
+        {/* Auto-Renewal Disclaimer */}
+        <div style={{
+          fontSize: '12px',
+          color: '#888',
+          textAlign: 'center',
+          lineHeight: 1.6,
+          marginBottom: '16px',
+          padding: '16px',
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '12px',
+          border: '1px solid #333'
+        }}>
+          <strong style={{ color: '#aaa' }}>Auto-Renewal Notice:</strong> {selectedPlan === 'week' ? (
+            'The 1-week plan is a one-time purchase and does not auto-renew.'
+          ) : (
+            `Your subscription will automatically renew at $${plans[selectedPlan].total} every ${selectedPlan === '1month' ? 'month' : selectedPlan === '3months' ? '3 months' : '6 months'} unless cancelled at least 24 hours before the renewal date.`
+          )}
+        </div>
+
         <div style={{
           fontSize: '11px',
           color: '#666',
@@ -572,7 +590,7 @@ export default function PremiumPage() {
           lineHeight: 1.5,
           marginBottom: '24px'
         }}>
-          Subscriptions will auto-renew under identical terms unless you cancel at least 24 hours before renewal via App Store. <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>View Terms</span>.
+          You can cancel anytime from your account settings. By subscribing, you agree to our <span style={{ textDecoration: 'underline', cursor: 'pointer', color: '#888' }}>Terms of Service</span> and <span style={{ textDecoration: 'underline', cursor: 'pointer', color: '#888' }}>Privacy Policy</span>.
         </div>
 
         {/* Fine Print */}
@@ -582,7 +600,7 @@ export default function PremiumPage() {
           textAlign: 'center',
           lineHeight: 1.4
         }}>
-          * You may still see sponsored content from Sltr and its affiliates.
+          * You may still see sponsored content from SLTR and its affiliates.
         </div>
       </div>
     </div>

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { usePremium } from '@/hooks/usePremium';
+import { PremiumPromo } from '@/components/PremiumPromo';
 
 interface Room {
   id: string;
@@ -31,11 +33,15 @@ const ROOM_CATEGORIES: Record<string, string> = {
 export default function PulseLobbyPage() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Only fetch rooms for premium users
+    if (premiumLoading || !isPremium) return;
+
     const fetchRooms = async () => {
       try {
         const response = await fetch('/api/livekit/rooms');
@@ -64,7 +70,12 @@ export default function PulseLobbyPage() {
     // Refresh room counts every 30 seconds
     const interval = setInterval(fetchRooms, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [premiumLoading, isPremium]);
+
+  // Show promo for non-premium users
+  if (!premiumLoading && !isPremium) {
+    return <PremiumPromo feature="The Pulse" fullPage />;
+  }
 
   const totalParticipants = rooms.reduce((sum, room) => sum + room.participantCount, 0);
 

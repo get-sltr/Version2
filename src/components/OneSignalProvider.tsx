@@ -32,13 +32,6 @@ export function OneSignalProvider() {
         await OneSignal.init({
           appId,
           allowLocalhostAsSecureOrigin: true,
-          notifyButton: {
-            enable: false, // We'll use our own UI
-          },
-          welcomeNotification: {
-            title: 'SLTR',
-            message: 'Thanks for enabling notifications!',
-          },
         });
 
         setInitialized(true);

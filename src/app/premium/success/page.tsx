@@ -11,6 +11,7 @@ function SuccessContent() {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [redirectCountdown, setRedirectCountdown] = useState(3);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -36,6 +37,17 @@ function SuccessContent() {
 
         if (profile?.is_premium) {
           setLoading(false);
+          // Auto-redirect to dashboard with countdown
+          const countdownInterval = setInterval(() => {
+            setRedirectCountdown(prev => {
+              if (prev <= 1) {
+                clearInterval(countdownInterval);
+                router.push('/dashboard');
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
         } else {
           // Retry once more after another delay
           await new Promise(resolve => setTimeout(resolve, 3000));
@@ -158,10 +170,17 @@ function SuccessContent() {
             color: colors.textSecondary,
             fontSize: '16px',
             maxWidth: '300px',
-            marginBottom: '32px',
+            marginBottom: '16px',
             lineHeight: 1.5
           }}>
             Your premium features are now unlocked. Enjoy unlimited access to SLTR!
+          </p>
+          <p style={{
+            color: colors.accent,
+            fontSize: '14px',
+            marginBottom: '32px'
+          }}>
+            Redirecting to grid in {redirectCountdown}...
           </p>
         </>
       )}

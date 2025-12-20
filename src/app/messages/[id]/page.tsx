@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { supabase } from '../../../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { usePremium, useMessage } from '@/hooks/usePremium';
+import { PremiumPromo } from '@/components/PremiumPromo';
 
 type MessageRecord = {
   id: string;
@@ -97,6 +99,11 @@ export default function ConversationPage() {
   // Hide chat photos feature
   const [hideChatPhotos, setHideChatPhotos] = useState<{ enabled: boolean; blurLevel: 'light' | 'heavy' }>({ enabled: false, blurLevel: 'light' });
   const [revealedImages, setRevealedImages] = useState<Set<string>>(new Set());
+
+  // Premium status
+  const { isPremium, messagesRemaining } = usePremium();
+  const [showPremiumPromo, setShowPremiumPromo] = useState(false);
+  const [premiumFeature, setPremiumFeature] = useState('');
 
   // Expiring photos feature
   const [showExpiringOption, setShowExpiringOption] = useState(false);
@@ -509,6 +516,13 @@ export default function ConversationPage() {
   const startVideoCall = async () => {
     if (!currentUserId || !otherUserId) return;
 
+    // Premium check for video calls
+    if (!isPremium) {
+      setPremiumFeature('Video Calls');
+      setShowPremiumPromo(true);
+      return;
+    }
+
     setStartingVideoCall(true);
     setError(null);
 
@@ -622,7 +636,7 @@ export default function ConversationPage() {
             </div>
             <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', textAlign: mine ? 'right' : 'left' }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
             </div>
             {mine && (
               <button
@@ -772,7 +786,7 @@ export default function ConversationPage() {
             )}
             <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', textAlign: mine ? 'right' : 'left' }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
             </div>
           </div>
         </div>
@@ -820,7 +834,7 @@ export default function ConversationPage() {
             </div>
             <div style={{ fontSize: '10px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary, padding: '0 12px 8px', textAlign: mine ? 'right' : 'left' }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
             </div>
           </div>
         </div>
@@ -904,7 +918,7 @@ export default function ConversationPage() {
           {m.content}
           <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.7, textAlign: 'right' }}>
             {formatTime(m.created_at)}
-            {mine && m.read_at && <span style={{ marginLeft: '6px' }}>Seen</span>}
+            {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
           </div>
           {mine && !m.id.startsWith('temp-') && (
             <button
@@ -1193,6 +1207,14 @@ export default function ConversationPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Premium Promo Modal */}
+      {showPremiumPromo && (
+        <PremiumPromo
+          feature={premiumFeature}
+          onClose={() => setShowPremiumPromo(false)}
+        />
       )}
 
       {/* Composer */}

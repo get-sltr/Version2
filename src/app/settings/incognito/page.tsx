@@ -1,9 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePremium } from '@/hooks/usePremium';
+import { PremiumPromo } from '@/components/PremiumPromo';
 
 export default function IncognitoModePage() {
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [enabled, setEnabled] = useState(false);
+  const [showPromo, setShowPromo] = useState(false);
 
   useEffect(() => {
     // Load saved preference
@@ -13,11 +17,27 @@ export default function IncognitoModePage() {
     }
   }, []);
 
+  // Show promo for non-premium users after loading
+  useEffect(() => {
+    if (!premiumLoading && !isPremium) {
+      setShowPromo(true);
+    }
+  }, [premiumLoading, isPremium]);
+
   const toggleIncognito = () => {
+    if (!isPremium) {
+      setShowPromo(true);
+      return;
+    }
     const newValue = !enabled;
     setEnabled(newValue);
     localStorage.setItem('incognitoMode', JSON.stringify(newValue));
   };
+
+  // Show promo modal for non-premium users
+  if (showPromo && !isPremium) {
+    return <PremiumPromo feature="Incognito Mode" fullPage />;
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif" }}>
