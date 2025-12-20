@@ -1,0 +1,667 @@
+/* =============================================================================
+   Map Feature Styles
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Header
+   ----------------------------------------------------------------------------- */
+
+.headerRow {
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profileAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  border: 2px solid #000;
+  display: block;
+}
+
+.searchBar {
+  flex: 1;
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+}
+
+.searchIcon {
+  font-size: 18px;
+}
+
+.settingsButton {
+  background: rgba(128, 128, 128, 0.15);
+  border: none;
+  border-radius: 18px;
+  padding: 8px 12px;
+  font-size: 14px;
+  flex-shrink: 0;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  backdrop-filter: blur(10px);
+}
+
+/* -----------------------------------------------------------------------------
+   Toggle Tabs
+   ----------------------------------------------------------------------------- */
+
+.toggleTabs {
+  display: flex;
+  padding: 0 15px 12px;
+  gap: 8px;
+}
+
+.toggleTab {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background 0.2s, color 0.2s;
+}
+
+/* -----------------------------------------------------------------------------
+   Pulse Banner
+   ----------------------------------------------------------------------------- */
+
+.pulseBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 15px 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.05) 100%);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.pulseBanner:hover {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.25) 0%, rgba(255, 107, 53, 0.1) 100%);
+  border-color: #ff6b35;
+}
+
+.pulseIcon {
+  font-size: 24px;
+}
+
+.pulseContent {
+  flex: 1;
+}
+
+.pulseTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.pulseSubtitle {
+  font-size: 11px;
+}
+
+.pulseArrow {
+  font-size: 18px;
+}
+
+/* -----------------------------------------------------------------------------
+   Visible Profiles Bar
+   ----------------------------------------------------------------------------- */
+
+.visibleProfilesBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.35), transparent);
+  z-index: 50;
+}
+
+.visibleProfilesScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.visibleProfilesScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.profileCard {
+  min-width: 120px;
+  background: rgba(128, 128, 128, 0.06);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s;
+}
+
+.profileCard:hover {
+  transform: scale(1.02);
+}
+
+.profileCardImage {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #000;
+  box-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  flex-shrink: 0;
+}
+
+.profileCardName {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profileCardDistance {
+  font-size: 12px;
+}
+
+/* -----------------------------------------------------------------------------
+   Map Controls
+   ----------------------------------------------------------------------------- */
+
+.controlsBar {
+  padding: 12px 20px;
+  background: #000;
+  border-top: 1px solid #1c1c1e;
+  display: flex;
+  gap: 10px;
+}
+
+.controlButton {
+  flex: 1;
+  background: #1c1c1e;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.controlButton:hover {
+  background: #2c2c2e;
+}
+
+.controlButtonPrimary {
+  flex: 1;
+  background: #ff6b35;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.controlButtonPrimary:hover {
+  background: #ff8c5a;
+}
+
+/* -----------------------------------------------------------------------------
+   Drawer (shared between Profile and Group)
+   ----------------------------------------------------------------------------- */
+
+.drawerBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 998;
+  animation: fadeIn 0.3s ease-out;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 85%;
+  max-width: 400px;
+  background: #1c1c1e;
+  z-index: 999;
+  overflow-y: auto;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
+  animation: slideInRight 0.3s ease-out;
+  border-radius: 20px 0 0 20px;
+}
+
+.drawerClose {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.drawerClose:hover {
+  background: rgba(128, 128, 128, 0.3);
+}
+
+.drawerImage {
+  height: 50vh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.drawerImageGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, transparent, rgba(28, 28, 30, 1));
+}
+
+.drawerImageInfo {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+}
+
+.drawerName {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.drawerStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.onlineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.positionBadge {
+  display: inline-block;
+  background: rgba(255, 107, 53, 0.2);
+  border: 1px solid;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.drawerContent {
+  padding: 24px 20px;
+}
+
+.drawerSection {
+  margin-bottom: 24px;
+}
+
+.drawerSection h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.drawerSection p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   Stats Grid
+   ----------------------------------------------------------------------------- */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statCard div:first-child {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.statCard div:last-child {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* -----------------------------------------------------------------------------
+   Tags
+   ----------------------------------------------------------------------------- */
+
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* -----------------------------------------------------------------------------
+   Action Buttons
+   ----------------------------------------------------------------------------- */
+
+.drawerActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.primaryButton {
+  flex: 1;
+  color: #fff;
+  text-align: center;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.primaryButton:hover {
+  opacity: 0.9;
+}
+
+.secondaryButton {
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.secondaryButton:hover {
+  background: rgba(128, 128, 128, 0.25);
+}
+
+/* -----------------------------------------------------------------------------
+   Group Drawer Specific
+   ----------------------------------------------------------------------------- */
+
+.groupHeader {
+  padding: 20px;
+  border-bottom: 1px solid;
+  text-align: center;
+}
+
+.groupIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  border: 2px solid #000;
+}
+
+.groupTitle {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.groupSubtitle {
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.attendeeCount {
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.attendeeNumber {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.infoCards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.infoCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.infoCardIcon {
+  font-size: 24px;
+}
+
+.infoCard div:first-child {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.infoCard div:last-child {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hostCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+}
+
+.hostCard:hover {
+  background: rgba(128, 128, 128, 0.25);
+}
+
+.hostAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #000;
+  flex-shrink: 0;
+}
+
+.hostCard div:first-child {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hostCard div:last-child {
+  font-size: 13px;
+}
+
+.attendeesRow {
+  display: flex;
+  gap: 8px;
+}
+
+.attendeeAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #000;
+}
+
+.attendeeMore {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* -----------------------------------------------------------------------------
+   Cruising FAB
+   ----------------------------------------------------------------------------- */
+
+.cruisingFab {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+  cursor: pointer;
+  z-index: 50;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.cruisingFab:hover {
+  transform: scale(1.1);
+}
+
+/* -----------------------------------------------------------------------------
+   Animations
+   ----------------------------------------------------------------------------- */
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

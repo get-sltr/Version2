@@ -1,0 +1,322 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import {
+  LiveKitRoom,
+  GridLayout,
+  ParticipantTile,
+  RoomAudioRenderer,
+  ControlBar,
+  useTracks,
+  useParticipants,
+  Chat,
+} from '@livekit/components-react';
+import '@livekit/components-styles';
+import { Track } from 'livekit-client';
+import { useTheme } from '@/contexts/ThemeContext';
+
+interface VideoConferenceProps {
+  roomName: string;
+  onLeave?: () => void;
+}
+
+/**
+ * Main Video Conference Component (Zoom-style)
+ * Used for Pulse rooms and Group events
+ */
+export default function VideoConference({ roomName, onLeave }: VideoConferenceProps) {
+  const { colors } = useTheme();
+  const [token, setToken] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showChat, setShowChat] = useState(false);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const response = await fetch('/api/livekit/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomName, roomType: 'pulse' }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to get access token');
+        }
+
+        const data = await response.json();
+        setToken(data.token);
+        setServerUrl(data.serverUrl);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to connect');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchToken();
+  }, [roomName]);
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: colors.background,
+          color: colors.text,
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '24px', marginBottom: '16px' }}>Connecting...</div>
+          <div style={{ fontSize: '14px', opacity: 0.6 }}>Setting up your video</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: colors.background,
+          color: colors.text,
+        }}
+      >
+        <div style={{ textAlign: 'center', maxWidth: '400px', padding: '20px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>😕</div>
+          <div style={{ fontSize: '20px', marginBottom: '12px' }}>Connection Failed</div>
+          <div style={{ fontSize: '14px', opacity: 0.6, marginBottom: '24px' }}>{error}</div>
+          <button
+            onClick={onLeave}
+            style={{
+              padding: '12px 24px',
+              background: colors.accent,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!token || !serverUrl) {
+    return null;
+  }
+
+  return (
+    <div style={{ height: '100vh', background: '#000' }}>
+      <LiveKitRoom
+        token={token}
+        serverUrl={serverUrl}
+        connect={true}
+        video={true}
+        audio={true}
+        onDisconnected={onLeave}
+        onError={(error) => {
+          console.error('LiveKit error:', error);
+          setError(error.message);
+        }}
+        style={{ height: '100%' }}
+        data-lk-theme="default"
+      >
+        <div style={{ display: 'flex', height: '100%' }}>
+          {/* Main video area */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
+            <RoomHeader roomName={roomName} onLeave={onLeave} />
+
+            {/* Video Grid */}
+            <div style={{ flex: 1, position: 'relative' }}>
+              <VideoGrid />
+            </div>
+
+            {/* Custom Controls */}
+            <div
+              style={{
+                padding: '16px',
+                background: 'rgba(0,0,0,0.8)',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '12px',
+              }}
+            >
+              <ControlBar
+                variation="minimal"
+                controls={{
+                  microphone: true,
+                  camera: true,
+                  screenShare: true,
+                  leave: true,
+                  chat: false,
+                }}
+              />
+              <button
+                onClick={() => setShowChat(!showChat)}
+                style={{
+                  padding: '10px 16px',
+                  background: showChat ? colors.accent : 'rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                💬 Chat
+              </button>
+            </div>
+          </div>
+
+          {/* Chat Sidebar */}
+          {showChat && (
+            <div
+              style={{
+                width: '320px',
+                borderLeft: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                background: 'rgba(0,0,0,0.9)',
+              }}
+            >
+              <div
+                style={{
+                  padding: '16px',
+                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ color: '#fff', fontWeight: 600 }}>Chat</span>
+                <button
+                  onClick={() => setShowChat(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#fff',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <Chat style={{ height: '100%' }} />
+              </div>
+            </div>
+          )}
+        </div>
+        <RoomAudioRenderer />
+      </LiveKitRoom>
+    </div>
+  );
+}
+
+/**
+ * Room Header Component
+ */
+function RoomHeader({
+  roomName,
+  onLeave,
+}: {
+  roomName: string;
+  onLeave?: () => void;
+}) {
+  const participants = useParticipants();
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDuration((d) => d + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatDuration = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hrs > 0) {
+      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div
+      style={{
+        padding: '12px 16px',
+        background: 'rgba(0,0,0,0.8)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <span style={{ color: '#fff', fontWeight: 600 }}>{roomName}</span>
+        <span
+          style={{
+            background: '#ff4444',
+            color: '#fff',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 600,
+          }}
+        >
+          LIVE
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>
+          👥 {participants.length}
+        </span>
+        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px' }}>
+          ⏱️ {formatDuration(duration)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Custom Video Grid - displays participant tiles without built-in controls
+ */
+function VideoGrid() {
+  const tracks = useTracks(
+    [
+      { source: Track.Source.Camera, withPlaceholder: false },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ],
+    { onlySubscribed: false }
+  );
+
+  return (
+    <GridLayout
+      tracks={tracks}
+      style={{ height: '100%' }}
+    >
+      <ParticipantTile />
+    </GridLayout>
+  );
+}

@@ -1,0 +1,645 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { supabase } from '../../../lib/supabase';
+import { IconFlame, IconWave, IconWink, IconEye, IconStar, IconChat, IconClose, IconBack } from '@/components/Icons';
+import ProBadge from '@/components/ProBadge';
+
+// Tap types available - now using components
+const TAP_TYPES = [
+  { id: 'flame', label: 'Fire', Icon: IconFlame },
+  { id: 'wave', label: 'Wave', Icon: IconWave },
+  { id: 'wink', label: 'Wink', Icon: IconWink },
+  { id: 'looking', label: 'Looking', Icon: IconEye },
+];
+
+// Section Header component
+const SectionHeader = ({ title }: { title: string }) => (
+  <div style={{
+    fontSize: '11px',
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase',
+    marginBottom: '10px',
+    letterSpacing: '1px',
+    fontWeight: 600
+  }}>
+    {title}
+  </div>
+);
+
+// Tag component for displaying values
+const Tag = ({ children, variant = 'default' }: { children: React.ReactNode; variant?: 'primary' | 'stat' | 'health' | 'looking' | 'tribe' | 'default' }) => {
+  const styles: Record<string, React.CSSProperties> = {
+    primary: { background: 'rgba(255,107,53,0.3)', color: '#FF6B35', fontWeight: 600 },
+    stat: { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.9)' },
+    health: { background: 'rgba(76,175,80,0.2)', color: '#81c784' },
+    looking: { background: 'rgba(100,181,246,0.2)', color: '#90caf9' },
+    tribe: { background: 'rgba(255,107,53,0.2)', color: '#ffab91' },
+    default: { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)' },
+  };
+
+  return (
+    <span style={{
+      fontSize: '13px',
+      padding: '6px 12px',
+      borderRadius: '6px',
+      display: 'inline-block',
+      ...styles[variant]
+    }}>
+      {children}
+    </span>
+  );
+};
+
+// Info Row component for key-value pairs
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>{label}</span>
+    <span style={{ color: '#fff', fontSize: '14px' }}>{value}</span>
+  </div>
+);
+
+export default function ProfileViewPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [hasTapped, setHasTapped] = useState(false);
+  const [showTapMenu, setShowTapMenu] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+
+        // Check if already favorited
+        const { data: favData } = await supabase
+          .from('favorites')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('favorited_user_id', params.id)
+          .single();
+
+        if (favData) setIsFavorited(true);
+
+        // Check if already tapped
+        const { data: tapData } = await supabase
+          .from('taps')
+          .select('id')
+          .eq('sender_id', user.id)
+          .eq('recipient_id', params.id)
+          .single();
+
+        if (tapData) setHasTapped(true);
+      }
+
+      // Load profile
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+
+      if (data) {
+        setProfile(data);
+      }
+      setLoading(false);
+    };
+
+    loadProfile();
+  }, [params.id]);
+
+  // Handle Tap
+  const handleTap = async (tapType: string) => {
+    if (!currentUserId || actionLoading) return;
+    setActionLoading(true);
+    setShowTapMenu(false);
+
+    try {
+      if (hasTapped) {
+        // Remove tap
+        await supabase
+          .from('taps')
+          .delete()
+          .eq('sender_id', currentUserId)
+          .eq('recipient_id', params.id);
+        setHasTapped(false);
+      } else {
+        // Add tap
+        await supabase
+          .from('taps')
+          .insert({
+            sender_id: currentUserId,
+            recipient_id: params.id,
+            tap_type: tapType
+          });
+        setHasTapped(true);
+      }
+    } catch (error) {
+      console.error('Tap error:', error);
+    }
+    setActionLoading(false);
+  };
+
+  // Handle Favorite
+  const handleFavorite = async () => {
+    if (!currentUserId || actionLoading) return;
+    setActionLoading(true);
+
+    try {
+      if (isFavorited) {
+        // Remove favorite
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', currentUserId)
+          .eq('favorited_user_id', params.id);
+        setIsFavorited(false);
+      } else {
+        // Add favorite
+        await supabase
+          .from('favorites')
+          .insert({
+            user_id: currentUserId,
+            favorited_user_id: params.id
+          });
+        setIsFavorited(true);
+      }
+    } catch (error) {
+      console.error('Favorite error:', error);
+    }
+    setActionLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#000',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#000',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff',
+        flexDirection: 'column',
+        gap: '20px'
+      }}>
+        <div style={{ fontSize: '48px' }}>Profile not found</div>
+        <button
+          onClick={() => router.back()}
+          style={{
+            padding: '10px 20px',
+            background: '#FF6B35',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer'
+          }}
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  // Check if sections have content
+  const hasAbout = profile.about || profile.bio;
+  const hasStats = profile.height || profile.weight || profile.body_type || profile.ethnicity;
+  const hasPosition = profile.position;
+  const hasLookingFor = profile.looking_for && Array.isArray(profile.looking_for) && profile.looking_for.length > 0;
+  const hasMeetAt = profile.meet_at && Array.isArray(profile.meet_at) && profile.meet_at.length > 0;
+  const hasIdentity = profile.gender || profile.pronouns || profile.relationship_status;
+  const hasHealth = profile.hiv_status || (profile.health_practices && profile.health_practices.length > 0) || (profile.vaccinations && profile.vaccinations.length > 0);
+  const hasTribes = profile.tribes && Array.isArray(profile.tribes) && profile.tribes.length > 0;
+  const hasTags = profile.tags && Array.isArray(profile.tags) && profile.tags.length > 0;
+  const hasSocials = profile.instagram || profile.twitter || profile.facebook;
+  const hasPhotos = profile.photo_urls && Array.isArray(profile.photo_urls) && profile.photo_urls.length > 0;
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
+      paddingBottom: '100px'
+    }}>
+      {/* Header */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        background: 'rgba(0,0,0,0.95)',
+        backdropFilter: 'blur(10px)',
+        padding: '12px 15px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 100,
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        <button
+          onClick={() => router.back()}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#FF6B35',
+            cursor: 'pointer',
+            padding: '5px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <IconBack size={24} />
+        </button>
+        <span style={{ fontSize: '16px', fontWeight: 600 }}>Profile</span>
+        <button style={{
+          background: 'none',
+          border: 'none',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: '20px',
+          cursor: 'pointer',
+          padding: '5px'
+        }}>
+          ...
+        </button>
+      </header>
+
+      {/* Main Photo - clean, just the image */}
+      <div style={{
+        width: '100%',
+        aspectRatio: '1',
+        background: '#1a1a1a',
+        position: 'relative'
+      }}>
+        {profile.photo_url && (
+          <img
+            src={profile.photo_url}
+            alt={profile.display_name || 'Profile'}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        )}
+
+        {/* Name overlay on photo */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
+          padding: '40px 15px 15px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {profile.is_online && (
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#4caf50' }} />
+            )}
+            <span style={{ fontSize: '28px', fontWeight: 600 }}>
+              {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
+            </span>
+            {profile.is_premium && <ProBadge size="md" />}
+          </div>
+          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginTop: '4px' }}>
+            Nearby
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Card - All information organized by category */}
+      <div style={{ padding: '0 15px' }}>
+
+        {/* About Section */}
+        {hasAbout && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="About" />
+            <p style={{ margin: 0, fontSize: '15px', lineHeight: '1.6', color: 'rgba(255,255,255,0.9)' }}>
+              {profile.about || profile.bio}
+            </p>
+          </div>
+        )}
+
+        {/* Position Section */}
+        {hasPosition && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Position" />
+            <Tag variant="primary">{profile.position}</Tag>
+          </div>
+        )}
+
+        {/* Stats Section */}
+        {hasStats && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Stats" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {profile.height && <Tag variant="stat">{profile.height}</Tag>}
+              {profile.weight && <Tag variant="stat">{profile.weight}</Tag>}
+              {profile.body_type && <Tag variant="stat">{profile.body_type}</Tag>}
+              {profile.ethnicity && <Tag variant="stat">{profile.ethnicity}</Tag>}
+            </div>
+          </div>
+        )}
+
+        {/* Looking For Section */}
+        {hasLookingFor && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Looking For" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {profile.looking_for.map((item: string) => (
+                <Tag key={item} variant="looking">{item}</Tag>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Meet At Section */}
+        {hasMeetAt && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Meet At" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {profile.meet_at.map((item: string) => (
+                <Tag key={item} variant="default">{item}</Tag>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Identity Section */}
+        {hasIdentity && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Identity" />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {profile.gender && <InfoRow label="Gender" value={profile.gender} />}
+              {profile.pronouns && <InfoRow label="Pronouns" value={profile.pronouns} />}
+              {profile.relationship_status && <InfoRow label="Relationship" value={profile.relationship_status} />}
+            </div>
+          </div>
+        )}
+
+        {/* Health & Safety Section */}
+        {hasHealth && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Health & Safety" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {profile.hiv_status && <Tag variant="health">{profile.hiv_status}</Tag>}
+              {profile.health_practices && Array.isArray(profile.health_practices) && profile.health_practices.map((item: string) => (
+                <Tag key={item} variant="health">{item}</Tag>
+              ))}
+              {profile.vaccinations && Array.isArray(profile.vaccinations) && profile.vaccinations.map((item: string) => (
+                <Tag key={item} variant="health">{item}</Tag>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tribes Section */}
+        {hasTribes && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Tribes" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {profile.tribes.map((tribe: string) => (
+                <Tag key={tribe} variant="tribe">{tribe}</Tag>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tags/Interests Section */}
+        {hasTags && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Tags & Interests" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {profile.tags.map((tag: string) => (
+                <Tag key={tag} variant="default">{tag}</Tag>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Social Links Section */}
+        {hasSocials && (
+          <div style={{ padding: '20px 0', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <SectionHeader title="Social" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {profile.instagram && (
+                <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noopener noreferrer"
+                   style={{ color: '#E1306C', textDecoration: 'none', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Instagram: @{profile.instagram}
+                </a>
+              )}
+              {profile.twitter && (
+                <a href={`https://twitter.com/${profile.twitter}`} target="_blank" rel="noopener noreferrer"
+                   style={{ color: '#1DA1F2', textDecoration: 'none', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Twitter: @{profile.twitter}
+                </a>
+              )}
+              {profile.facebook && (
+                <a href={`https://facebook.com/${profile.facebook}`} target="_blank" rel="noopener noreferrer"
+                   style={{ color: '#4267B2', textDecoration: 'none', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  Facebook: {profile.facebook}
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Additional Photos Section */}
+        {hasPhotos && (
+          <div style={{ padding: '20px 0' }}>
+            <SectionHeader title="Photos" />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+              {profile.photo_urls.filter((url: string) => url).map((url: string, index: number) => (
+                <div key={index} style={{ aspectRatio: '1', background: '#1a1a1a', borderRadius: '4px', overflow: 'hidden' }}>
+                  <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tap Menu Popup */}
+      {showTapMenu && (
+        <div style={{
+          position: 'fixed',
+          bottom: '80px',
+          left: '15px',
+          right: '15px',
+          background: 'rgba(30,30,30,0.98)',
+          borderRadius: '16px',
+          padding: '16px',
+          zIndex: 200,
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', textAlign: 'center' }}>
+            Send a Tap
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+            {TAP_TYPES.map((tap) => (
+              <button
+                key={tap.id}
+                onClick={() => handleTap(tap.id)}
+                disabled={actionLoading}
+                style={{
+                  padding: '12px 8px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: '#fff'
+                }}
+              >
+                <tap.Icon size={24} />
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>{tap.label}</span>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowTapMenu(false)}
+            style={{
+              width: '100%',
+              marginTop: '12px',
+              padding: '12px',
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Fixed Action Buttons at Bottom */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '8px',
+        padding: '12px 15px',
+        background: 'rgba(0,0,0,0.95)',
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(255,255,255,0.1)'
+      }}>
+        {/* Tap Button */}
+        <button
+          onClick={() => hasTapped ? handleTap('flame') : setShowTapMenu(true)}
+          disabled={actionLoading}
+          style={{
+            padding: '12px',
+            background: hasTapped ? 'rgba(255,107,53,0.3)' : 'rgba(255,255,255,0.1)',
+            border: hasTapped ? '1px solid #FF6B35' : 'none',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: hasTapped ? '#FF6B35' : '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2px'
+          }}
+        >
+          <IconFlame size={18} />
+          <span>{hasTapped ? 'Tapped' : 'Tap'}</span>
+        </button>
+
+        {/* Fave Button */}
+        <button
+          onClick={handleFavorite}
+          disabled={actionLoading}
+          style={{
+            padding: '12px',
+            background: isFavorited ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.1)',
+            border: isFavorited ? '1px solid #FFD700' : 'none',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: isFavorited ? '#FFD700' : '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2px'
+          }}
+        >
+          <IconStar size={18} />
+          <span>{isFavorited ? 'Faved' : 'Fave'}</span>
+        </button>
+
+        {/* Message Button */}
+        <button
+          onClick={() => router.push(`/messages/${params.id}`)}
+          style={{
+            padding: '12px',
+            background: '#FF6B35',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2px'
+          }}
+        >
+          <IconChat size={18} />
+          <span>Message</span>
+        </button>
+
+        {/* Close Button */}
+        <button
+          onClick={() => router.back()}
+          style={{
+            padding: '12px',
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '2px'
+          }}
+        >
+          <IconClose size={18} />
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+  );
+}

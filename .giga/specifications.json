@@ -1,0 +1,22 @@
+[
+  {
+    "fileName": "main-overview.mdc",
+    "description": "Complete system overview documenting the core architecture, component relationships, and high-level feature map of the dating/social platform"
+  },
+  {
+    "fileName": "privacy-models.mdc",
+    "description": "Detailed documentation of privacy-related data models and algorithms, including group privacy settings, incognito mode, profile visibility controls, and tag visibility rules"
+  },
+  {
+    "fileName": "group-management.mdc",
+    "description": "Comprehensive documentation of group management algorithms, validation rules, capacity management, and member relationship models"
+  },
+  {
+    "fileName": "location-systems.mdc",
+    "description": "Technical specification of location-based features including Travel Mode system, location-based discovery, and real-time tracking algorithms"
+  },
+  {
+    "fileName": "content-management.mdc",
+    "description": "Detailed documentation of content management systems including photo albums, video limitations, ephemeral messaging, and associated privacy controls"
+  }
+]

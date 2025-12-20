@@ -1,0 +1,502 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+export default function SearchPage() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Filters
+  const [ageMin, setAgeMin] = useState(18);
+  const [ageMax, setAgeMax] = useState(80);
+  const [distance, setDistance] = useState(30);
+  const [position, setPosition] = useState<string[]>([]);
+  const [tribes, setTribes] = useState<string[]>([]);
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [withPhotos, setWithPhotos] = useState(false);
+
+  const positions = ['Top', 'Bottom', 'Versatile', 'Top Vers', 'Btm Vers', 'Side'];
+  const tribeOptions = ['Bear', 'Twink', 'Jock', 'Otter', 'Daddy', 'Leather', 'Poz', 'Discreet', 'Clean Cut'];
+
+  const mockProfiles = [
+    { id: 1, name: 'HungTop4U', image: '/images/2.jpg', distance: '0.5 mi', age: 28, position: 'Top', tribes: ['Jock'], online: true },
+    { id: 2, name: 'DiscretBttm', image: '/images/3.jpg', distance: '1.2 mi', age: 32, position: 'Bottom', tribes: ['Discreet'], online: false },
+    { id: 3, name: 'VersGuy420', image: '/images/4.jpg', distance: '2.8 mi', age: 25, position: 'Versatile', tribes: ['Clean Cut'], online: true },
+    { id: 4, name: 'NeedTHROAT🐴', image: '/images/6.jpg', distance: '3.0 mi', age: 30, position: 'Top', tribes: ['Bear'], online: true },
+    { id: 5, name: 'FitJock23', image: '/images/5.jpg', distance: '0.8 mi', age: 23, position: 'Versatile', tribes: ['Jock'], online: true },
+    { id: 6, name: 'DaddyBear', image: '/images/6.jpg', distance: '5.0 mi', age: 45, position: 'Top', tribes: ['Bear', 'Daddy'], online: false }
+  ];
+
+  const togglePosition = (pos: string) => {
+    setPosition(prev => 
+      prev.includes(pos) ? prev.filter(p => p !== pos) : [...prev, pos]
+    );
+  };
+
+  const toggleTribe = (tribe: string) => {
+    setTribes(prev => 
+      prev.includes(tribe) ? prev.filter(t => t !== tribe) : [...prev, tribe]
+    );
+  };
+
+  const filteredProfiles = mockProfiles.filter(profile => {
+    // Search query
+    if (searchQuery && !profile.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    // Age range
+    if (profile.age < ageMin || profile.age > ageMax) return false;
+    // Distance
+    const profileDistance = parseFloat(profile.distance);
+    if (profileDistance > distance) return false;
+    // Position
+    if (position.length > 0 && !position.includes(profile.position)) return false;
+    // Tribes
+    if (tribes.length > 0 && !tribes.some(t => profile.tribes.includes(t))) return false;
+    // Online only
+    if (onlineOnly && !profile.online) return false;
+    // With photos (all mock profiles have photos)
+    if (withPhotos && !profile.image) return false;
+    
+    return true;
+  });
+
+  const clearFilters = () => {
+    setAgeMin(18);
+    setAgeMax(80);
+    setDistance(30);
+    setPosition([]);
+    setTribes([]);
+    setOnlineOnly(false);
+    setWithPhotos(false);
+  };
+
+  const activeFilterCount = 
+    (ageMin !== 18 || ageMax !== 80 ? 1 : 0) +
+    (distance !== 30 ? 1 : 0) +
+    position.length +
+    tribes.length +
+    (onlineOnly ? 1 : 0) +
+    (withPhotos ? 1 : 0);
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
+      fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif",
+      paddingBottom: '100px'
+    }}>
+      {/* Header */}
+      <div style={{
+        position: 'sticky',
+        top: 0,
+        background: '#000',
+        borderBottom: '1px solid #333',
+        padding: '16px 20px',
+        zIndex: 10
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+          <button
+            onClick={() => router.back()}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#FF6B35',
+              fontSize: '16px',
+              cursor: 'pointer',
+              padding: 0
+            }}
+          >
+            ← Back
+          </button>
+          <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0, flex: 1 }}>
+            Search
+          </h1>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{ position: 'relative' }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by username..."
+            style={{
+              width: '100%',
+              background: '#1c1c1e',
+              border: '1px solid #333',
+              borderRadius: '12px',
+              padding: '12px 16px',
+              color: '#fff',
+              fontSize: '16px'
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: '#666',
+                fontSize: '20px',
+                cursor: 'pointer',
+                padding: 0
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        {/* Filter Button */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          style={{
+            width: '100%',
+            marginTop: '12px',
+            background: activeFilterCount > 0 ? 'rgba(255,107,53,0.2)' : '#1c1c1e',
+            border: activeFilterCount > 0 ? '1px solid rgba(255,107,53,0.5)' : '1px solid #333',
+            borderRadius: '12px',
+            padding: '12px 16px',
+            color: activeFilterCount > 0 ? '#FF6B35' : '#fff',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}
+        >
+          <span>🎛️</span>
+          <span>Filters</span>
+          {activeFilterCount > 0 && (
+            <span style={{
+              background: '#FF6B35',
+              borderRadius: '12px',
+              padding: '2px 8px',
+              fontSize: '12px',
+              color: '#fff'
+            }}>
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <div style={{
+          background: '#1c1c1e',
+          borderBottom: '1px solid #333',
+          padding: '20px',
+          maxHeight: '60vh',
+          overflowY: 'auto'
+        }}>
+          {/* Age Range */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
+              Age Range: {ageMin} - {ageMax}
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <input
+                type="range"
+                min="18"
+                max="80"
+                value={ageMin}
+                onChange={(e) => setAgeMin(Math.min(parseInt(e.target.value), ageMax - 1))}
+                style={{ flex: 1 }}
+              />
+              <input
+                type="range"
+                min="18"
+                max="80"
+                value={ageMax}
+                onChange={(e) => setAgeMax(Math.max(parseInt(e.target.value), ageMin + 1))}
+                style={{ flex: 1 }}
+              />
+            </div>
+          </div>
+
+          {/* Distance */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
+              Maximum Distance: {distance} mi
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value={distance}
+              onChange={(e) => setDistance(parseInt(e.target.value))}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          {/* Position */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
+              Position
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {positions.map(pos => (
+                <button
+                  key={pos}
+                  onClick={() => togglePosition(pos)}
+                  style={{
+                    background: position.includes(pos) ? 'rgba(255,107,53,0.2)' : '#2c2c2e',
+                    border: position.includes(pos) ? '1px solid rgba(255,107,53,0.5)' : '1px solid #444',
+                    borderRadius: '20px',
+                    padding: '8px 16px',
+                    color: position.includes(pos) ? '#FF6B35' : '#fff',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {pos}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tribes */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
+              Tribes
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {tribeOptions.map(tribe => (
+                <button
+                  key={tribe}
+                  onClick={() => toggleTribe(tribe)}
+                  style={{
+                    background: tribes.includes(tribe) ? 'rgba(255,107,53,0.2)' : '#2c2c2e',
+                    border: tribes.includes(tribe) ? '1px solid rgba(255,107,53,0.5)' : '1px solid #444',
+                    borderRadius: '20px',
+                    padding: '8px 16px',
+                    color: tribes.includes(tribe) ? '#FF6B35' : '#fff',
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {tribe}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Toggles */}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 0',
+              cursor: 'pointer'
+            }}>
+              <span style={{ fontSize: '15px' }}>Online Only</span>
+              <div
+                onClick={() => setOnlineOnly(!onlineOnly)}
+                style={{
+                  width: '44px',
+                  height: '24px',
+                  background: onlineOnly ? '#4CAF50' : '#444',
+                  borderRadius: '12px',
+                  position: 'relative',
+                  transition: 'background 0.2s'
+                }}
+              >
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  background: '#fff',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  top: '2px',
+                  left: onlineOnly ? '22px' : '2px',
+                  transition: 'left 0.2s'
+                }} />
+              </div>
+            </label>
+
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px 0',
+              cursor: 'pointer'
+            }}>
+              <span style={{ fontSize: '15px' }}>With Photos Only</span>
+              <div
+                onClick={() => setWithPhotos(!withPhotos)}
+                style={{
+                  width: '44px',
+                  height: '24px',
+                  background: withPhotos ? '#4CAF50' : '#444',
+                  borderRadius: '12px',
+                  position: 'relative',
+                  transition: 'background 0.2s'
+                }}
+              >
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  background: '#fff',
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  top: '2px',
+                  left: withPhotos ? '22px' : '2px',
+                  transition: 'left 0.2s'
+                }} />
+              </div>
+            </label>
+          </div>
+
+          {/* Filter Actions */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={clearFilters}
+              style={{
+                flex: 1,
+                background: '#2c2c2e',
+                border: '1px solid #444',
+                borderRadius: '12px',
+                padding: '12px',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Clear All
+            </button>
+            <button
+              onClick={() => setShowFilters(false)}
+              style={{
+                flex: 1,
+                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '12px',
+                color: '#fff',
+                fontSize: '14px',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      <div style={{ padding: '20px' }}>
+        <div style={{
+          fontSize: '14px',
+          color: '#aaa',
+          marginBottom: '16px'
+        }}>
+          {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
+        </div>
+
+        {filteredProfiles.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            color: '#666'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+            <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+              No results found
+            </div>
+            <div style={{ fontSize: '14px' }}>
+              Try adjusting your filters
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+            gap: '12px'
+          }}>
+            {filteredProfiles.map(profile => (
+              <div
+                key={profile.id}
+                onClick={() => router.push(`/profile/${profile.id}`)}
+                style={{
+                  position: 'relative',
+                  aspectRatio: '3/4',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  background: '#1c1c1e'
+                }}
+              >
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundImage: `url(${profile.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }} />
+                
+                {/* Online Indicator */}
+                {profile.online && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    background: '#4CAF50',
+                    border: '2px solid #000'
+                  }} />
+                )}
+
+                {/* Profile Info */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
+                  padding: '40px 12px 12px'
+                }}>
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    marginBottom: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {profile.name}
+                  </div>
+                  <div style={{
+                    fontSize: '11px',
+                    color: '#aaa',
+                    display: 'flex',
+                    gap: '6px'
+                  }}>
+                    <span>{profile.age}</span>
+                    <span>•</span>
+                    <span>{profile.distance}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
