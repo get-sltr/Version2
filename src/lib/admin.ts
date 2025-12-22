@@ -21,10 +21,10 @@ const ROLE_HIERARCHY: Record<AdminRole, number> = {
 // Founder email - has ultimate platform authority
 export const FOUNDER_EMAIL = 'kminn121@gmail.com';
 
-// Admin emails and their roles
+// Admin emails and their roles (all lowercase for consistent lookup)
 // Add more admins here as needed
 const ADMIN_ROLES: Record<string, AdminRole> = {
-  [FOUNDER_EMAIL]: 'founder',
+  [FOUNDER_EMAIL.toLowerCase()]: 'founder',
   // Add more admins:
   // 'admin@example.com': 'admin',
   // 'mod@example.com': 'moderator',

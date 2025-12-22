@@ -19,6 +19,7 @@ const PROTECTED_ROUTES = [
   '/checkout',
   '/cruising',
   '/connections',
+  '/admin',
 ];
 
 // Routes that should redirect to dashboard if already authenticated
