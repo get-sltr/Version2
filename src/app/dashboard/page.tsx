@@ -7,6 +7,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { IconSearch, IconMap, IconMenu, IconStar, IconUser, IconCheck, IconEye, IconCrown, IconClose } from '@/components/Icons';
 import BottomNav from '@/components/BottomNav';
 import ProBadge from '@/components/ProBadge';
+import { DTFNButton } from '@/components/dtfn';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -287,29 +288,257 @@ export default function Dashboard() {
           </a>
         </div>
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginLeft: '-15px', marginRight: '-15px', paddingLeft: '15px', paddingRight: '15px' }}>
-          <a href="/settings" style={{ background: colors.surface, border: 'none', borderRadius: '18px', padding: '8px 12px', color: colors.text, fontSize: '14px', flexShrink: 0, textDecoration: 'none', display: 'flex', alignItems: 'center' }}><IconMenu size={16} /></a>
-          <button style={{ background: colors.surface, border: 'none', borderRadius: '18px', padding: '8px 12px', color: colors.text, fontSize: '14px', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}><IconStar size={16} /></button>
-          {filters.map(filter => (
-            <button 
-              key={filter.id} 
-              onClick={() => handleFilterClick(filter)}
-              style={{ 
-                background: (filter.id === 'position' && selectedPositions.length > 0) || (filter.id === 'age' && (ageMin || ageMax)) || (filter.id === 'tribes' && selectedTribes.length > 0) || activeFilter === filter.id ? '#FF6B35' : 'rgba(255, 107, 53, 0.5)', 
-                color: '#fff', 
-                border: 'none', 
-                borderRadius: '4px', 
-                padding: '8px 16px',
-                fontSize: '14px',
-                fontWeight: '600',
-                flexShrink: 0,
-                cursor: 'pointer',
-                position: 'relative'
-              }}
-            >
-              {filter.icon ? filter.icon + ' ' : ''}{getFilterButtonLabel(filter)}
-              {filter.hasDropdown && <span style={{ marginLeft: '4px', fontSize: '10px' }}>▾</span>}
-            </button>
-          ))}
+          <a href="/settings" style={{ background: '#0a0a0a', border: '1px solid #333', borderRadius: '6px', padding: '8px 12px', color: '#888', fontSize: '14px', flexShrink: 0, textDecoration: 'none', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
+            <IconMenu size={16} />
+          </a>
+          <button style={{ background: '#0a0a0a', border: '1px solid #333', borderRadius: '6px', padding: '8px 12px', color: '#888', fontSize: '14px', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
+            <IconStar size={16} />
+          </button>
+          {filters.map(filter => {
+            const isFilterActive = (filter.id === 'position' && selectedPositions.length > 0) ||
+                                   (filter.id === 'age' && (ageMin || ageMax)) ||
+                                   (filter.id === 'tribes' && selectedTribes.length > 0) ||
+                                   activeFilter === filter.id;
+
+            const isDropdownOpen = (filter.id === 'age' && showAgeDropdown) ||
+                                   (filter.id === 'position' && showPositionDropdown) ||
+                                   (filter.id === 'tribes' && showTribesDropdown);
+
+            // Special DTFN button with droplets
+            if (filter.id === 'dtfn') {
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => handleFilterClick(filter)}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: '#0a0a0a',
+                    color: isFilterActive ? '#ff6b35' : '#888',
+                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
+                    transition: 'all 0.3s ease-out',
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '2px',
+                    background: isFilterActive ? '#ff6b35' : '#333',
+                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
+                    transition: 'all 0.3s',
+                  }} />
+                  <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center' }}>
+                    DTFN
+                    <span style={{ display: 'inline-flex', alignItems: 'flex-end', marginLeft: '2px', gap: 0 }}>
+                      <svg style={{ width: '12px', height: '12px', fill: isFilterActive ? '#ff6b35' : '#888', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                        <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
+                      </svg>
+                      <svg style={{ width: '8px', height: '8px', marginLeft: '-1px', fill: isFilterActive ? '#ff6b35' : '#888', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                        <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
+                      </svg>
+                    </span>
+                  </span>
+                </button>
+              );
+            }
+
+            // Online button with green dot
+            if (filter.id === 'online') {
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => handleFilterClick(filter)}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: '#0a0a0a',
+                    color: isFilterActive ? '#ff6b35' : '#888',
+                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
+                    transition: 'all 0.3s ease-out',
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '2px',
+                    background: isFilterActive ? '#ff6b35' : '#333',
+                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
+                    transition: 'all 0.3s',
+                  }} />
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isFilterActive ? '#4caf50' : '#555', position: 'relative', zIndex: 10 }} />
+                  <span style={{ position: 'relative', zIndex: 10 }}>Online</span>
+                </button>
+              );
+            }
+
+            // New button with star icon
+            if (filter.id === 'fresh') {
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => handleFilterClick(filter)}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: '#0a0a0a',
+                    color: isFilterActive ? '#ff6b35' : '#888',
+                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
+                    transition: 'all 0.3s ease-out',
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '2px',
+                    background: isFilterActive ? '#ff6b35' : '#333',
+                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
+                    transition: 'all 0.3s',
+                  }} />
+                  <svg style={{ width: '14px', height: '14px', fill: isFilterActive ? '#ff6b35' : '#888', position: 'relative', zIndex: 10, transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                  </svg>
+                  <span style={{ position: 'relative', zIndex: 10 }}>New</span>
+                </button>
+              );
+            }
+
+            // Photos button with camera icon
+            if (filter.id === 'photos') {
+              return (
+                <button
+                  key={filter.id}
+                  onClick={() => handleFilterClick(filter)}
+                  style={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    background: '#0a0a0a',
+                    color: isFilterActive ? '#ff6b35' : '#888',
+                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.5px',
+                    flexShrink: 0,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
+                    transition: 'all 0.3s ease-out',
+                  }}
+                >
+                  <span style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '2px',
+                    background: isFilterActive ? '#ff6b35' : '#333',
+                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
+                    transition: 'all 0.3s',
+                  }} />
+                  <svg style={{ width: '14px', height: '14px', fill: isFilterActive ? '#ff6b35' : '#888', position: 'relative', zIndex: 10, transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                    <path d="M4 4H7L9 2H15L17 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4ZM12 17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17ZM12 9C13.65 9 15 10.35 15 12C15 13.65 13.65 15 12 15C10.35 15 9 13.65 9 12C9 10.35 10.35 9 12 9Z"/>
+                  </svg>
+                  <span style={{ position: 'relative', zIndex: 10 }}>Photos</span>
+                </button>
+              );
+            }
+
+            // Regular filter buttons (Age, Position, Tribes) with dropdown
+            return (
+              <button
+                key={filter.id}
+                onClick={() => handleFilterClick(filter)}
+                style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: '#0a0a0a',
+                  color: isFilterActive ? '#ff6b35' : '#888',
+                  border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
+                  borderRadius: '6px',
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.5px',
+                  flexShrink: 0,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
+                  transition: 'all 0.3s ease-out',
+                }}
+              >
+                <span style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '2px',
+                  background: isFilterActive ? '#ff6b35' : '#333',
+                  boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
+                  transition: 'all 0.3s',
+                }} />
+                <span style={{ position: 'relative', zIndex: 10 }}>{getFilterButtonLabel(filter)}</span>
+                {filter.hasDropdown && (
+                  <span style={{
+                    position: 'relative',
+                    zIndex: 10,
+                    fontSize: '10px',
+                    transition: 'transform 0.2s',
+                    transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}>▾</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Age Dropdown */}
@@ -697,7 +926,7 @@ export default function Dashboard() {
       </main>
 
       <div style={{ position: 'fixed', bottom: '90px', right: '15px', zIndex: 50 }}>
-        <button style={{ background: 'rgba(40,40,40,0.95)', border: 'none', borderRadius: '25px', padding: '12px 18px', fontSize: '13px', fontWeight: 500, color: '#fff', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 15px rgba(0,0,0,0.4)', cursor: 'pointer' }}>DTFN 💦</button>
+        <DTFNButton />
       </div>
 
       <BottomNav active="explore" />

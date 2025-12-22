@@ -1,10 +1,19 @@
 "use client"
 
 import Link from 'next/link';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function AboutPage() {
+  const { darkMode, toggleDarkMode, colors } = useTheme();
+
   return (
-    <main className="bg-white text-black min-h-screen px-6 md:px-12 lg:px-24 py-20">
+    <main style={{
+      backgroundColor: colors.background,
+      color: colors.text,
+      minHeight: '100vh',
+      overflowX: 'hidden',
+      fontFamily: "'Space Mono', monospace"
+    }}>
 
       {/* Header */}
       <header style={{
@@ -13,190 +22,571 @@ export default function AboutPage() {
         left: 0,
         right: 0,
         padding: '20px 30px',
-        background: 'rgba(255,255,255,0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid #eee',
+        background: darkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: `1px solid ${colors.border}`,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 100
       }}>
-        <Link href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 700, letterSpacing: '0.3em', textDecoration: 'none', color: '#000' }}>s l t r</Link>
+        <Link href="/" style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: '28px',
+          fontWeight: 700,
+          letterSpacing: '0.3em',
+          textDecoration: 'none',
+          color: colors.text
+        }}>
+          s l t r
+        </Link>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          <Link href="/login" style={{ fontSize: '13px', color: '#000', textDecoration: 'none', fontWeight: 500 }}>Log in</Link>
-          <Link href="/signup" style={{ fontSize: '13px', color: '#fff', background: '#000', padding: '10px 20px', textDecoration: 'none', fontWeight: 600, borderRadius: '4px' }}>Sign up</Link>
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            style={{
+              background: 'none',
+              border: `1px solid ${colors.border}`,
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              color: colors.text
+            }}
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? '☀' : '☾'}
+          </button>
+          <Link href="/login" style={{
+            fontSize: '13px',
+            color: colors.text,
+            textDecoration: 'none',
+            fontWeight: 500,
+            opacity: 0.8,
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            Log in
+          </Link>
+          <Link href="/signup" style={{
+            fontSize: '13px',
+            color: '#fff',
+            background: colors.accent,
+            padding: '10px 20px',
+            textDecoration: 'none',
+            fontWeight: 600,
+            borderRadius: '4px',
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            Sign up
+          </Link>
         </div>
       </header>
 
-      {/* Title Section */}
-      <section className="max-w-3xl mx-auto text-center mb-24 pt-16">
-        <h1 className="text-4xl md:text-5xl font-serif tracking-tight mb-6">
-          About SLTR
-        </h1>
-        <p className="text-sm uppercase tracking-widest text-neutral-500">
+      {/* Hero Section */}
+      <section style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+        padding: '120px 24px 80px'
+      }}>
+        {/* Gradient orb */}
+        <div style={{
+          position: 'absolute',
+          top: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '600px',
+          height: '600px',
+          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.08)'} 0%, transparent 70%)`,
+          borderRadius: '50%',
+          filter: 'blur(60px)',
+          pointerEvents: 'none'
+        }} />
+
+        <p style={{
+          fontSize: '12px',
+          letterSpacing: '0.4em',
+          textTransform: 'uppercase',
+          color: colors.accent,
+          marginBottom: '24px',
+          fontWeight: 500,
+          fontFamily: "'Space Mono', monospace"
+        }}>
           Rules Don't Apply
         </p>
+
+        <h1 style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 'clamp(48px, 10vw, 100px)',
+          fontWeight: 300,
+          letterSpacing: '0.05em',
+          textAlign: 'center',
+          lineHeight: 1,
+          marginBottom: '32px',
+          color: colors.text
+        }}>
+          About <span style={{ color: colors.accent }}>SLTR</span>
+        </h1>
+
+        <p style={{
+          fontSize: '16px',
+          color: colors.textSecondary,
+          maxWidth: '500px',
+          textAlign: 'center',
+          lineHeight: 1.6,
+          fontFamily: "'Space Mono', monospace"
+        }}>
+          Built for connection. Designed without compromise.
+        </p>
+
+        {/* Scroll indicator */}
+        <div style={{
+          position: 'absolute',
+          bottom: '40px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          opacity: 0.4
+        }}>
+          <span style={{
+            fontSize: '10px',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            Scroll
+          </span>
+          <div style={{
+            width: '1px',
+            height: '40px',
+            background: `linear-gradient(to bottom, ${colors.text}, transparent)`
+          }} />
+        </div>
       </section>
 
-      {/* Body */}
-      <section className="max-w-3xl mx-auto space-y-16 text-lg leading-relaxed">
+      {/* The Problem Section */}
+      <section style={{
+        padding: '120px 24px',
+        background: colors.surface
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '48px'
+          }}>
+            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <span style={{
+              fontSize: '11px',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color: colors.accent,
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              The Problem
+            </span>
+          </div>
 
-        <p>
-          The apps we grew up with didn't start broken. They became broken.
-        </p>
+          <div style={{ fontSize: '20px', lineHeight: 1.9, color: colors.text }}>
+            <p style={{ marginBottom: '32px' }}>
+              The apps we grew up with didn't start broken. <span style={{ fontWeight: 600 }}>They became broken.</span>
+            </p>
 
-        <p>
-          What began as spaces for connection slowly turned into subscription traps.
-          Features that once felt basic are now locked behind paywalls. Prices climb
-          year after year. Billion-dollar companies squeezing the same users who built them.
-        </p>
+            <p style={{ marginBottom: '32px', color: colors.textSecondary }}>
+              What began as spaces for connection slowly turned into subscription traps. Features that once felt basic are now locked behind paywalls. Prices climb year after year.
+            </p>
 
-        <p>
-          Then came the bots. The fake profiles. The endless spam. You open an app hoping
-          to connect with real people and end up dodging promotions, scams, and accounts
-          that aren't even human.
-        </p>
+            <p style={{ marginBottom: '32px', color: colors.textSecondary }}>
+              Then came the bots. The fake profiles. The endless spam. You open an app hoping to connect with real people and end up dodging promotions, scams, and accounts that aren't even human.
+            </p>
 
-        <p>
-          And some platforms quietly decide who belongs. If you don't fit a certain look
-          or mold, you feel it immediately. That isn't community. That's a club with a dress code.
-        </p>
-
-        <div className="border-l-4 border-orange-500 pl-6 italic">
-          SLTR exists because that didn't sit right with me.
+            <p style={{ color: colors.textSecondary }}>
+              And some platforms quietly decide who belongs. If you don't fit a certain look or mold, you feel it immediately. That isn't community. <span style={{ color: colors.accent, fontWeight: 600 }}>That's a club with a dress code.</span>
+            </p>
+          </div>
         </div>
+      </section>
 
-        {/* Core Value */}
-        <h2 className="text-2xl font-serif mt-24">
-          The One Thing That Matters
-        </h2>
+      {/* Quote Section */}
+      <section style={{
+        padding: '100px 24px',
+        background: colors.accent,
+        position: 'relative'
+      }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <p style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(28px, 5vw, 48px)',
+            fontWeight: 400,
+            color: '#000',
+            textAlign: 'center',
+            lineHeight: 1.4,
+            fontStyle: 'italic'
+          }}>
+            "SLTR exists because that didn't sit right with me."
+          </p>
+        </div>
+      </section>
 
-        <p>
-          When I created SLTR, I started with one core value:
-          <span className="text-orange-500 font-medium"> connection</span>.
-        </p>
+      {/* Core Value Section */}
+      <section style={{
+        padding: '120px 24px',
+        background: colors.background
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '48px'
+          }}>
+            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <span style={{
+              fontSize: '11px',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color: colors.accent,
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              The One Thing That Matters
+            </span>
+          </div>
 
-        <p>
-          Not matches. Not metrics. Not engagement tricks.
-          <br />
-          Connection.
-        </p>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(36px, 6vw, 64px)',
+            fontWeight: 400,
+            marginBottom: '48px',
+            lineHeight: 1.2,
+            color: colors.accent
+          }}>
+            Connection.
+          </h2>
 
-        <p>
-          Everything in SLTR is built from that mindset. If something doesn't create
-          a real connection, it doesn't belong here.
-        </p>
+          <div style={{ fontSize: '18px', lineHeight: 1.9, color: colors.textSecondary }}>
+            <p style={{ marginBottom: '28px' }}>
+              Not matches. Not metrics. Not engagement tricks.
+            </p>
 
-        <p>
-          Profiles are designed to express who you actually are. Conversations don't
-          get fragmented across apps. Video lives inside the platform instead of sending
-          you elsewhere. Nothing is disconnected because connection is the point.
-        </p>
+            <p style={{ marginBottom: '28px' }}>
+              Everything in SLTR is built from that mindset. If something doesn't create a real connection, it doesn't belong here.
+            </p>
 
-        {/* What SLTR Is */}
-        <h2 className="text-2xl font-serif mt-24">
-          What SLTR Is
-        </h2>
+            <p>
+              Profiles are designed to express who you actually are. Conversations don't get fragmented across apps. Video lives inside the platform. <span style={{ color: colors.text, fontWeight: 500 }}>Nothing is disconnected because connection is the point.</span>
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <p>
-          SLTR is for everyone. No judgment. No assumptions.
-        </p>
+      {/* Features Grid */}
+      <section style={{
+        padding: '120px 24px',
+        background: colors.surface
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '64px'
+          }}>
+            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <span style={{
+              fontSize: '11px',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color: colors.accent,
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              What SLTR Is
+            </span>
+          </div>
 
-        <p>
-          I built tools and indicators so you can express yourself clearly and honestly,
-          without being boxed into someone else's idea of who you should be.
-        </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '24px'
+          }}>
+            {/* Feature 1 */}
+            <div style={{
+              padding: '40px',
+              background: colors.background,
+              border: `1px solid ${colors.border}`,
+              borderRadius: '8px'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '24px',
+                fontSize: '20px',
+                color: colors.accent
+              }}>
+                ◎
+              </div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                marginBottom: '12px',
+                fontFamily: "'Space Mono', monospace"
+              }}>
+                For Everyone
+              </h3>
+              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
+                No judgment. No assumptions. Tools and indicators so you can express yourself clearly and honestly, without being boxed in.
+              </p>
+            </div>
 
-        <p>
-          SLTR includes high-quality, built-in video calling. No WhatsApp. No FaceTime.
-          No jumping between apps. One tap, and you see who's on the other end.
-        </p>
+            {/* Feature 2 */}
+            <div style={{
+              padding: '40px',
+              background: colors.background,
+              border: `1px solid ${colors.border}`,
+              borderRadius: '8px'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '24px',
+                fontSize: '20px',
+                color: colors.accent
+              }}>
+                ▶
+              </div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                marginBottom: '12px',
+                fontFamily: "'Space Mono', monospace"
+              }}>
+                Built-in Video
+              </h3>
+              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
+                High-quality video calling. No WhatsApp. No FaceTime. No jumping between apps. One tap, and you see who's on the other end.
+              </p>
+            </div>
 
-        <p>
-          I'm not interested in invasive ID checks or facial recognition. Instead,
-          SLTR gives you the tools to do your own due diligence, on your own terms.
-        </p>
+            {/* Feature 3 */}
+            <div style={{
+              padding: '40px',
+              background: colors.background,
+              border: `1px solid ${colors.border}`,
+              borderRadius: '8px'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '24px',
+                fontSize: '20px',
+                color: colors.accent
+              }}>
+                ⬡
+              </div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                marginBottom: '12px',
+                fontFamily: "'Space Mono', monospace"
+              }}>
+                Group Rooms
+              </h3>
+              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
+                Host hundreds of people from around the world. No Zoom links. No Telegram threads. One place. Shared presence.
+              </p>
+            </div>
 
-        {/* Beyond One-on-One */}
-        <h2 className="text-2xl font-serif mt-24">
-          Beyond One-on-One
-        </h2>
+            {/* Feature 4 */}
+            <div style={{
+              padding: '40px',
+              background: colors.background,
+              border: `1px solid ${colors.border}`,
+              borderRadius: '8px'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '24px',
+                fontSize: '20px',
+                color: colors.accent
+              }}>
+                ◈
+              </div>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                marginBottom: '12px',
+                fontFamily: "'Space Mono', monospace"
+              }}>
+                Your Privacy
+              </h3>
+              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
+                No invasive ID checks or facial recognition. SLTR gives you the tools to do your own due diligence, on your own terms.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <p>
-          Connection doesn't always happen in private chats.
-        </p>
+      {/* Personal Section */}
+      <section style={{
+        padding: '120px 24px',
+        background: colors.background
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+            marginBottom: '48px'
+          }}>
+            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <span style={{
+              fontSize: '11px',
+              letterSpacing: '0.3em',
+              textTransform: 'uppercase',
+              color: colors.accent,
+              fontFamily: "'Space Mono', monospace"
+            }}>
+              I Know The Pain
+            </span>
+          </div>
 
-        <p>
-          SLTR includes group rooms that can host hundreds of people from around the
-          world. No Zoom links. No Telegram threads. One place. Shared presence.
-        </p>
+          <div style={{ fontSize: '18px', lineHeight: 1.9, color: colors.textSecondary }}>
+            <p style={{ marginBottom: '28px' }}>
+              I'm not building this from the outside. <span style={{ color: colors.text, fontWeight: 500 }}>I'm a user too.</span>
+            </p>
 
-        {/* Pain */}
-        <h2 className="text-2xl font-serif mt-24">
-          I Know the Pain
-        </h2>
+            <p style={{ marginBottom: '28px' }}>
+              I know what it's like to be ready to connect and hit a paywall. I know the error codes. I know the frustration of hopping between apps just to do something simple.
+            </p>
 
-        <p>
-          I'm not building this from the outside. I'm a user too.
-        </p>
+            <p style={{ marginBottom: '40px' }}>
+              SLTR was built to remove those barriers. One place. No excuses.
+            </p>
 
-        <p>
-          I know what it's like to be ready to connect and hit a paywall. I know the
-          error codes. I know the frustration of hopping between apps just to do
-          something simple.
-        </p>
+            <div style={{
+              padding: '40px',
+              background: darkMode ? 'rgba(255,107,53,0.08)' : 'rgba(255,107,53,0.05)',
+              borderLeft: `3px solid ${colors.accent}`,
+              borderRadius: '0 8px 8px 0'
+            }}>
+              <p style={{ marginBottom: '20px', color: colors.text }}>
+                There's no corporate board here. No investors demanding growth at your expense. Just someone who uses these apps every day and decided to build what should have existed all along.
+              </p>
+              <p style={{
+                color: colors.text,
+                fontWeight: 600,
+                fontSize: '22px',
+                fontFamily: "'Cormorant Garamond', serif"
+              }}>
+                Rules don't apply when they stop serving people.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <p>
-          SLTR was built to remove those barriers.
-          <br />
-          One place. No excuses.
-        </p>
+      {/* CTA Section */}
+      <section style={{
+        padding: '140px 24px',
+        background: colors.surface,
+        position: 'relative',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '400px',
+          height: '400px',
+          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.1)' : 'rgba(255,107,53,0.06)'} 0%, transparent 60%)`,
+          borderRadius: '50%',
+          filter: 'blur(60px)',
+          pointerEvents: 'none'
+        }} />
 
-        {/* Rules */}
-        <h2 className="text-2xl font-serif mt-24">
-          Rules Don't Apply
-        </h2>
-
-        <p>
-          This is personal.
-        </p>
-
-        <p>
-          There's no corporate board here. No investors demanding growth at your expense.
-          Just someone who uses these apps every day and decided to build what should
-          have existed all along.
-        </p>
-
-        <p className="font-medium">
-          Rules don't apply when they stop serving people.
-        </p>
-
-        {/* CTA */}
-        <div className="text-center pt-16 pb-8">
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(32px, 6vw, 56px)',
+            fontWeight: 400,
+            marginBottom: '20px',
+            lineHeight: 1.2,
+            color: colors.text
+          }}>
+            Ready to <span style={{ color: colors.accent }}>connect</span>?
+          </h2>
+          <p style={{
+            fontSize: '16px',
+            color: colors.textSecondary,
+            marginBottom: '40px',
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            Join SLTR and experience what connection should feel like.
+          </p>
           <Link
             href="/signup"
             style={{
               display: 'inline-block',
               padding: '18px 48px',
-              fontSize: '14px',
+              fontSize: '13px',
               fontWeight: 600,
               textTransform: 'uppercase',
-              letterSpacing: '3px',
-              background: '#000',
+              letterSpacing: '0.2em',
+              background: colors.accent,
               color: '#fff',
               textDecoration: 'none',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              fontFamily: "'Space Mono', monospace"
             }}
           >
             Join SLTR
           </Link>
         </div>
-
       </section>
 
       {/* Footer */}
-      <footer className="mt-32 text-center text-sm text-neutral-500">
-        © 2025 SLTR Digital LLC
+      <footer style={{
+        padding: '40px 24px',
+        borderTop: `1px solid ${colors.border}`,
+        textAlign: 'center',
+        background: colors.background
+      }}>
+        <p style={{ fontSize: '11px', color: colors.textMuted }}>
+          © 2025 SLTR Digital LLC
+        </p>
       </footer>
 
     </main>

@@ -8,34 +8,10 @@ import { useTheme } from '../../contexts/ThemeContext';
 // Dynamic imports to avoid SSR issues
 const MapComponent = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Map), { ssr: false }) as any;
 const Popup = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Popup), { ssr: false }) as any;
-const Source = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Source), { ssr: false }) as any;
-const Layer = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Layer), { ssr: false }) as any;
 const Marker = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Marker), { ssr: false }) as any;
 const NavigationControl = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.NavigationControl), { ssr: false }) as any;
 const GeolocateControl = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.GeolocateControl), { ssr: false }) as any;
 
-type Profile = {
-  id: string;
-  name: string;
-  age: number;
-  lat: number;
-  lng: number;
-  image?: string;
-  online?: boolean;
-  distance?: number;
-  position?: string;
-};
-
-type Group = {
-  id: string;
-  name: string;
-  lat: number;
-  lng: number;
-  host: string;
-  hostImage?: string;
-  attendees?: number;
-  maxAttendees?: number;
-};
 
 export default function MapboxMap({
   profiles = [],
@@ -134,17 +110,6 @@ export default function MapboxMap({
   }, [centerOn]);
 
 
-  // Handle clicks on group features
-  const handleMapClick = (e: any) => {
-    const feature = e.features?.[0];
-    if (!feature?.layer?.id || feature.layer.id !== 'groups-point') return;
-
-    const props = feature.properties;
-    const [lng, lat] = feature.geometry.coordinates;
-    setPopup({ type: 'group', lat, lng, data: props });
-    onSelectGroup?.(props);
-  };
-
   if (!token) {
     return (
       <div style={{ padding: 20, textAlign: 'center' }}>
@@ -166,8 +131,6 @@ export default function MapboxMap({
         }}
         minZoom={2}
         maxZoom={18}
-        interactiveLayerIds={['groups-point']}
-        onClick={handleMapClick}
         onMoveEnd={reportVisibleProfiles}
         onLoad={reportVisibleProfiles}
         style={{ width: '100%', height: '100%' }}
@@ -219,17 +182,19 @@ export default function MapboxMap({
             >
               <div
                 style={{
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #9c27b0, #e91e63)',
-                  border: '2px solid #fff',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '14px',
+                  fontSize: '16px',
                 }}
                 title={venue.name}
               >
@@ -307,29 +272,41 @@ export default function MapboxMap({
           </Marker>
         )}
 
-        {viewMode === 'groups' && (
-          <Source
-            id="groups"
-            type="vector"
-            tiles={[`/api/tiles/groups/{z}/{x}/{y}.pbf`]}
-            minzoom={2}
-            maxzoom={18}
-          >
-            <Layer
-              id="groups-point"
-              type="circle"
-              source="groups"
-              sourceLayer="groups"
-              layout={{}}
-              paint={{
-                'circle-color': '#FF6B35',
-                'circle-radius': 10,
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#000'
-              }}
-            />
-          </Source>
-        )}
+        {/* Groups as markers when in groups view mode */}
+        {viewMode === 'groups' &&
+          groups
+            .filter((g: any) => typeof g.lat === 'number' && typeof g.lng === 'number')
+            .map((group: any) => (
+              <Marker
+                key={group.id}
+                longitude={group.lng}
+                latitude={group.lat}
+                anchor="center"
+                onClick={() => {
+                  setPopup({ type: 'group', lat: group.lat, lng: group.lng, data: group });
+                  onSelectGroup?.(group);
+                }}
+              >
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #FF6B35, #FF8C42)',
+                    border: '3px solid #fff',
+                    boxShadow: '0 2px 8px rgba(255,107,53,0.5)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '18px',
+                  }}
+                  title={group.name}
+                >
+                  👥
+                </div>
+              </Marker>
+            ))}
 
         {popup && (
           <Popup

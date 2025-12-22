@@ -70,9 +70,20 @@ function getGroupsTileSQL(): string {
       SELECT ST_MakeEnvelope($1, $2, $3, $4, 4326) AS geom
     ),
     q AS (
-      SELECT id, name, type, category, hostimage, ST_AsMVTGeom(geom, (SELECT geom FROM tile), 4096, 256, true) AS geom
-      FROM groups
-      WHERE geom && (SELECT geom FROM tile)
+      SELECT
+        g.id,
+        g.name,
+        g.type::text,
+        g.category::text,
+        g.attendees,
+        g.max_attendees,
+        p.photo_url as host_image,
+        ST_AsMVTGeom(g.location_point::geometry, (SELECT geom FROM tile), 4096, 256, true) AS geom
+      FROM groups g
+      LEFT JOIN profiles p ON g.host_id = p.id
+      WHERE g.location_point IS NOT NULL
+        AND g.is_active = TRUE
+        AND g.location_point::geometry && (SELECT geom FROM tile)
     )
     SELECT ST_AsMVT(q, $5, 4096, 'geom') AS mvt FROM q;`;
 }
