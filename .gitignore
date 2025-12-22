@@ -38,6 +38,10 @@ coverage/
 # Misc
 *.pem
 *.key
+
+# Migration files - contains user data
+/migration/
+users-to-migrate.csv
 .vercelnode_modules/
 .next/
 .env

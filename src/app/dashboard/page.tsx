@@ -283,19 +283,65 @@ export default function Dashboard() {
             <span style={{ opacity: 0.5 }}><IconSearch size={16} /></span>
             <span style={{ opacity: 0.5, fontSize: '15px', color: colors.text }}>Explore more profiles</span>
           </a>
-          <a href="/map" style={{ width: '44px', height: '44px', borderRadius: '10px', background: colors.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', flexShrink: 0, color: colors.text }}>
+          <a href="/map" style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '8px',
+            background: '#0a0a0a',
+            border: '1px solid #ff6b35',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            flexShrink: 0,
+            color: '#ff6b35',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(255,107,53,0.25)',
+            transition: 'all 0.3s ease-out'
+          }}>
+            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#ff6b35', boxShadow: '0 0 10px rgba(255,107,53,0.8)' }} />
             <IconMap size={20} />
           </a>
         </div>
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginLeft: '-15px', marginRight: '-15px', paddingLeft: '15px', paddingRight: '15px' }}>
-          <a href="/settings" style={{ background: '#0a0a0a', border: '1px solid #333', borderRadius: '6px', padding: '8px 12px', color: '#888', fontSize: '14px', flexShrink: 0, textDecoration: 'none', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+          <a href="/settings" style={{
+            background: '#0a0a0a',
+            border: '1px solid #333',
+            borderRadius: '6px',
+            padding: '8px 12px',
+            color: '#888',
+            fontSize: '14px',
+            flexShrink: 0,
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            transition: 'all 0.3s ease-out'
+          }}>
             <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
             <IconMenu size={16} />
           </a>
-          <button style={{ background: '#0a0a0a', border: '1px solid #333', borderRadius: '6px', padding: '8px 12px', color: '#888', fontSize: '14px', flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden' }}>
+          <a href="/favorites" style={{
+            background: '#0a0a0a',
+            border: '1px solid #333',
+            borderRadius: '6px',
+            padding: '8px 12px',
+            color: '#888',
+            fontSize: '14px',
+            flexShrink: 0,
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease-out'
+          }}>
             <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
             <IconStar size={16} />
-          </button>
+          </a>
           {filters.map(filter => {
             const isFilterActive = (filter.id === 'position' && selectedPositions.length > 0) ||
                                    (filter.id === 'age' && (ageMin || ageMax)) ||

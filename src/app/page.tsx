@@ -15,15 +15,16 @@ export default function LandingPage() {
       fontFamily: "'Space Mono', monospace"
     }}>
 
-      {/* Header */}
+      {/* Header - Mobile Optimized */}
       <header style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        padding: '20px 30px',
-        background: darkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
+        padding: '16px 20px',
+        background: darkMode ? 'rgba(0,0,0,0.95)' : 'rgba(255,255,255,0.98)',
         backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${colors.border}`,
         display: 'flex',
         justifyContent: 'space-between',
@@ -32,15 +33,17 @@ export default function LandingPage() {
       }}>
         <Link href="/" style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '28px',
+          fontSize: '20px',
           fontWeight: 700,
-          letterSpacing: '0.3em',
+          letterSpacing: '0.2em',
           textDecoration: 'none',
-          color: colors.text
+          color: colors.text,
+          whiteSpace: 'nowrap',
+          flexShrink: 0
         }}>
-          s l t r
+          SLTR
         </Link>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
@@ -54,8 +57,9 @@ export default function LandingPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '16px',
-              color: colors.text
+              fontSize: '14px',
+              color: colors.text,
+              flexShrink: 0
             }}
             aria-label="Toggle dark mode"
           >
@@ -66,100 +70,173 @@ export default function LandingPage() {
             color: colors.text,
             textDecoration: 'none',
             fontWeight: 500,
-            opacity: 0.8,
-            fontFamily: "'Space Mono', monospace"
+            opacity: 0.7,
+            fontFamily: "'Space Mono', monospace",
+            whiteSpace: 'nowrap'
           }}>
             Log in
           </Link>
+          {/* Lit Orange Button */}
           <Link href="/signup" style={{
+            position: 'relative',
             fontSize: '13px',
             color: '#fff',
-            background: colors.accent,
-            padding: '10px 20px',
+            background: 'linear-gradient(135deg, #FF6B35 0%, #FF8555 50%, #FF6B35 100%)',
+            padding: '12px 24px',
             textDecoration: 'none',
-            fontWeight: 600,
-            borderRadius: '4px',
-            fontFamily: "'Space Mono', monospace"
+            fontWeight: 700,
+            borderRadius: '8px',
+            fontFamily: "'Space Mono', monospace",
+            boxShadow: '0 4px 20px rgba(255,107,53,0.4), 0 0 40px rgba(255,107,53,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,107,53,0.6)',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
           }}>
-            Sign up
+            <span style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '50%',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
+              borderRadius: '7px 7px 0 0',
+              pointerEvents: 'none'
+            }} />
+            <span style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '3px',
+              background: '#FF6B35',
+              boxShadow: '0 0 15px rgba(255,107,53,1), 0 0 30px rgba(255,107,53,0.6)',
+              pointerEvents: 'none'
+            }} />
+            <span style={{ position: 'relative', zIndex: 1 }}>Sign up</span>
           </Link>
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section - Mobile Optimized */}
       <section style={{
-        minHeight: '100vh',
+        minHeight: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
-        padding: '120px 24px 80px'
+        padding: '100px 24px 60px'
       }}>
         {/* Gradient orb */}
         <div style={{
           position: 'absolute',
-          top: '20%',
+          top: '30%',
           left: '50%',
-          transform: 'translateX(-50%)',
-          width: '600px',
-          height: '600px',
-          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.08)'} 0%, transparent 70%)`,
+          transform: 'translate(-50%, -50%)',
+          width: '100%',
+          maxWidth: '500px',
+          height: '500px',
+          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)'} 0%, transparent 70%)`,
           borderRadius: '50%',
-          filter: 'blur(60px)',
+          filter: 'blur(80px)',
           pointerEvents: 'none'
         }} />
 
         <p style={{
-          fontSize: '12px',
-          letterSpacing: '0.4em',
+          fontSize: '11px',
+          letterSpacing: '0.35em',
           textTransform: 'uppercase',
           color: colors.accent,
-          marginBottom: '24px',
-          fontWeight: 500,
-          fontFamily: "'Space Mono', monospace"
+          marginBottom: '20px',
+          fontWeight: 600,
+          fontFamily: "'Space Mono', monospace",
+          textShadow: darkMode ? '0 0 20px rgba(255,107,53,0.5)' : 'none'
         }}>
           Rules Don't Apply
         </p>
 
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 'clamp(48px, 10vw, 120px)',
+          fontSize: 'clamp(56px, 15vw, 140px)',
           fontWeight: 300,
-          letterSpacing: '0.1em',
+          letterSpacing: '0.15em',
           textAlign: 'center',
-          lineHeight: 1,
-          marginBottom: '32px',
+          lineHeight: 0.9,
+          marginBottom: '28px',
           color: colors.text
         }}>
-          S L T R
+          SLTR
         </h1>
 
         <p style={{
-          fontSize: '16px',
+          fontSize: '15px',
           color: colors.textSecondary,
-          maxWidth: '500px',
+          maxWidth: '340px',
           textAlign: 'center',
-          lineHeight: 1.6,
-          fontFamily: "'Space Mono', monospace"
+          lineHeight: 1.7,
+          fontFamily: "'Space Mono', monospace",
+          padding: '0 20px'
         }}>
           Built for connection. Designed without compromise.
         </p>
 
+        {/* CTA Button in Hero */}
+        <Link href="/signup" style={{
+          position: 'relative',
+          marginTop: '40px',
+          fontSize: '14px',
+          color: '#fff',
+          background: 'linear-gradient(135deg, #FF6B35 0%, #FF8555 50%, #FF6B35 100%)',
+          padding: '16px 40px',
+          textDecoration: 'none',
+          fontWeight: 700,
+          borderRadius: '10px',
+          fontFamily: "'Space Mono', monospace",
+          boxShadow: '0 8px 30px rgba(255,107,53,0.5), 0 0 60px rgba(255,107,53,0.25), inset 0 1px 0 rgba(255,255,255,0.25)',
+          border: '1px solid rgba(255,133,85,0.6)',
+          overflow: 'hidden',
+          textTransform: 'uppercase',
+          letterSpacing: '0.15em'
+        }}>
+          <span style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '50%',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)',
+            borderRadius: '9px 9px 0 0',
+            pointerEvents: 'none'
+          }} />
+          <span style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: '#FF6B35',
+            boxShadow: '0 0 20px rgba(255,107,53,1), 0 0 40px rgba(255,107,53,0.7), 0 0 60px rgba(255,107,53,0.4)',
+            pointerEvents: 'none'
+          }} />
+          <span style={{ position: 'relative', zIndex: 1 }}>Get Started</span>
+        </Link>
+
         {/* Scroll indicator */}
         <div style={{
           position: 'absolute',
-          bottom: '40px',
+          bottom: '30px',
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '8px',
-          opacity: 0.4
+          opacity: 0.35
         }}>
           <span style={{
-            fontSize: '10px',
+            fontSize: '9px',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             fontFamily: "'Space Mono', monospace"
@@ -168,7 +245,7 @@ export default function LandingPage() {
           </span>
           <div style={{
             width: '1px',
-            height: '40px',
+            height: '30px',
             background: `linear-gradient(to bottom, ${colors.text}, transparent)`
           }} />
         </div>
@@ -176,43 +253,44 @@ export default function LandingPage() {
 
       {/* The Problem Section */}
       <section style={{
-        padding: '120px 24px',
+        padding: '80px 24px',
         background: colors.surface
       }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
-            marginBottom: '48px'
+            gap: '12px',
+            marginBottom: '32px'
           }}>
-            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <div style={{ width: '32px', height: '2px', background: colors.accent }} />
             <span style={{
-              fontSize: '11px',
+              fontSize: '10px',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               color: colors.accent,
-              fontFamily: "'Space Mono', monospace"
+              fontFamily: "'Space Mono', monospace",
+              fontWeight: 600
             }}>
               The Problem
             </span>
           </div>
 
-          <div style={{ fontSize: '20px', lineHeight: 1.9, color: colors.text }}>
-            <p style={{ marginBottom: '32px' }}>
+          <div style={{ fontSize: '17px', lineHeight: 1.8, color: colors.text }}>
+            <p style={{ marginBottom: '24px' }}>
               The apps we grew up with didn't start broken. <span style={{ fontWeight: 600 }}>They became broken.</span>
             </p>
 
-            <p style={{ marginBottom: '32px', color: colors.textSecondary }}>
-              What began as spaces for connection slowly turned into subscription traps. Features that once felt basic are now locked behind paywalls. Prices climb year after year.
+            <p style={{ marginBottom: '24px', color: colors.textSecondary }}>
+              What began as spaces for connection slowly turned into subscription traps. Features that once felt basic are now locked behind paywalls.
             </p>
 
-            <p style={{ marginBottom: '32px', color: colors.textSecondary }}>
-              Then came the bots. The fake profiles. The endless spam. You open an app hoping to connect with real people and end up dodging promotions, scams, and accounts that aren't even human.
+            <p style={{ marginBottom: '24px', color: colors.textSecondary }}>
+              Then came the bots. The fake profiles. The endless spam. You open an app hoping to connect with real people and end up dodging scams.
             </p>
 
             <p style={{ color: colors.textSecondary }}>
-              And some platforms quietly decide who belongs. If you don't fit a certain look or mold, you feel it immediately. That isn't community. <span style={{ color: colors.accent, fontWeight: 600 }}>That's a club with a dress code.</span>
+              And some platforms quietly decide who belongs. <span style={{ color: colors.accent, fontWeight: 600 }}>That's a club with a dress code.</span>
             </p>
           </div>
         </div>
@@ -220,14 +298,14 @@ export default function LandingPage() {
 
       {/* Quote Section */}
       <section style={{
-        padding: '100px 24px',
+        padding: '60px 24px',
         background: colors.accent,
         position: 'relative'
       }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <p style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(28px, 5vw, 48px)',
+            fontSize: 'clamp(24px, 6vw, 40px)',
             fontWeight: 400,
             color: '#000',
             textAlign: 'center',
@@ -241,50 +319,51 @@ export default function LandingPage() {
 
       {/* Core Value Section */}
       <section style={{
-        padding: '120px 24px',
+        padding: '80px 24px',
         background: colors.background
       }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
-            marginBottom: '48px'
+            gap: '12px',
+            marginBottom: '32px'
           }}>
-            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <div style={{ width: '32px', height: '2px', background: colors.accent }} />
             <span style={{
-              fontSize: '11px',
+              fontSize: '10px',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               color: colors.accent,
-              fontFamily: "'Space Mono', monospace"
+              fontFamily: "'Space Mono', monospace",
+              fontWeight: 600
             }}>
-              The One Thing That Matters
+              The One Thing
             </span>
           </div>
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(36px, 6vw, 64px)',
+            fontSize: 'clamp(40px, 10vw, 72px)',
             fontWeight: 400,
-            marginBottom: '48px',
-            lineHeight: 1.2,
+            marginBottom: '32px',
+            lineHeight: 1,
             color: colors.accent
           }}>
             Connection.
           </h2>
 
-          <div style={{ fontSize: '18px', lineHeight: 1.9, color: colors.textSecondary }}>
-            <p style={{ marginBottom: '28px' }}>
+          <div style={{ fontSize: '16px', lineHeight: 1.8, color: colors.textSecondary }}>
+            <p style={{ marginBottom: '20px' }}>
               Not matches. Not metrics. Not engagement tricks.
             </p>
 
-            <p style={{ marginBottom: '28px' }}>
-              Everything in SLTR is built from that mindset. If something doesn't create a real connection, it doesn't belong here.
+            <p style={{ marginBottom: '20px' }}>
+              Everything in SLTR is built from that mindset. If it doesn't create real connection, it doesn't belong here.
             </p>
 
             <p>
-              Profiles are designed to express who you actually are. Conversations don't get fragmented across apps. Video lives inside the platform. <span style={{ color: colors.text, fontWeight: 500 }}>Nothing is disconnected because connection is the point.</span>
+              Profiles express who you are. Conversations stay in one place. Video lives inside the platform. <span style={{ color: colors.text, fontWeight: 500 }}>Connection is the point.</span>
             </p>
           </div>
         </div>
@@ -292,23 +371,24 @@ export default function LandingPage() {
 
       {/* Features Grid */}
       <section style={{
-        padding: '120px 24px',
+        padding: '80px 20px',
         background: colors.surface
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
-            marginBottom: '64px'
+            gap: '12px',
+            marginBottom: '40px'
           }}>
-            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <div style={{ width: '32px', height: '2px', background: colors.accent }} />
             <span style={{
-              fontSize: '11px',
+              fontSize: '10px',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               color: colors.accent,
-              fontFamily: "'Space Mono', monospace"
+              fontFamily: "'Space Mono', monospace",
+              fontWeight: 600
             }}>
               What SLTR Is
             </span>
@@ -316,142 +396,146 @@ export default function LandingPage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '24px'
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '12px'
           }}>
             {/* Feature 1 */}
             <div style={{
-              padding: '40px',
+              padding: '24px 20px',
               background: colors.background,
               border: `1px solid ${colors.border}`,
-              borderRadius: '8px'
+              borderRadius: '12px'
             }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px',
-                fontSize: '20px',
-                color: colors.accent
+                marginBottom: '16px',
+                fontSize: '18px',
+                color: colors.accent,
+                boxShadow: darkMode ? '0 0 20px rgba(255,107,53,0.2)' : 'none'
               }}>
                 ◎
               </div>
               <h3 style={{
-                fontSize: '18px',
+                fontSize: '15px',
                 fontWeight: 600,
-                marginBottom: '12px',
+                marginBottom: '8px',
                 fontFamily: "'Space Mono', monospace"
               }}>
                 For Everyone
               </h3>
-              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
-                No judgment. No assumptions. Tools and indicators so you can express yourself clearly and honestly, without being boxed in.
+              <p style={{ color: colors.textSecondary, lineHeight: 1.6, fontSize: '13px' }}>
+                No judgment. Express yourself honestly.
               </p>
             </div>
 
             {/* Feature 2 */}
             <div style={{
-              padding: '40px',
+              padding: '24px 20px',
               background: colors.background,
               border: `1px solid ${colors.border}`,
-              borderRadius: '8px'
+              borderRadius: '12px'
             }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px',
-                fontSize: '20px',
-                color: colors.accent
+                marginBottom: '16px',
+                fontSize: '18px',
+                color: colors.accent,
+                boxShadow: darkMode ? '0 0 20px rgba(255,107,53,0.2)' : 'none'
               }}>
                 ▶
               </div>
               <h3 style={{
-                fontSize: '18px',
+                fontSize: '15px',
                 fontWeight: 600,
-                marginBottom: '12px',
+                marginBottom: '8px',
                 fontFamily: "'Space Mono', monospace"
               }}>
                 Built-in Video
               </h3>
-              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
-                High-quality video calling. No WhatsApp. No FaceTime. No jumping between apps. One tap, and you see who's on the other end.
+              <p style={{ color: colors.textSecondary, lineHeight: 1.6, fontSize: '13px' }}>
+                One tap. See who's on the other end.
               </p>
             </div>
 
             {/* Feature 3 */}
             <div style={{
-              padding: '40px',
+              padding: '24px 20px',
               background: colors.background,
               border: `1px solid ${colors.border}`,
-              borderRadius: '8px'
+              borderRadius: '12px'
             }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px',
-                fontSize: '20px',
-                color: colors.accent
+                marginBottom: '16px',
+                fontSize: '18px',
+                color: colors.accent,
+                boxShadow: darkMode ? '0 0 20px rgba(255,107,53,0.2)' : 'none'
               }}>
                 ⬡
               </div>
               <h3 style={{
-                fontSize: '18px',
+                fontSize: '15px',
                 fontWeight: 600,
-                marginBottom: '12px',
+                marginBottom: '8px',
                 fontFamily: "'Space Mono', monospace"
               }}>
                 Group Rooms
               </h3>
-              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
-                Host hundreds of people from around the world. No Zoom links. No Telegram threads. One place. Shared presence.
+              <p style={{ color: colors.textSecondary, lineHeight: 1.6, fontSize: '13px' }}>
+                Host hundreds. One place. Shared presence.
               </p>
             </div>
 
             {/* Feature 4 */}
             <div style={{
-              padding: '40px',
+              padding: '24px 20px',
               background: colors.background,
               border: `1px solid ${colors.border}`,
-              borderRadius: '8px'
+              borderRadius: '12px'
             }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
+                background: darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '24px',
-                fontSize: '20px',
-                color: colors.accent
+                marginBottom: '16px',
+                fontSize: '18px',
+                color: colors.accent,
+                boxShadow: darkMode ? '0 0 20px rgba(255,107,53,0.2)' : 'none'
               }}>
                 ◈
               </div>
               <h3 style={{
-                fontSize: '18px',
+                fontSize: '15px',
                 fontWeight: 600,
-                marginBottom: '12px',
+                marginBottom: '8px',
                 fontFamily: "'Space Mono', monospace"
               }}>
                 Your Privacy
               </h3>
-              <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
-                No invasive ID checks or facial recognition. SLTR gives you the tools to do your own due diligence, on your own terms.
+              <p style={{ color: colors.textSecondary, lineHeight: 1.6, fontSize: '13px' }}>
+                Your terms. No invasive checks.
               </p>
             </div>
           </div>
@@ -460,54 +544,56 @@ export default function LandingPage() {
 
       {/* Personal Section */}
       <section style={{
-        padding: '120px 24px',
+        padding: '80px 24px',
         background: colors.background
       }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
-            marginBottom: '48px'
+            gap: '12px',
+            marginBottom: '32px'
           }}>
-            <div style={{ width: '48px', height: '2px', background: colors.accent }} />
+            <div style={{ width: '32px', height: '2px', background: colors.accent }} />
             <span style={{
-              fontSize: '11px',
+              fontSize: '10px',
               letterSpacing: '0.3em',
               textTransform: 'uppercase',
               color: colors.accent,
-              fontFamily: "'Space Mono', monospace"
+              fontFamily: "'Space Mono', monospace",
+              fontWeight: 600
             }}>
               I Know The Pain
             </span>
           </div>
 
-          <div style={{ fontSize: '18px', lineHeight: 1.9, color: colors.textSecondary }}>
-            <p style={{ marginBottom: '28px' }}>
+          <div style={{ fontSize: '16px', lineHeight: 1.8, color: colors.textSecondary }}>
+            <p style={{ marginBottom: '20px' }}>
               I'm not building this from the outside. <span style={{ color: colors.text, fontWeight: 500 }}>I'm a user too.</span>
             </p>
 
-            <p style={{ marginBottom: '28px' }}>
-              I know what it's like to be ready to connect and hit a paywall. I know the error codes. I know the frustration of hopping between apps just to do something simple.
+            <p style={{ marginBottom: '20px' }}>
+              I know what it's like to be ready to connect and hit a paywall. I know the frustration of hopping between apps.
             </p>
 
-            <p style={{ marginBottom: '40px' }}>
-              SLTR was built to remove those barriers. One place. No excuses.
+            <p style={{ marginBottom: '28px' }}>
+              SLTR was built to remove those barriers.
             </p>
 
             <div style={{
-              padding: '40px',
-              background: darkMode ? 'rgba(255,107,53,0.08)' : 'rgba(255,107,53,0.05)',
+              padding: '28px',
+              background: darkMode ? 'rgba(255,107,53,0.1)' : 'rgba(255,107,53,0.05)',
               borderLeft: `3px solid ${colors.accent}`,
-              borderRadius: '0 8px 8px 0'
+              borderRadius: '0 12px 12px 0',
+              boxShadow: darkMode ? '0 0 30px rgba(255,107,53,0.1)' : 'none'
             }}>
-              <p style={{ marginBottom: '20px', color: colors.text }}>
-                There's no corporate board here. No investors demanding growth at your expense. Just someone who uses these apps every day and decided to build what should have existed all along.
+              <p style={{ marginBottom: '16px', color: colors.text, fontSize: '15px' }}>
+                No corporate board. No investors demanding growth at your expense. Just someone who decided to build what should have existed.
               </p>
               <p style={{
-                color: colors.text,
+                color: colors.accent,
                 fontWeight: 600,
-                fontSize: '22px',
+                fontSize: '20px',
                 fontFamily: "'Cormorant Garamond', serif"
               }}>
                 Rules don't apply when they stop serving people.
@@ -519,7 +605,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section style={{
-        padding: '140px 24px',
+        padding: '100px 24px',
         background: colors.surface,
         position: 'relative',
         textAlign: 'center'
@@ -529,67 +615,95 @@ export default function LandingPage() {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: '400px',
+          width: '100%',
+          maxWidth: '400px',
           height: '400px',
-          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.1)' : 'rgba(255,107,53,0.06)'} 0%, transparent 60%)`,
+          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.08)'} 0%, transparent 60%)`,
           borderRadius: '50%',
-          filter: 'blur(60px)',
+          filter: 'blur(80px)',
           pointerEvents: 'none'
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(32px, 6vw, 56px)',
+            fontSize: 'clamp(32px, 8vw, 56px)',
             fontWeight: 400,
-            marginBottom: '20px',
+            marginBottom: '16px',
             lineHeight: 1.2,
             color: colors.text
           }}>
             Ready to <span style={{ color: colors.accent }}>connect</span>?
           </h2>
           <p style={{
-            fontSize: '16px',
+            fontSize: '14px',
             color: colors.textSecondary,
-            marginBottom: '40px',
-            fontFamily: "'Space Mono', monospace"
+            marginBottom: '36px',
+            fontFamily: "'Space Mono', monospace",
+            maxWidth: '320px',
+            margin: '0 auto 36px'
           }}>
             Join SLTR and experience what connection should feel like.
           </p>
+          {/* Lit Orange CTA Button */}
           <Link
             href="/signup"
             style={{
+              position: 'relative',
               display: 'inline-block',
               padding: '18px 48px',
-              fontSize: '13px',
-              fontWeight: 600,
+              fontSize: '14px',
+              fontWeight: 700,
               textTransform: 'uppercase',
-              letterSpacing: '0.2em',
-              background: colors.accent,
+              letterSpacing: '0.15em',
+              background: 'linear-gradient(135deg, #FF6B35 0%, #FF8555 50%, #FF6B35 100%)',
               color: '#fff',
               textDecoration: 'none',
-              borderRadius: '4px',
-              fontFamily: "'Space Mono', monospace"
+              borderRadius: '10px',
+              fontFamily: "'Space Mono', monospace",
+              boxShadow: '0 8px 30px rgba(255,107,53,0.5), 0 0 60px rgba(255,107,53,0.25), inset 0 1px 0 rgba(255,255,255,0.25)',
+              border: '1px solid rgba(255,133,85,0.6)',
+              overflow: 'hidden'
             }}
           >
-            Join SLTR
+            <span style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '50%',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)',
+              borderRadius: '9px 9px 0 0',
+              pointerEvents: 'none'
+            }} />
+            <span style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: '#FF6B35',
+              boxShadow: '0 0 20px rgba(255,107,53,1), 0 0 40px rgba(255,107,53,0.7), 0 0 60px rgba(255,107,53,0.4)',
+              pointerEvents: 'none'
+            }} />
+            <span style={{ position: 'relative', zIndex: 1 }}>Join SLTR</span>
           </Link>
         </div>
       </section>
 
       {/* Footer */}
       <footer style={{
-        padding: '40px 24px',
+        padding: '32px 24px',
         borderTop: `1px solid ${colors.border}`,
         textAlign: 'center',
         background: colors.background
       }}>
         <div style={{
           display: 'flex',
-          gap: '24px',
+          gap: '16px',
           justifyContent: 'center',
           flexWrap: 'wrap',
-          marginBottom: '20px'
+          marginBottom: '16px'
         }}>
           <Link href="/privacy" style={{ fontSize: '11px', color: colors.textMuted, textDecoration: 'none' }}>Privacy</Link>
           <Link href="/terms" style={{ fontSize: '11px', color: colors.textMuted, textDecoration: 'none' }}>Terms</Link>

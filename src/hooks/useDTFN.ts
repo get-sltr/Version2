@@ -24,7 +24,16 @@ export function useDTFN() {
         .eq('id', user.id)
         .single();
 
-      if (error) throw error;
+      // Handle schema cache miss gracefully - column may not be recognized yet
+      if (error) {
+        if (error.message?.includes('schema cache') || error.code === 'PGRST204') {
+          console.warn('DTFN column not yet in schema cache. Please refresh Supabase schema.');
+          setIsActive(false);
+          setDtfnActiveUntil(null);
+          return;
+        }
+        throw error;
+      }
 
       if (data?.dtfn_active_until) {
         const activeUntil = new Date(data.dtfn_active_until);
@@ -44,6 +53,9 @@ export function useDTFN() {
       }
     } catch (error) {
       console.error('Error fetching DTFN status:', error);
+      // Fail gracefully - don't break the app
+      setIsActive(false);
+      setDtfnActiveUntil(null);
     }
   }, []);
 
@@ -61,7 +73,14 @@ export function useDTFN() {
           .update({ dtfn_active_until: null })
           .eq('id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          // Handle schema cache miss
+          if (error.message?.includes('schema cache')) {
+            console.warn('DTFN column not yet in schema cache. Please refresh Supabase schema.');
+            return;
+          }
+          throw error;
+        }
 
         setIsActive(false);
         setDtfnActiveUntil(null);
@@ -75,7 +94,14 @@ export function useDTFN() {
           .update({ dtfn_active_until: activeUntil.toISOString() })
           .eq('id', user.id);
 
-        if (error) throw error;
+        if (error) {
+          // Handle schema cache miss
+          if (error.message?.includes('schema cache')) {
+            console.warn('DTFN column not yet in schema cache. Please refresh Supabase schema.');
+            return;
+          }
+          throw error;
+        }
 
         setIsActive(true);
         setDtfnActiveUntil(activeUntil);
