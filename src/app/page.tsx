@@ -32,17 +32,19 @@ export default function LandingPage() {
         zIndex: 100
       }}>
         <Link href="/" style={{
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '24px',
-          fontWeight: 300,
-          letterSpacing: '0.25em',
+          display: 'flex',
+          alignItems: 'center',
           textDecoration: 'none',
-          color: colors.text,
-          whiteSpace: 'nowrap',
-          flexShrink: 0,
-          textTransform: 'lowercase'
+          flexShrink: 0
         }}>
-          s l t r
+          <img
+            src="/icons/icon-192x192.png"
+            alt="SLTR"
+            style={{
+              height: '40px',
+              width: 'auto'
+            }}
+          />
         </Link>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {/* Dark Mode Toggle */}
