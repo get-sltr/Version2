@@ -136,7 +136,7 @@ export default function PulseSplashPage() {
         lineHeight: 1.6
       }}>
         Connect with up to 400 people in real-time video conferences. 
-        Voice, video, and chat - all in one beat.
+        Voice, video, and messaging - all in one beat.
       </p>
 
       {/* Device Recommendation */}
@@ -178,8 +178,8 @@ export default function PulseSplashPage() {
       }}>
         {[
           { icon: '🎥', title: 'HD Video', desc: 'Crystal clear video quality' },
-          { icon: '🎤', title: 'Voice Chat', desc: 'Spatial audio for natural conversations' },
-          { icon: '💬', title: 'Live Chat', desc: 'Text chat alongside video' },
+          { icon: '🎤', title: 'Voice Rooms', desc: 'Spatial audio for natural conversations' },
+          { icon: '💬', title: 'Live Messaging', desc: 'Text messaging alongside video' },
           { icon: '🖥️', title: 'Screen Share', desc: 'Share your screen with everyone' }
         ].map((feature, i) => (
           <div

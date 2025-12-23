@@ -133,10 +133,13 @@ export async function POST(request: NextRequest) {
       { headers: rateLimitHeaders(rateLimitResult) }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create checkout session';
+    // Log full error server-side for debugging
     console.error('Stripe checkout error:', error);
+
+    // NEVER expose raw error messages to client - they may contain API keys
+    // Return generic error message to prevent key leakage
     return NextResponse.json(
-      { error: errorMessage },
+      { error: 'Unable to process payment. Please try again later.' },
       { status: 500, headers: rateLimitHeaders(rateLimitResult) }
     );
   }

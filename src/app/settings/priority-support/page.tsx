@@ -453,7 +453,7 @@ export default function PrioritySupportPage() {
             {[
               { icon: '⚡', title: '24-Hour Response', desc: 'Fast replies from our team' },
               { icon: '🎯', title: 'Priority Queue', desc: 'Your tickets are handled first' },
-              { icon: '💬', title: 'Direct Access', desc: 'Chat with senior support staff' },
+              { icon: '💬', title: 'Direct Access', desc: 'Message senior support staff' },
               { icon: '🔒', title: 'Account Recovery', desc: 'Expedited account assistance' },
             ].map((benefit, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

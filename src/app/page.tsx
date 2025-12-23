@@ -143,7 +143,7 @@ export default function LandingPage() {
           backgroundImage: 'url(/images/4.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
-          opacity: darkMode ? 0.15 : 0.1,
+          opacity: darkMode ? 0.4 : 0.5,
           pointerEvents: 'none'
         }} />
         {/* Gradient overlay for text readability */}

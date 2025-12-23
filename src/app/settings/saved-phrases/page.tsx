@@ -115,7 +115,7 @@ export default function SavedPhrasesPage() {
           color: '#aaa',
           lineHeight: 1.6
         }}>
-          💬 Quick reply templates that appear below your chat input. Tap to send instantly.
+          💬 Quick reply templates that appear below your message input. Tap to send instantly.
         </div>
 
         {/* Add New Phrase */}

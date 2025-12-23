@@ -180,7 +180,7 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
                   gap: '8px',
                 }}
               >
-                💬 Chat
+                💬 Messages
               </button>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
                   alignItems: 'center',
                 }}
               >
-                <span style={{ color: '#fff', fontWeight: 600 }}>Chat</span>
+                <span style={{ color: '#fff', fontWeight: 600 }}>Messages</span>
                 <button
                   onClick={() => setShowChat(false)}
                   style={{

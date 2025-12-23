@@ -344,7 +344,7 @@ export default function GroupDetailPage() {
           </div>
         </div>
 
-        {/* Group Chat */}
+        {/* Group Messages */}
         {isJoined && (
           <div style={{
             background: '#1c1c1e',
@@ -352,7 +352,7 @@ export default function GroupDetailPage() {
             padding: '20px',
             marginBottom: '100px'
           }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Group Chat</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Group Messages</h3>
             <a
               href={`/messages/group-${group.id}`}
               style={{
@@ -414,7 +414,7 @@ export default function GroupDetailPage() {
                 gap: '8px'
               }}
             >
-              💬 Open Chat
+              💬 Open Messages
             </a>
             <button
               onClick={() => setShowLeaveConfirm(true)}

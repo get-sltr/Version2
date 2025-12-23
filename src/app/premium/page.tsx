@@ -241,14 +241,14 @@ export default function PremiumPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {[
               { icon: '🖼️', text: 'Unlimited profiles' },
-              { icon: '🌍', text: 'Unlimited Chat in Explore' },
+              { icon: '🌍', text: 'Unlimited Messaging in Explore' },
               { icon: '👁️', text: 'Viewed me' },
               { icon: '👻', text: 'Incognito mode' },
-              { icon: '✨', text: 'For You Chats' },
+              { icon: '✨', text: 'For You Matches' },
               { icon: '⏰', text: 'Unlimited expiring photos' },
               { icon: '💦', text: 'Right Now - 100 profiles' },
               { icon: '↩️', text: 'Unsend messages' },
-              { icon: '🌐', text: 'Chat translate' },
+              { icon: '🌐', text: 'Message translate' },
               { icon: '⋯', text: 'Typing status' }
             ].map((feature, i) => (
               <div
@@ -280,7 +280,7 @@ export default function PremiumPage() {
               { icon: '🚫', text: 'No 3rd party ads*' },
               { icon: '✓', text: 'Read receipts' },
               { icon: '💬', text: 'Saved phrases' },
-              { icon: '💬', text: 'Mark recently chatted' },
+              { icon: '💬', text: 'Mark recently messaged' },
               { icon: '🎥', text: 'The Pulse - Premium Video Rooms' }
             ].map((feature, i) => (
               <div
@@ -494,7 +494,7 @@ export default function PremiumPage() {
             {[
               { icon: '⭐', text: 'Pro Badge on Profile' },
               { icon: '✓', text: 'Read Receipts' },
-              { icon: '🙈', text: 'Hide Chat Photos' },
+              { icon: '🙈', text: 'Hide Message Photos' },
               { icon: '⏱️', text: 'Expiring Photos' },
               { icon: '📌', text: 'Pin Conversations' },
               { icon: '🎯', text: 'Priority Support (24hr response)' },

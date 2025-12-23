@@ -166,8 +166,8 @@ export default function SettingsPage() {
         <a href="/settings/blocked-users" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Blocked Users" hasArrow />
         </a>
-        <a href="/settings/hide-chat-photos" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Hide Chat Photos" hasArrow />
+        <a href="/settings/hide-message-photos" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+          <MenuItem label="Hide Message Photos" hasArrow />
         </a>
       </Section>
 

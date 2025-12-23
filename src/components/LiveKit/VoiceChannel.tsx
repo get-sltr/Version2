@@ -23,7 +23,7 @@ interface VoiceChannelProps {
 
 /**
  * Voice/Video Channel Component (Telegram/Discord-style)
- * Persistent channels for community voice chat
+ * Persistent channels for community voice rooms
  */
 export default function VoiceChannel({ channelId, channelName, onLeave }: VoiceChannelProps) {
   const { colors } = useTheme();

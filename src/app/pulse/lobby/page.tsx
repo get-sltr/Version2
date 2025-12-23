@@ -205,7 +205,7 @@ export default function PulseLobbyPage() {
             maxWidth: '600px',
             lineHeight: 1.6
           }}>
-            Join live video rooms with the community. Chat, connect, and vibe with
+            Join live video rooms with the community. Connect, and vibe with
             others in real-time. Select a room below to get started.
           </p>
         </div>

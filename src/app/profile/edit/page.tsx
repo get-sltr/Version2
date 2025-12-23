@@ -714,7 +714,7 @@ export default function EditProfilePage() {
       <SectionTitle icon="👥" title="EXPECTATIONS" colors={colors} />
       <Section card>
         <a href="/profile/edit/looking-for" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="I'm Looking For" value="Chat, Dates, Friends, Hookups" hasArrow colors={colors} />
+          <RowItem label="I'm Looking For" value="Dates, Friends, Hookups" hasArrow colors={colors} />
         </a>
         <a href="/profile/edit/meet-at" style={{ textDecoration: 'none', color: 'inherit' }}>
           <RowItem label="Meet At" value="My Place, Your Place, Bar" hasArrow colors={colors} />

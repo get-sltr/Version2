@@ -69,7 +69,7 @@ export default function HideChatPhotosPage() {
           ←
         </button>
         <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>
-          Hide Chat Photos
+          Hide Message Photos
         </h1>
       </header>
 
@@ -87,7 +87,7 @@ export default function HideChatPhotosPage() {
             Privacy Protection
           </h3>
           <p style={{ fontSize: '14px', color: '#aaa', lineHeight: 1.6, textAlign: 'center' }}>
-            Blur photos in your chat conversations for extra privacy. Tap on any photo to reveal it temporarily.
+            Blur photos in your conversations for extra privacy. Tap on any photo to reveal it temporarily.
           </p>
         </div>
 
@@ -105,7 +105,7 @@ export default function HideChatPhotosPage() {
           }}>
             <div>
               <div style={{ fontSize: '17px', fontWeight: 600, marginBottom: '4px' }}>
-                Hide Photos in Chat
+                Hide Photos in Messages
               </div>
               <div style={{ fontSize: '14px', color: '#888' }}>
                 Blur all shared photos by default
@@ -240,7 +240,7 @@ export default function HideChatPhotosPage() {
               }} />
             </div>
             <p style={{ fontSize: '12px', color: '#666', textAlign: 'center', marginTop: '12px' }}>
-              Tap any photo in chat to reveal it
+              Tap any photo in messages to reveal it
             </p>
           </div>
         )}
@@ -259,7 +259,7 @@ export default function HideChatPhotosPage() {
             Premium Feature
           </h4>
           <p style={{ fontSize: '14px', color: '#aaa', marginBottom: '16px', lineHeight: 1.6 }}>
-            Hide Chat Photos is available with SLTR Premium
+            Hide Message Photos is available with SLTR Premium
           </p>
           <a
             href="/premium"
