@@ -4,6 +4,7 @@ import { useState, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { isValidAge, validatePassword, isValidEmail, calculateAge } from '../../lib/validation';
+import posthog from 'posthog-js';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -88,6 +89,20 @@ export default function SignupPage() {
         localStorage.setItem('lastSignupEmail', email);
       } catch {
         // ignore storage failures
+      }
+
+      // Identify user and capture signup event in PostHog
+      if (data.user) {
+        posthog.identify(data.user.id, {
+          email: email,
+          age: userAge,
+          created_at: new Date().toISOString(),
+        });
+        posthog.capture('user_signed_up', {
+          email: email,
+          age: userAge,
+          source: 'signup_page',
+        });
       }
 
       // Redirect to verify page

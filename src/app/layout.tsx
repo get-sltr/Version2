@@ -3,6 +3,7 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { LocationPermission } from '../components/LocationPermission';
 import { OneSignalProvider } from '../components/OneSignalProvider';
+import AuthListener from '../components/AuthListener';
 
 export const metadata: Metadata = {
   title: 'SLTR - No Rules Apply',
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { readonly children: React.Reac
       </head>
       <body style={{ margin: 0, WebkitTapHighlightColor: 'transparent' }}>
         <ThemeProvider>
+          <AuthListener />
           {children}
           <ServiceWorkerRegistration />
           <LocationPermission />

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import type { Position, Tribe } from '@/types/database';
+import posthog from 'posthog-js';
 
 const POSITIONS: { value: Position; label: string; emoji: string }[] = [
   { value: 'top', label: 'Top', emoji: '🔝' },
@@ -120,6 +121,14 @@ export default function OnboardingPage() {
         });
 
       if (error) throw error;
+
+      // Capture onboarding completed event in PostHog
+      posthog.capture('onboarding_completed', {
+        display_name: displayName.trim(),
+        position: position,
+        tribes: selectedTribes,
+        has_bio: !!bio.trim(),
+      });
 
       // Redirect to dashboard
       router.push('/dashboard');

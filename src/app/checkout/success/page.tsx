@@ -1,7 +1,8 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
 
 function CheckoutSuccessPageContent() {
   const router = useRouter();
@@ -17,6 +18,16 @@ function CheckoutSuccessPageContent() {
   };
 
   const selectedPlan = plans[plan as keyof typeof plans] || plans['6months'];
+  const hasTrackedCheckout = useRef(false);
+
+  // Capture checkout completed event (only once on mount)
+  if (!hasTrackedCheckout.current) {
+    hasTrackedCheckout.current = true;
+    posthog.capture('checkout_completed', {
+      plan: plan,
+      plan_period: selectedPlan.period,
+    });
+  }
 
   useEffect(() => {
     // Mark user as premium in localStorage (in production, this comes from backend)

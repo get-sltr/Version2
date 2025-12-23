@@ -6,6 +6,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { getMyFavorites, removeFavorite } from '@/lib/api/favorites';
 import type { FavoriteWithProfile } from '@/types/database';
 import { IconBack, IconStar, IconLocation } from '@/components/Icons';
+import posthog from 'posthog-js';
 
 export default function FavoritesPage() {
   const router = useRouter();
@@ -37,6 +38,11 @@ export default function FavoritesPage() {
     try {
       await removeFavorite(userId);
       setFavorites(favorites.filter(f => f.favorited_user_id !== userId));
+
+      // Capture favorite_removed event in PostHog
+      posthog.capture('favorite_removed', {
+        removed_user_id: userId,
+      });
     } catch (err: any) {
       alert(err.message || 'Failed to remove favorite');
     }

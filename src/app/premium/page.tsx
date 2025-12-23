@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 export default function PremiumPage() {
   const router = useRouter();
@@ -76,6 +77,14 @@ export default function PremiumPage() {
       }
 
       if (data.url) {
+        // Capture premium plan selected event in PostHog
+        posthog.capture('premium_plan_selected', {
+          plan: selectedPlan,
+          price: plans[selectedPlan].total,
+          price_per_month: plans[selectedPlan].price,
+          discount: plans[selectedPlan].discount,
+        });
+
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {

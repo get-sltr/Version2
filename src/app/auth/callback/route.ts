@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next');
+  const type = requestUrl.searchParams.get('type');
 
   if (code) {
     const cookieStore = await cookies();
@@ -32,6 +33,11 @@ export async function GET(request: Request) {
     if (error) {
       console.error('Auth callback error:', error);
       return NextResponse.redirect(new URL('/login?error=auth_failed', request.url));
+    }
+
+    // Handle password recovery flow
+    if (type === 'recovery') {
+      return NextResponse.redirect(new URL('/reset-password', request.url));
     }
 
     // If a specific redirect was requested, use that

@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { usePremium, useMessage } from '@/hooks/usePremium';
 import { PremiumPromo } from '@/components/PremiumPromo';
+import posthog from 'posthog-js';
 
 type MessageRecord = {
   id: string;
@@ -339,6 +340,17 @@ export default function ConversationPage() {
 
       setSending(false);
 
+      if (!sendError) {
+        // Capture message_sent event in PostHog
+        posthog.capture('message_sent', {
+          message_type: type,
+          recipient_id: otherUserId,
+          has_image: !!imageUrl,
+          has_shared_profile: !!sharedProfileId,
+          is_expiring: isExpiringImage,
+        });
+      }
+
       if (sendError) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticMessage.id));
         if (sendError.code === '42501' || sendError.message?.includes('policy')) {
@@ -493,6 +505,12 @@ export default function ConversationPage() {
         blocker_id: currentUserId,
         blocked_id: otherUserId,
       });
+
+      // Capture user_blocked event in PostHog
+      posthog.capture('user_blocked', {
+        blocked_user_id: otherUserId,
+      });
+
       router.push('/messages');
     } catch (err) {
       setError('Failed to block user');
@@ -546,6 +564,11 @@ export default function ConversationPage() {
           recipient_id: otherUserId,
           content: 'Video call started',
           type: 'video_call',
+        });
+
+        // Capture video_call_started event in PostHog
+        posthog.capture('video_call_started', {
+          recipient_id: otherUserId,
         });
 
         // Navigate to our own call page with the Daily room URL

@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import posthog from 'posthog-js';
 
 function ReportPageContent() {
   const router = useRouter();
@@ -38,10 +39,17 @@ function ReportPageContent() {
       alert('Please select at least one reason');
       return;
     }
-    
+
+    // Capture user_reported event in PostHog
+    posthog.capture('user_reported', {
+      reported_user: reportedUser,
+      reasons: selectedReasons,
+      has_additional_info: !!additionalInfo.trim(),
+    });
+
     // In production, send report to backend
     setSubmitted(true);
-    
+
     setTimeout(() => {
       router.back();
     }, 2000);

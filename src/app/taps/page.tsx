@@ -7,6 +7,7 @@ import { getReceivedTaps, getSentTaps, markTapViewed, sendTap } from '@/lib/api/
 import { IconFlame, IconWave, IconWink, IconEye, IconClose, IconMenu, IconLocation } from '@/components/Icons';
 import BottomNav from '@/components/BottomNav';
 import type { TapWithUser, TapType } from '@/types/database';
+import posthog from 'posthog-js';
 
 const formatRelativeTime = (isoDate: string) => {
   const timestamp = new Date(isoDate).getTime();
@@ -64,6 +65,13 @@ export default function TapsPage() {
       await sendTap(userId, tapType);
       const sent = await getSentTaps();
       setSentTaps(sent);
+
+      // Capture tap_back_sent event in PostHog
+      posthog.capture('tap_back_sent', {
+        recipient_id: userId,
+        tap_type: tapType,
+      });
+
       alert('Tap sent!');
     } catch (err: any) {
       alert(err.message || 'Failed to send tap');

@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import { IconFlame, IconWave, IconWink, IconEye, IconStar, IconChat, IconClose, IconBack } from '@/components/Icons';
 import ProBadge from '@/components/ProBadge';
+import posthog from 'posthog-js';
 
 // Tap types available - now using components
 const TAP_TYPES = [
@@ -140,6 +141,12 @@ export default function ProfileViewPage() {
             tap_type: tapType
           });
         setHasTapped(true);
+
+        // Capture tap_sent event in PostHog
+        posthog.capture('tap_sent', {
+          tap_type: tapType,
+          recipient_id: params.id,
+        });
       }
     } catch (error) {
       console.error('Tap error:', error);
@@ -170,6 +177,11 @@ export default function ProfileViewPage() {
             favorited_user_id: params.id
           });
         setIsFavorited(true);
+
+        // Capture favorite_added event in PostHog
+        posthog.capture('favorite_added', {
+          favorited_user_id: params.id,
+        });
       }
     } catch (error) {
       console.error('Favorite error:', error);
