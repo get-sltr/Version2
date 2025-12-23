@@ -33,15 +33,16 @@ export default function LandingPage() {
       }}>
         <Link href="/" style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '20px',
-          fontWeight: 700,
-          letterSpacing: '0.2em',
+          fontSize: '24px',
+          fontWeight: 300,
+          letterSpacing: '0.25em',
           textDecoration: 'none',
           color: colors.text,
           whiteSpace: 'nowrap',
-          flexShrink: 0
+          flexShrink: 0,
+          textTransform: 'lowercase'
         }}>
-          SLTR
+          s l t r
         </Link>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           {/* Dark Mode Toggle */}
@@ -185,15 +186,17 @@ export default function LandingPage() {
 
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: 'clamp(56px, 15vw, 140px)',
+          fontSize: 'clamp(48px, 12vw, 120px)',
           fontWeight: 300,
-          letterSpacing: '0.15em',
+          letterSpacing: '0.2em',
           textAlign: 'center',
-          lineHeight: 0.9,
+          lineHeight: 1,
           marginBottom: '28px',
-          color: colors.text
+          color: colors.text,
+          position: 'relative',
+          zIndex: 1
         }}>
-          SLTR
+          S L T R
         </h1>
 
         <p style={{
