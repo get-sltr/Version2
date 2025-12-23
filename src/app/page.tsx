@@ -127,8 +127,34 @@ export default function LandingPage() {
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
-        padding: '100px 24px 60px'
+        padding: '100px 24px 60px',
+        overflow: 'hidden'
       }}>
+        {/* Faded background image */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: 'url(/images/4.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+          opacity: darkMode ? 0.15 : 0.1,
+          pointerEvents: 'none'
+        }} />
+        {/* Gradient overlay for text readability */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: darkMode
+            ? 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.8) 100%)'
+            : 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.9) 100%)',
+          pointerEvents: 'none'
+        }} />
         {/* Gradient orb */}
         <div style={{
           position: 'absolute',
@@ -138,7 +164,7 @@ export default function LandingPage() {
           width: '100%',
           maxWidth: '500px',
           height: '500px',
-          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)'} 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.25)' : 'rgba(255,107,53,0.15)'} 0%, transparent 70%)`,
           borderRadius: '50%',
           filter: 'blur(80px)',
           pointerEvents: 'none'
