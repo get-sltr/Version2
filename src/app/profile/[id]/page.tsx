@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import { IconFlame, IconWave, IconWink, IconEye, IconStar, IconChat, IconClose, IconBack } from '@/components/Icons';
 import ProBadge from '@/components/ProBadge';
+import { DTFNBadge } from '@/components/dtfn';
 import posthog from 'posthog-js';
 
 // Tap types available - now using components
@@ -330,6 +331,7 @@ export default function ProfileViewPage() {
               {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
             </span>
             {profile.is_premium && <ProBadge size="md" />}
+            <DTFNBadge isActive={profile.dtfn_active_until && new Date(profile.dtfn_active_until) > new Date()} size="md" />
           </div>
           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginTop: '4px' }}>
             Nearby
