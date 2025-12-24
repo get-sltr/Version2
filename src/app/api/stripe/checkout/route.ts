@@ -17,7 +17,7 @@ const STRIPE_API_VERSION = '2024-12-18.acacia' as Stripe.LatestApiVersion
 const VALID_PLANS = ['week', '1month', '3months', '6months'] as const
 type Plan = (typeof VALID_PLANS)[number]
 
-const SUBSCRIPTION_PLANS: ReadonlySet<Plan> = new Set([
+const SUBSCRIPTION_PLANS: ReadonlySet<Plan> = new Set<Plan>([
   '1month',
   '3months',
   '6months',
