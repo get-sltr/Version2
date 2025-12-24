@@ -346,13 +346,13 @@ export const PULSE_ROOMS = {
     description: 'Main community hangout',
     theme: 'default',
   },
-  'party-n-play': {
-    name: 'Party n Play',
+  'the-orbit': {
+    name: 'The Orbit',
     description: '420 & chill vibes',
     theme: 'neon',
   },
-  'smoke-n-stroke': {
-    name: 'Smoke n Stroke',
+  'the-den': {
+    name: 'The Den',
     description: 'Late night sessions',
     theme: 'dark',
   },
