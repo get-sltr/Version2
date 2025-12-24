@@ -76,10 +76,15 @@ async function linkUserToOneSignal() {
     await OneSignal.login(user.id);
 
     // Optionally store player ID in your database for server-side notifications
-    await supabase
+    const { error } = await supabase
       .from('profiles')
       .update({ onesignal_player_id: playerId })
       .eq('id', user.id);
+
+    if (error) {
+      // Column may not exist yet - fail silently
+      console.debug('OneSignal player ID not saved:', error.message);
+    }
 
     console.log('OneSignal linked to user:', user.id);
   } catch (error) {
