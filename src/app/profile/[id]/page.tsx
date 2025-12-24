@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import { IconFlame, IconWave, IconWink, IconEye, IconStar, IconChat, IconClose, IconBack } from '@/components/Icons';
 import ProBadge from '@/components/ProBadge';
+import OrbitBadge from '@/components/OrbitBadge';
 import { DTFNBadge } from '@/components/dtfn';
 import posthog from 'posthog-js';
 
@@ -101,15 +102,19 @@ export default function ProfileViewPage() {
         if (tapData) setHasTapped(true);
       }
 
-      // Load profile
+      // Load profile with user_settings for pnp_visible
       const { data } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, user_settings(pnp_visible)')
         .eq('id', params.id)
         .single();
 
       if (data) {
-        setProfile(data);
+        // Flatten user_settings into the profile object
+        setProfile({
+          ...data,
+          pnp_visible: data.user_settings?.pnp_visible || false
+        });
       }
       setLoading(false);
     };
@@ -323,13 +328,14 @@ export default function ProfileViewPage() {
           background: 'linear-gradient(transparent, rgba(0,0,0,0.9))',
           padding: '40px 15px 15px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {profile.is_online && (
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#4caf50' }} />
             )}
             <span style={{ fontSize: '28px', fontWeight: 600 }}>
               {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
             </span>
+            {profile.pnp_visible && <OrbitBadge size="md" />}
             {profile.is_premium && <ProBadge size="md" />}
             <DTFNBadge isActive={profile.dtfn_active_until && new Date(profile.dtfn_active_until) > new Date()} size="md" />
           </div>

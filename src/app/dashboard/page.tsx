@@ -7,11 +7,14 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { IconSearch, IconMap, IconMenu, IconStar, IconUser, IconCheck, IconEye, IconCrown, IconClose } from '@/components/Icons';
 import BottomNav from '@/components/BottomNav';
 import ProBadge from '@/components/ProBadge';
-import { DTFNButton } from '@/components/dtfn';
+import OrbitBadge from '@/components/OrbitBadge';
+import { DTFNButton, DTFNBadge } from '@/components/dtfn';
+import { usePremium } from '@/hooks/usePremium';
 
 export default function Dashboard() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { isPremium } = usePremium();
   const [activeFilter, setActiveFilter] = useState('online');
   const [showAd, setShowAd] = useState(true);
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -147,7 +150,7 @@ export default function Dashboard() {
 
     let query = supabase
       .from('profiles')
-      .select('*')
+      .select('*, user_settings(pnp_visible)')
       .not('photo_url', 'is', null);  // Only show profiles WITH photos
 
     // Apply filters based on activeFilter
@@ -162,8 +165,8 @@ export default function Dashboard() {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       query = query.gte('created_at', sevenDaysAgo.toISOString());
     } else if (activeFilter === 'dtfn') {
-      // Show only DTFN users (looking for hookups/right now)
-      query = query.eq('is_dtfn', true);
+      // Show only DTFN users with active DTFN (dtfn_active_until > now)
+      query = query.gt('dtfn_active_until', new Date().toISOString());
     }
 
     query = query.order('last_seen', { ascending: false }).limit(50);
@@ -173,9 +176,14 @@ export default function Dashboard() {
     if (error) {
       console.error('Error fetching profiles:', error);
     }
-    
+
     if (data) {
-      setProfiles(data);
+      // Flatten user_settings into the profile object
+      const profilesWithPnP = data.map((profile: any) => ({
+        ...profile,
+        pnp_visible: profile.user_settings?.pnp_visible || false
+      }));
+      setProfiles(profilesWithPnP);
     }
     setLoading(false);
   };
@@ -212,6 +220,16 @@ export default function Dashboard() {
       setShowTribesDropdown(!showTribesDropdown);
       setShowPositionDropdown(false);
       setShowAgeDropdown(false);
+    } else if (filter.id === 'dtfn') {
+      // DTFN filter is premium-only
+      if (!isPremium) {
+        router.push('/premium');
+        return;
+      }
+      setActiveFilter(filter.id);
+      setShowPositionDropdown(false);
+      setShowAgeDropdown(false);
+      setShowTribesDropdown(false);
     } else {
       setActiveFilter(filter.id);
       setShowPositionDropdown(false);
@@ -939,12 +957,22 @@ export default function Dashboard() {
                 backgroundPosition: 'center'
               }} />
 
-              {/* Pro Badge */}
-              {profile.is_premium && (
-                <div style={{ position: 'absolute', top: '6px', right: '6px', zIndex: 2 }}>
-                  <ProBadge size="sm" />
+              {/* PnP Orbit badge - top left */}
+              {profile.pnp_visible && (
+                <div style={{ position: 'absolute', top: '6px', left: '6px', zIndex: 2 }}>
+                  <OrbitBadge size="sm" />
                 </div>
               )}
+
+              {/* Badges container - top right */}
+              <div style={{ position: 'absolute', top: '6px', right: '6px', zIndex: 2, display: 'flex', gap: '4px', alignItems: 'center' }}>
+                {profile.dtfn_active_until && new Date(profile.dtfn_active_until) > new Date() && (
+                  <DTFNBadge isActive={true} size="sm" />
+                )}
+                {profile.is_premium && (
+                  <ProBadge size="sm" />
+                )}
+              </div>
 
               {/* Minimal overlay - just name and distance */}
               <div style={{

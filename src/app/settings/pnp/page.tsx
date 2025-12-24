@@ -1,24 +1,79 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function PnPPage() {
+  const router = useRouter();
+  const { colors } = useTheme();
   const [answer, setAnswer] = useState<'yes' | 'no' | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('pnp');
-    if (saved) setAnswer(saved as 'yes' | 'no');
-  }, []);
+    const loadSetting = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
 
-  const handleSelect = (value: 'yes' | 'no') => {
+      // Load from database
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('pnp_visible')
+        .eq('user_id', user.id)
+        .single();
+
+      if (settings) {
+        setAnswer(settings.pnp_visible ? 'yes' : 'no');
+      }
+      setLoading(false);
+    };
+
+    loadSetting();
+  }, [router]);
+
+  const handleSelect = async (value: 'yes' | 'no') => {
     setAnswer(value);
+    setSaving(true);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Save to database
+    const { error } = await supabase
+      .from('user_settings')
+      .upsert({
+        user_id: user.id,
+        pnp_visible: value === 'yes'
+      }, {
+        onConflict: 'user_id'
+      });
+
+    if (error) {
+      console.error('Error saving PnP setting:', error);
+    }
+
+    // Also store in localStorage for quick access
     localStorage.setItem('pnp', value);
+    setSaving(false);
   };
 
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Cormorant Garamond', 'Space Mono', -apple-system, BlinkMacSystemFont, serif" }}>
-      <header style={{ padding: '15px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c1c1e', position: 'sticky', top: 0, background: '#000', zIndex: 100 }}>
-        <a href="/settings" style={{ color: '#fff', textDecoration: 'none', fontSize: '24px' }}>‹</a>
+    <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, fontFamily: "'Cormorant Garamond', 'Space Mono', -apple-system, BlinkMacSystemFont, serif" }}>
+      <header style={{ padding: '15px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${colors.border}`, position: 'sticky', top: 0, background: colors.background, zIndex: 100 }}>
+        <a href="/settings" style={{ color: colors.text, textDecoration: 'none', fontSize: '24px' }}>‹</a>
         <span style={{ fontSize: '17px', fontWeight: 600 }}>Privacy Settings</span>
         <span style={{ width: '24px' }}></span>
       </header>
@@ -31,39 +86,49 @@ export default function PnPPage() {
         <div style={{ display: 'flex', gap: '15px', marginTop: '30px' }}>
           <button
             onClick={() => handleSelect('yes')}
+            disabled={saving}
             style={{
               flex: 1,
               padding: '20px',
-              background: answer === 'yes' ? '#FF6B35' : '#1c1c1e',
-              border: answer === 'yes' ? '2px solid #FF6B35' : '2px solid #333',
+              background: answer === 'yes' ? '#FF6B35' : colors.surface,
+              border: answer === 'yes' ? '2px solid #FF6B35' : `2px solid ${colors.border}`,
               borderRadius: '12px',
-              color: '#fff',
+              color: colors.text,
               fontSize: '18px',
               fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s'
+              cursor: saving ? 'wait' : 'pointer',
+              transition: 'all 0.2s',
+              opacity: saving ? 0.7 : 1
             }}
           >
             Yes
           </button>
           <button
             onClick={() => handleSelect('no')}
+            disabled={saving}
             style={{
               flex: 1,
               padding: '20px',
-              background: answer === 'no' ? '#FF6B35' : '#1c1c1e',
-              border: answer === 'no' ? '2px solid #FF6B35' : '2px solid #333',
+              background: answer === 'no' ? '#FF6B35' : colors.surface,
+              border: answer === 'no' ? '2px solid #FF6B35' : `2px solid ${colors.border}`,
               borderRadius: '12px',
-              color: '#fff',
+              color: colors.text,
               fontSize: '18px',
               fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s'
+              cursor: saving ? 'wait' : 'pointer',
+              transition: 'all 0.2s',
+              opacity: saving ? 0.7 : 1
             }}
           >
             No
           </button>
         </div>
+
+        {answer === 'yes' && (
+          <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '14px', color: colors.textSecondary }}>
+            Your profile will show the orbit icon to other users.
+          </p>
+        )}
       </div>
     </div>
   );

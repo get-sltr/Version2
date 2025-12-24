@@ -11,6 +11,11 @@ export default function SettingsPage() {
   const { darkMode, toggleDarkMode, colors } = useTheme();
   const [profile, setProfile] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
+  const [savedPhrases, setSavedPhrases] = useState<string[]>([]);
+  const [travelMode, setTravelMode] = useState<{ isActive: boolean; city: string } | null>(null);
+  const [minAge, setMinAge] = useState(18);
+  const [maxAge, setMaxAge] = useState(99);
+  const [maxDistance, setMaxDistance] = useState(30);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -26,14 +31,57 @@ export default function SettingsPage() {
         .select('*')
         .eq('id', authUser.id)
         .single();
-      
+
       if (profileData) {
         setProfile(profileData);
       }
+
+      // Load saved phrases from localStorage
+      const saved = localStorage.getItem('savedPhrases');
+      if (saved) {
+        setSavedPhrases(JSON.parse(saved));
+      }
+
+      // Load travel mode
+      const travelData = localStorage.getItem('travelMode');
+      if (travelData) {
+        setTravelMode(JSON.parse(travelData));
+      }
+
+      // Load age range
+      const savedMinAge = localStorage.getItem('minAge');
+      const savedMaxAge = localStorage.getItem('maxAge');
+      if (savedMinAge) setMinAge(parseInt(savedMinAge));
+      if (savedMaxAge) setMaxAge(parseInt(savedMaxAge));
+
+      // Load max distance
+      const savedDistance = localStorage.getItem('maxDistance');
+      if (savedDistance) setMaxDistance(parseInt(savedDistance));
     };
 
     loadProfile();
   }, [router]);
+
+  const handleMinAgeChange = (value: string) => {
+    const numValue = parseInt(value) || 18;
+    const clamped = Math.max(18, Math.min(numValue, maxAge - 1));
+    setMinAge(clamped);
+    localStorage.setItem('minAge', clamped.toString());
+  };
+
+  const handleMaxAgeChange = (value: string) => {
+    const numValue = parseInt(value) || 99;
+    const clamped = Math.max(minAge + 1, Math.min(numValue, 99));
+    setMaxAge(clamped);
+    localStorage.setItem('maxAge', clamped.toString());
+  };
+
+  const handleDistanceChange = (value: string) => {
+    const numValue = parseInt(value) || 30;
+    const clamped = Math.max(1, Math.min(numValue, 100));
+    setMaxDistance(clamped);
+    localStorage.setItem('maxDistance', clamped.toString());
+  };
 
   const handleLogout = async () => {
     try {
@@ -81,87 +129,195 @@ export default function SettingsPage() {
       </div>
 
       {/* Account */}
-      <Section title="ACCOUNT" glow="strong">
+      <Section title="ACCOUNT">
         <a href="/settings/account" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Account Settings" hasArrow accentBorder />
+          <MenuItem label="Account Settings" hasArrow />
         </a>
-        <MenuItem label="Phone Number" value={profile?.phone || 'Not set'} accentBorder />
-        <MenuItem label="Email" value={user?.email || 'Not set'} accentBorder />
-        <MenuItem label="Password" value="••••••••" accentBorder />
+        <MenuItem label="Phone Number" value={profile?.phone || 'Not set'} />
+        <MenuItem label="Email" value={user?.email || 'Not set'} />
+        <MenuItem label="Password" value="••••••••" />
       </Section>
 
       {/* Preferences */}
-      <Section title="PREFERENCES" glow="soft">
+      <Section title="PREFERENCES">
         <MenuItem label="Distance Unit" value="Miles" hasArrow />
         <a href="/settings/show-me" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Show Me" value="Top, Bottom, Versatile, Top Vers, Btm Vers, Side" hasArrow />
         </a>
-        <a href="/settings/age-range" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Age Range" value="18-80" hasArrow />
-        </a>
-        <a href="/settings/max-distance" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Maximum Distance" value="30 mi" hasArrow />
-        </a>
+        {/* Age Range - Inline Inputs */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}` }}>
+          <span style={{ fontSize: '16px', color: colors.text }}>Age Range</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <input
+              type="number"
+              value={minAge}
+              onChange={(e) => handleMinAgeChange(e.target.value)}
+              min={18}
+              max={98}
+              style={{
+                width: '50px',
+                padding: '8px',
+                fontSize: '14px',
+                textAlign: 'center',
+                border: `1px solid ${colors.border}`,
+                borderRadius: '8px',
+                background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                color: colors.text,
+                outline: 'none'
+              }}
+            />
+            <span style={{ color: colors.textSecondary }}>-</span>
+            <input
+              type="number"
+              value={maxAge}
+              onChange={(e) => handleMaxAgeChange(e.target.value)}
+              min={19}
+              max={99}
+              style={{
+                width: '50px',
+                padding: '8px',
+                fontSize: '14px',
+                textAlign: 'center',
+                border: `1px solid ${colors.border}`,
+                borderRadius: '8px',
+                background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                color: colors.text,
+                outline: 'none'
+              }}
+            />
+          </div>
+        </div>
+        {/* Max Distance - Inline Input */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}` }}>
+          <span style={{ fontSize: '16px', color: colors.text }}>Maximum Distance</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <input
+              type="number"
+              value={maxDistance}
+              onChange={(e) => handleDistanceChange(e.target.value)}
+              min={1}
+              max={100}
+              style={{
+                width: '55px',
+                padding: '8px',
+                fontSize: '14px',
+                textAlign: 'center',
+                border: `1px solid ${colors.border}`,
+                borderRadius: '8px',
+                background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                color: colors.text,
+                outline: 'none'
+              }}
+            />
+            <span style={{ fontSize: '14px', color: colors.textSecondary }}>mi</span>
+          </div>
+        </div>
         <a href="/settings/saved-phrases" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Saved Phrases" hasArrow />
+          <MenuItem
+            label="Saved Phrases"
+            value={savedPhrases.length > 0 ? `${savedPhrases.length} phrase${savedPhrases.length > 1 ? 's' : ''}` : 'None'}
+            hasArrow
+          />
         </a>
+        {/* Show preview of first phrase */}
+        {savedPhrases.length > 0 && (
+          <a href="/settings/saved-phrases" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+            <div style={{
+              padding: '12px 0',
+              borderBottom: `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}`,
+              fontSize: '13px',
+              color: colors.textSecondary,
+              fontStyle: 'italic'
+            }}>
+              "{savedPhrases[0].length > 40 ? savedPhrases[0].substring(0, 40) + '...' : savedPhrases[0]}"
+            </div>
+          </a>
+        )}
       </Section>
 
       {/* Notifications */}
-      <Section title="NOTIFICATIONS" glow="soft">
+      <Section title="NOTIFICATIONS">
         <a href="/settings/push-notifications" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Push Notifications" hasArrow />
         </a>
-        <a href="/settings/email-notifications" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Email Notifications" hasArrow />
-        </a>
       </Section>
 
-      {/* Display */}
-      <Section title="DISPLAY">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: `1px solid ${colors.border}` }}>
-          <span style={{ fontSize: '15px' }}>Dark Mode</span>
-          <button
-            onClick={toggleDarkMode}
-            style={{
-              width: '51px',
-              height: '31px',
-              background: darkMode ? colors.accent : colors.surface,
-              borderRadius: '16px',
-              border: 'none',
-              position: 'relative',
-              cursor: 'pointer',
-              transition: 'background 0.3s'
-            }}
-          >
+      {/* Display - Dark Mode Toggle (Prominent) */}
+      <div style={{ padding: '20px', marginBottom: '12px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: colors.textSecondary, marginBottom: '10px', paddingLeft: '5px' }}>DISPLAY</div>
+        <button
+          onClick={toggleDarkMode}
+          style={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '20px',
+            background: darkMode
+              ? 'linear-gradient(135deg, rgba(40, 40, 45, 0.95) 0%, rgba(28, 28, 30, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 248, 248, 0.98) 100%)',
+            borderRadius: '16px',
+            border: `1px solid ${darkMode ? 'rgba(80, 80, 80, 0.5)' : 'rgba(200, 200, 200, 0.6)'}`,
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
-              width: '27px',
-              height: '27px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              background: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '22px'
+            }}>
+              {darkMode ? '🌙' : '☀️'}
+            </div>
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontSize: '17px', fontWeight: 600, color: colors.text }}>
+                {darkMode ? 'Dark Mode' : 'Light Mode'}
+              </div>
+              <div style={{ fontSize: '13px', color: colors.textSecondary, marginTop: '2px' }}>
+                Tap to switch to {darkMode ? 'light' : 'dark'} theme
+              </div>
+            </div>
+          </div>
+          <div style={{
+            width: '56px',
+            height: '32px',
+            background: darkMode ? '#FF6B35' : '#ccc',
+            borderRadius: '16px',
+            position: 'relative',
+            transition: 'background 0.3s'
+          }}>
+            <div style={{
+              width: '28px',
+              height: '28px',
               background: '#fff',
               borderRadius: '50%',
               position: 'absolute',
               top: '2px',
-              left: darkMode ? '22px' : '2px',
-              transition: 'left 0.3s'
+              left: darkMode ? '26px' : '2px',
+              transition: 'left 0.3s',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
             }} />
-          </button>
-        </div>
-      </Section>
+          </div>
+        </button>
+      </div>
 
       {/* Privacy */}
       <Section title="PRIVACY">
         <a href="/settings/travel-mode" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Travel Mode" value="Off" hasArrow />
+          <MenuItem label="Travel Mode" value={travelMode?.isActive ? travelMode.city : 'Off'} hasArrow />
         </a>
         <a href="/settings/incognito" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Incognito Mode" value="Off" hasArrow />
         </a>
-        <a href="/settings/show-distance" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Show Distance" hasArrow />
-        </a>
-        <a href="/settings/show-age" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Show Age" hasArrow />
-        </a>
+        <ToggleMenuItem label="Show Distance" storageKey="showDistance" />
+        <ToggleMenuItem label="Show Age" storageKey="showAge" />
         <ToggleMenuItem label="PnP" storageKey="pnp" />
         <a href="/settings/blocked-users" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Blocked Users" hasArrow />
@@ -216,17 +372,14 @@ export default function SettingsPage() {
   );
 }
 
-function Section({ title, glow, children }: { title: string; glow?: 'soft' | 'strong'; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const { colors, darkMode } = useTheme();
   // Glass background adapts to theme
   const glassBg = darkMode
     ? 'rgba(28, 28, 30, 0.9)'  // Dark glass
     : 'rgba(255, 255, 255, 0.95)';  // Light glass
-  const boxShadow = glow === 'strong'
-    ? '0 8px 28px rgba(0,0,0,0.18), inset 0 0 24px rgba(255,107,53,0.08)'
-    : '0 6px 22px rgba(0,0,0,0.12), inset 0 0 18px rgba(180,180,180,0.08)';
-  const borderColor = darkMode ? 'rgba(255, 107, 53, 0.4)' : 'rgba(255, 107, 53, 0.6)';
-  const innerBorderColor = darkMode ? 'rgba(80, 80, 80, 0.4)' : 'rgba(180, 180, 180, 0.4)';
+  const boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+  const borderColor = darkMode ? 'rgba(80, 80, 80, 0.5)' : 'rgba(200, 200, 200, 0.6)';
 
   return (
     <div style={{ padding: '20px', marginBottom: '12px' }}>
@@ -237,43 +390,18 @@ function Section({ title, glow, children }: { title: string; glow?: 'soft' | 'st
         backdropFilter: 'blur(10px)',
         borderRadius: '12px',
         overflow: 'hidden',
-        boxShadow
+        boxShadow,
+        border: `1px solid ${borderColor}`
       }}>
-        {/* Orange rim border */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          borderRadius: '12px',
-          border: `2px solid ${borderColor}`,
-          pointerEvents: 'none',
-          zIndex: 2
-        }} />
-        {/* Glass border */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          borderRadius: '12px',
-          border: `1px solid ${innerBorderColor}`,
-          pointerEvents: 'none',
-          zIndex: 1
-        }} />
         <div style={{ padding: '0 15px', position: 'relative', zIndex: 0, color: colors.text }}>{children}</div>
       </div>
     </div>
   );
 }
 
-function MenuItem({ label, value, hasArrow, accentBorder }: { label: string; value?: string; hasArrow?: boolean; accentBorder?: boolean }) {
+function MenuItem({ label, value, hasArrow }: { label: string; value?: string; hasArrow?: boolean }) {
   const { colors, darkMode } = useTheme();
-  const borderStyle = accentBorder
-    ? `2px solid ${darkMode ? 'rgba(255, 107, 53, 0.5)' : 'rgba(255, 107, 53, 0.7)'}`
-    : `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}`;
+  const borderStyle = `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}`;
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: borderStyle }}>

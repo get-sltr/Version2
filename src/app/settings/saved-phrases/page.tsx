@@ -2,39 +2,65 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../../lib/supabase';
+import { useTheme } from '../../../contexts/ThemeContext';
+
+const FREE_PHRASE_LIMIT = 1;
 
 export default function SavedPhrasesPage() {
   const router = useRouter();
+  const { colors, darkMode } = useTheme();
   const [phrases, setPhrases] = useState<string[]>([]);
   const [newPhrase, setNewPhrase] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
+  const [isPremium, setIsPremium] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load saved phrases from localStorage
-    const saved = localStorage.getItem('savedPhrases');
-    if (saved) {
-      setPhrases(JSON.parse(saved));
-    } else {
-      // Default phrases
-      setPhrases([
-        'Pretty open here. Vers/btm',
-        'Into most things, kissing sucking',
-        'Looking for now',
-        'Can host',
-        'What are you into?',
-        'Send more pics?'
-      ]);
-    }
+    const loadData = async () => {
+      // Check premium status
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_premium, role')
+          .eq('id', user.id)
+          .single();
+
+        // Premium if is_premium is true OR role is 'founder'
+        const hasPremium = profile?.is_premium === true || profile?.role === 'founder';
+        setIsPremium(hasPremium);
+      }
+
+      // Load saved phrases from localStorage
+      const saved = localStorage.getItem('savedPhrases');
+      if (saved) {
+        setPhrases(JSON.parse(saved));
+      } else {
+        // Default: 1 phrase for free users
+        setPhrases(['What are you into?']);
+      }
+      setIsLoading(false);
+    };
+
+    loadData();
   }, []);
 
+  const canAddMore = isPremium || phrases.length < FREE_PHRASE_LIMIT;
+
   const savePhrase = () => {
-    if (newPhrase.trim()) {
-      const updated = [...phrases, newPhrase.trim()];
-      setPhrases(updated);
-      localStorage.setItem('savedPhrases', JSON.stringify(updated));
-      setNewPhrase('');
+    if (!newPhrase.trim()) return;
+
+    if (!canAddMore) {
+      router.push('/premium');
+      return;
     }
+
+    const updated = [...phrases, newPhrase.trim()];
+    setPhrases(updated);
+    localStorage.setItem('savedPhrases', JSON.stringify(updated));
+    setNewPhrase('');
   };
 
   const deletePhrase = (index: number) => {
@@ -64,20 +90,34 @@ export default function SavedPhrasesPage() {
     setEditText('');
   };
 
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: colors.background,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ color: colors.textSecondary }}>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#000',
-      color: '#fff',
+      background: colors.background,
+      color: colors.text,
       fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif"
     }}>
       {/* Header */}
       <header style={{
         position: 'sticky',
         top: 0,
-        background: 'rgba(0,0,0,0.95)',
+        background: darkMode ? 'rgba(0,0,0,0.95)' : 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid #1c1c1e',
+        borderBottom: `1px solid ${colors.border}`,
         padding: '16px 20px',
         zIndex: 100,
         display: 'flex',
@@ -85,6 +125,7 @@ export default function SavedPhrasesPage() {
         gap: '16px'
       }}>
         <button
+          type="button"
           onClick={() => router.back()}
           style={{
             background: 'none',
@@ -101,29 +142,71 @@ export default function SavedPhrasesPage() {
         <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>
           Saved Phrases
         </h1>
+        {isPremium && (
+          <span style={{
+            marginLeft: 'auto',
+            background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+            color: '#000',
+            padding: '4px 10px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: 600
+          }}>
+            ⭐ PREMIUM
+          </span>
+        )}
       </header>
 
       <div style={{ padding: '20px' }}>
         {/* Info */}
         <div style={{
-          background: 'rgba(255,107,53,0.1)',
-          border: '1px solid rgba(255,107,53,0.3)',
+          background: darkMode ? 'rgba(255,107,53,0.1)' : 'rgba(255,107,53,0.08)',
+          border: `1px solid ${darkMode ? 'rgba(255,107,53,0.3)' : 'rgba(255,107,53,0.2)'}`,
           borderRadius: '12px',
           padding: '16px',
           marginBottom: '24px',
           fontSize: '14px',
-          color: '#aaa',
+          color: colors.textSecondary,
           lineHeight: 1.6
         }}>
           💬 Quick reply templates that appear below your message input. Tap to send instantly.
         </div>
 
+        {/* Limit indicator for free users */}
+        {!isPremium && (
+          <div style={{
+            background: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+            borderRadius: '12px',
+            padding: '14px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span style={{ fontSize: '14px', color: colors.textSecondary }}>
+              Phrases: {phrases.length}/{FREE_PHRASE_LIMIT}
+            </span>
+            <a
+              href="/premium"
+              style={{
+                color: '#FF6B35',
+                fontSize: '14px',
+                fontWeight: 600,
+                textDecoration: 'none'
+              }}
+            >
+              Upgrade for unlimited →
+            </a>
+          </div>
+        )}
+
         {/* Add New Phrase */}
         <div style={{
-          background: '#1c1c1e',
+          background: colors.surface,
           borderRadius: '16px',
           padding: '16px',
-          marginBottom: '24px'
+          marginBottom: '24px',
+          border: `1px solid ${colors.border}`
         }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>
             Add New Phrase
@@ -134,24 +217,27 @@ export default function SavedPhrasesPage() {
               value={newPhrase}
               onChange={(e) => setNewPhrase(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && savePhrase()}
-              placeholder="Type your phrase..."
+              placeholder={canAddMore ? "Type your phrase..." : "Upgrade for more phrases"}
               maxLength={100}
+              disabled={!canAddMore}
               style={{
                 flex: 1,
-                background: '#000',
-                border: '1px solid #333',
+                background: colors.background,
+                border: `1px solid ${colors.border}`,
                 borderRadius: '12px',
                 padding: '14px 16px',
-                color: '#fff',
+                color: colors.text,
                 fontSize: '15px',
-                outline: 'none'
+                outline: 'none',
+                opacity: canAddMore ? 1 : 0.5
               }}
             />
             <button
+              type="button"
               onClick={savePhrase}
               disabled={!newPhrase.trim()}
               style={{
-                background: newPhrase.trim() ? '#FF6B35' : '#333',
+                background: newPhrase.trim() ? '#FF6B35' : (darkMode ? '#333' : '#ccc'),
                 border: 'none',
                 borderRadius: '12px',
                 padding: '14px 24px',
@@ -162,12 +248,14 @@ export default function SavedPhrasesPage() {
                 opacity: newPhrase.trim() ? 1 : 0.5
               }}
             >
-              Add
+              {canAddMore ? 'Add' : '🔒'}
             </button>
           </div>
-          <div style={{ fontSize: '12px', color: '#666', marginTop: '8px', textAlign: 'right' }}>
-            {newPhrase.length}/100
-          </div>
+          {canAddMore && (
+            <div style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '8px', textAlign: 'right' }}>
+              {newPhrase.length}/100
+            </div>
+          )}
         </div>
 
         {/* Phrases List */}
@@ -175,14 +263,15 @@ export default function SavedPhrasesPage() {
           <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>
             Your Phrases ({phrases.length})
           </h3>
-          
+
           {phrases.length === 0 ? (
             <div style={{
-              background: '#1c1c1e',
+              background: colors.surface,
               borderRadius: '16px',
               padding: '40px 20px',
               textAlign: 'center',
-              color: '#666'
+              color: colors.textSecondary,
+              border: `1px solid ${colors.border}`
             }}>
               <div style={{ fontSize: '40px', marginBottom: '12px' }}>💬</div>
               <div>No saved phrases yet</div>
@@ -196,12 +285,13 @@ export default function SavedPhrasesPage() {
                 <div
                   key={index}
                   style={{
-                    background: '#1c1c1e',
+                    background: colors.surface,
                     borderRadius: '12px',
                     padding: '16px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px'
+                    gap: '12px',
+                    border: `1px solid ${colors.border}`
                   }}
                 >
                   {editingIndex === index ? (
@@ -215,16 +305,17 @@ export default function SavedPhrasesPage() {
                         autoFocus
                         style={{
                           flex: 1,
-                          background: '#000',
+                          background: colors.background,
                           border: '1px solid #FF6B35',
                           borderRadius: '8px',
                           padding: '10px 12px',
-                          color: '#fff',
+                          color: colors.text,
                           fontSize: '15px',
                           outline: 'none'
                         }}
                       />
                       <button
+                        type="button"
                         onClick={saveEdit}
                         style={{
                           background: '#FF6B35',
@@ -240,13 +331,14 @@ export default function SavedPhrasesPage() {
                         Save
                       </button>
                       <button
+                        type="button"
                         onClick={cancelEdit}
                         style={{
-                          background: '#333',
+                          background: darkMode ? '#333' : '#ddd',
                           border: 'none',
                           borderRadius: '8px',
                           padding: '10px 16px',
-                          color: '#fff',
+                          color: colors.text,
                           fontSize: '14px',
                           cursor: 'pointer'
                         }}
@@ -264,13 +356,14 @@ export default function SavedPhrasesPage() {
                         {phrase}
                       </div>
                       <button
+                        type="button"
                         onClick={() => startEdit(index)}
                         style={{
-                          background: 'rgba(255,255,255,0.1)',
+                          background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
                           border: 'none',
                           borderRadius: '8px',
                           padding: '8px 12px',
-                          color: '#fff',
+                          color: colors.text,
                           fontSize: '14px',
                           cursor: 'pointer'
                         }}
@@ -278,6 +371,7 @@ export default function SavedPhrasesPage() {
                         Edit
                       </button>
                       <button
+                        type="button"
                         onClick={() => deletePhrase(index)}
                         style={{
                           background: 'rgba(255,59,48,0.15)',
@@ -299,39 +393,41 @@ export default function SavedPhrasesPage() {
           )}
         </div>
 
-        {/* Premium Badge */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)',
-          border: '1px solid rgba(255,107,53,0.3)',
-          borderRadius: '16px',
-          padding: '20px',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '28px', marginBottom: '12px' }}>⭐</div>
-          <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-            Premium Feature
-          </h4>
-          <p style={{ fontSize: '14px', color: '#aaa', marginBottom: '16px', lineHeight: 1.6 }}>
-            Unlimited saved phrases available with SLTR Premium
-          </p>
-          <a
-            href="/premium"
-            style={{
-              display: 'inline-block',
-              background: '#FF6B35',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '12px 32px',
-              color: '#fff',
-              fontSize: '15px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            Upgrade Now
-          </a>
-        </div>
+        {/* Premium Upgrade CTA - only show for non-premium */}
+        {!isPremium && (
+          <div style={{
+            background: `linear-gradient(135deg, ${darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)'} 0%, ${darkMode ? 'rgba(255,107,53,0.05)' : 'rgba(255,107,53,0.02)'} 100%)`,
+            border: `1px solid ${darkMode ? 'rgba(255,107,53,0.3)' : 'rgba(255,107,53,0.2)'}`,
+            borderRadius: '16px',
+            padding: '24px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>⭐</div>
+            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
+              Unlock Unlimited Phrases
+            </h4>
+            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px', lineHeight: 1.6 }}>
+              Premium members get unlimited saved phrases to speed up their conversations
+            </p>
+            <a
+              href="/premium"
+              style={{
+                display: 'inline-block',
+                background: '#FF6B35',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '14px 36px',
+                color: '#fff',
+                fontSize: '16px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Upgrade to Premium
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

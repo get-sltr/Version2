@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePremium } from '@/hooks/usePremium';
 import { PremiumPromo } from '@/components/PremiumPromo';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 export default function TravelModePage() {
   const router = useRouter();
+  const { colors, darkMode } = useTheme();
   const { isPremium, isLoading: premiumLoading } = usePremium();
   const [isActive, setIsActive] = useState(false);
   const [city, setCity] = useState('');
@@ -71,7 +73,6 @@ export default function TravelModePage() {
 
     localStorage.setItem('travelMode', JSON.stringify(travelData));
     setIsActive(true);
-    router.back();
   };
 
   const handleDeactivate = () => {
@@ -91,17 +92,17 @@ export default function TravelModePage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#000',
-      color: '#fff',
+      background: colors.background,
+      color: colors.text,
       fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif"
     }}>
       {/* Header */}
       <header style={{
         position: 'sticky',
         top: 0,
-        background: 'rgba(0,0,0,0.95)',
+        background: darkMode ? 'rgba(0,0,0,0.95)' : 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid #1c1c1e',
+        borderBottom: `1px solid ${colors.border}`,
         padding: '16px 20px',
         zIndex: 100,
         display: 'flex',
@@ -140,7 +141,7 @@ export default function TravelModePage() {
           <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>
             Browse Before You Travel
           </h3>
-          <p style={{ fontSize: '14px', color: '#aaa', lineHeight: 1.6, textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: colors.textSecondary, lineHeight: 1.6, textAlign: 'center' }}>
             Set your destination and travel dates. Your profile will appear in that city, and you'll see profiles from there.
           </p>
         </div>
@@ -155,16 +156,17 @@ export default function TravelModePage() {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: '24px', marginBottom: '8px' }}>🌍</div>
-            <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '4px' }}>
+            <div style={{ fontSize: '18px', fontWeight: 700, marginBottom: '4px', color: '#fff' }}>
               Travel Mode Active
             </div>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>
+            <div style={{ fontSize: '14px', opacity: 0.9, color: '#fff' }}>
               {city}
             </div>
-            <div style={{ fontSize: '13px', opacity: 0.8, marginTop: '4px' }}>
+            <div style={{ fontSize: '13px', opacity: 0.8, marginTop: '4px', color: '#fff' }}>
               {startDate} - {endDate}
             </div>
             <button
+              type="button"
               onClick={handleDeactivate}
               style={{
                 marginTop: '16px',
@@ -189,14 +191,15 @@ export default function TravelModePage() {
             Destination City
           </label>
           <button
+            type="button"
             onClick={() => setShowCitySearch(true)}
             style={{
               width: '100%',
-              background: '#1c1c1e',
-              border: '1px solid #333',
+              background: darkMode ? '#1c1c1e' : '#f5f5f5',
+              border: `1px solid ${colors.border}`,
               borderRadius: '12px',
               padding: '16px',
-              color: city ? '#fff' : '#666',
+              color: city ? colors.text : colors.textSecondary,
               fontSize: '16px',
               textAlign: 'left',
               cursor: 'pointer',
@@ -217,7 +220,7 @@ export default function TravelModePage() {
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '12px', color: colors.textSecondary, marginBottom: '8px' }}>
                 Start Date
               </label>
               <input
@@ -227,18 +230,18 @@ export default function TravelModePage() {
                 min={new Date().toISOString().split('T')[0]}
                 style={{
                   width: '100%',
-                  background: '#1c1c1e',
-                  border: '1px solid #333',
+                  background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '12px',
                   padding: '14px',
-                  color: '#fff',
+                  color: colors.text,
                   fontSize: '15px',
                   outline: 'none'
                 }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '12px', color: colors.textSecondary, marginBottom: '8px' }}>
                 End Date
               </label>
               <input
@@ -248,11 +251,11 @@ export default function TravelModePage() {
                 min={startDate || new Date().toISOString().split('T')[0]}
                 style={{
                   width: '100%',
-                  background: '#1c1c1e',
-                  border: '1px solid #333',
+                  background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '12px',
                   padding: '14px',
-                  color: '#fff',
+                  color: colors.text,
                   fontSize: '15px',
                   outline: 'none'
                 }}
@@ -263,11 +266,12 @@ export default function TravelModePage() {
 
         {/* Save Button */}
         <button
+          type="button"
           onClick={handleSave}
           disabled={!city || !startDate || !endDate}
           style={{
             width: '100%',
-            background: (city && startDate && endDate) ? '#FF6B35' : '#333',
+            background: (city && startDate && endDate) ? '#FF6B35' : (darkMode ? '#333' : '#ccc'),
             border: 'none',
             borderRadius: '12px',
             padding: '16px',
@@ -281,40 +285,6 @@ export default function TravelModePage() {
         >
           {isActive ? 'Update Travel Mode' : 'Activate Travel Mode'}
         </button>
-
-        {/* Premium Badge */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)',
-          border: '1px solid rgba(255,107,53,0.3)',
-          borderRadius: '16px',
-          padding: '20px',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '28px', marginBottom: '12px' }}>⭐</div>
-          <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-            Premium Feature
-          </h4>
-          <p style={{ fontSize: '14px', color: '#aaa', marginBottom: '16px', lineHeight: 1.6 }}>
-            Travel Mode is available with SLTR Premium
-          </p>
-          <a
-            href="/premium"
-            style={{
-              display: 'inline-block',
-              background: '#FF6B35',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '12px 32px',
-              color: '#fff',
-              fontSize: '15px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            Upgrade Now
-          </a>
-        </div>
       </div>
 
       {/* City Search Modal */}
@@ -332,7 +302,7 @@ export default function TravelModePage() {
           <div style={{
             position: 'fixed',
             inset: '10% 5% 5%',
-            background: '#1c1c1e',
+            background: darkMode ? '#1c1c1e' : '#fff',
             borderRadius: '24px 24px 0 0',
             zIndex: 999,
             display: 'flex',
@@ -342,10 +312,11 @@ export default function TravelModePage() {
             {/* Search Header */}
             <div style={{
               padding: '20px',
-              borderBottom: '1px solid #333'
+              borderBottom: `1px solid ${colors.border}`
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                 <button
+                  type="button"
                   onClick={() => setShowCitySearch(false)}
                   style={{
                     background: 'none',
@@ -358,7 +329,7 @@ export default function TravelModePage() {
                 >
                   ✕
                 </button>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: colors.text }}>
                   Select Destination
                 </h3>
               </div>
@@ -370,11 +341,11 @@ export default function TravelModePage() {
                 autoFocus
                 style={{
                   width: '100%',
-                  background: '#000',
-                  border: '1px solid #333',
+                  background: darkMode ? '#000' : '#f5f5f5',
+                  border: `1px solid ${colors.border}`,
                   borderRadius: '12px',
                   padding: '14px 16px',
-                  color: '#fff',
+                  color: colors.text,
                   fontSize: '15px',
                   outline: 'none'
                 }}
@@ -387,20 +358,21 @@ export default function TravelModePage() {
               overflowY: 'auto',
               padding: '20px'
             }}>
-              <div style={{ marginBottom: '16px', fontSize: '13px', fontWeight: 600, color: '#888' }}>
+              <div style={{ marginBottom: '16px', fontSize: '13px', fontWeight: 600, color: colors.textSecondary }}>
                 POPULAR DESTINATIONS
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {filteredCities.map((c, i) => (
                   <button
+                    type="button"
                     key={i}
                     onClick={() => selectCity(c.name)}
                     style={{
-                      background: city === c.name ? 'rgba(255,107,53,0.2)' : '#000',
-                      border: city === c.name ? '1px solid #FF6B35' : '1px solid #333',
+                      background: city === c.name ? 'rgba(255,107,53,0.2)' : (darkMode ? '#000' : '#f5f5f5'),
+                      border: city === c.name ? '1px solid #FF6B35' : `1px solid ${colors.border}`,
                       borderRadius: '12px',
                       padding: '16px',
-                      color: '#fff',
+                      color: colors.text,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -411,7 +383,7 @@ export default function TravelModePage() {
                     <span style={{ fontSize: '28px' }}>{c.icon}</span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '16px', fontWeight: 600 }}>{c.name}</div>
-                      <div style={{ fontSize: '13px', color: '#888' }}>{c.country}</div>
+                      <div style={{ fontSize: '13px', color: colors.textSecondary }}>{c.country}</div>
                     </div>
                     {city === c.name && (
                       <span style={{ color: '#FF6B35', fontSize: '20px' }}>✓</span>

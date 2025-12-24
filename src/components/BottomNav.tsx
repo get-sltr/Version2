@@ -99,6 +99,7 @@ export function BottomNav({ active }: BottomNavProps) {
   // Auto-detect active based on path if not provided
   const currentActive = active || detectActive(pathname);
 
+  // Build nav items - standard 4-item navigation
   const navItems: { key: NavItem; href: string; icon: typeof IconSearch; label: string }[] = [
     { key: 'explore', href: '/dashboard', icon: IconSearch, label: 'Explore' },
     { key: 'taps', href: '/taps', icon: IconFlame, label: 'Taps' },
@@ -146,7 +147,10 @@ export function BottomNav({ active }: BottomNavProps) {
               position: 'relative'
             }}
           >
-            <div style={{ position: 'relative', display: 'inline-flex' }}>
+            <div style={{
+              position: 'relative',
+              display: 'inline-flex'
+            }}>
               <Icon size={24} />
               {badgeCount > 0 && (
                 <div style={{

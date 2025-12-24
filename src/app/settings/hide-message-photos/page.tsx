@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from '../../../contexts/ThemeContext';
+import { usePremium } from '@/hooks/usePremium';
 
 export default function HideChatPhotosPage() {
   const router = useRouter();
+  const { colors, darkMode } = useTheme();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [isEnabled, setIsEnabled] = useState(false);
   const [blurLevel, setBlurLevel] = useState<'light' | 'heavy'>('light');
 
@@ -37,17 +41,17 @@ export default function HideChatPhotosPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#000',
-      color: '#fff',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      background: colors.background,
+      color: colors.text,
+      fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif",
     }}>
       {/* Header */}
       <header style={{
         position: 'sticky',
         top: 0,
-        background: 'rgba(0,0,0,0.95)',
+        background: darkMode ? 'rgba(0,0,0,0.95)' : 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid #1c1c1e',
+        borderBottom: `1px solid ${colors.border}`,
         padding: '16px 20px',
         zIndex: 100,
         display: 'flex',
@@ -55,6 +59,7 @@ export default function HideChatPhotosPage() {
         gap: '16px',
       }}>
         <button
+          type="button"
           onClick={() => router.back()}
           style={{
             background: 'none',
@@ -86,14 +91,51 @@ export default function HideChatPhotosPage() {
           <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>
             Privacy Protection
           </h3>
-          <p style={{ fontSize: '14px', color: '#aaa', lineHeight: 1.6, textAlign: 'center' }}>
+          <p style={{ fontSize: '14px', color: colors.textSecondary, lineHeight: 1.6, textAlign: 'center' }}>
             Blur photos in your conversations for extra privacy. Tap on any photo to reveal it temporarily.
           </p>
         </div>
 
+        {/* Premium Badge - show for non-premium users */}
+        {!premiumLoading && !isPremium && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)',
+            border: '1px solid rgba(255,107,53,0.3)',
+            borderRadius: '16px',
+            padding: '20px',
+            textAlign: 'center',
+            marginBottom: '24px',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '12px' }}>⭐</div>
+            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
+              Premium Feature
+            </h4>
+            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px', lineHeight: 1.6 }}>
+              Hide Message Photos is available with SLTR Premium
+            </p>
+            <a
+              href="/premium"
+              style={{
+                display: 'inline-block',
+                background: '#FF6B35',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '12px 32px',
+                color: '#fff',
+                fontSize: '15px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Upgrade Now
+            </a>
+          </div>
+        )}
+
         {/* Main Toggle */}
         <div style={{
-          background: '#1c1c1e',
+          background: darkMode ? '#1c1c1e' : '#f5f5f5',
           borderRadius: '16px',
           padding: '20px',
           marginBottom: '24px',
@@ -107,17 +149,18 @@ export default function HideChatPhotosPage() {
               <div style={{ fontSize: '17px', fontWeight: 600, marginBottom: '4px' }}>
                 Hide Photos in Messages
               </div>
-              <div style={{ fontSize: '14px', color: '#888' }}>
+              <div style={{ fontSize: '14px', color: colors.textSecondary }}>
                 Blur all shared photos by default
               </div>
             </div>
             <button
+              type="button"
               onClick={handleToggle}
               style={{
                 width: '51px',
                 height: '31px',
                 borderRadius: '31px',
-                background: isEnabled ? '#FF6B35' : '#333',
+                background: isEnabled ? '#FF6B35' : (darkMode ? '#333' : '#ccc'),
                 border: 'none',
                 cursor: 'pointer',
                 position: 'relative',
@@ -133,6 +176,7 @@ export default function HideChatPhotosPage() {
                 top: '2px',
                 left: isEnabled ? '22px' : '2px',
                 transition: 'left 0.2s',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
               }} />
             </button>
           </div>
@@ -141,21 +185,22 @@ export default function HideChatPhotosPage() {
         {/* Blur Level Options */}
         {isEnabled && (
           <div style={{
-            background: '#1c1c1e',
+            background: darkMode ? '#1c1c1e' : '#f5f5f5',
             borderRadius: '16px',
             overflow: 'hidden',
             marginBottom: '24px',
           }}>
             <div style={{
               padding: '16px 20px',
-              borderBottom: '1px solid #333',
+              borderBottom: `1px solid ${colors.border}`,
             }}>
-              <div style={{ fontSize: '13px', color: '#888', fontWeight: 600, textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '13px', color: colors.textSecondary, fontWeight: 600, textTransform: 'uppercase' }}>
                 Blur Intensity
               </div>
             </div>
 
             <button
+              type="button"
               onClick={() => handleBlurLevel('light')}
               style={{
                 width: '100%',
@@ -166,12 +211,12 @@ export default function HideChatPhotosPage() {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 cursor: 'pointer',
-                borderBottom: '1px solid #333',
+                borderBottom: `1px solid ${colors.border}`,
               }}
             >
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '17px', color: '#fff', marginBottom: '4px' }}>Light Blur</div>
-                <div style={{ fontSize: '13px', color: '#888' }}>Subtle blur, shapes visible</div>
+                <div style={{ fontSize: '17px', color: colors.text, marginBottom: '4px' }}>Light Blur</div>
+                <div style={{ fontSize: '13px', color: colors.textSecondary }}>Subtle blur, shapes visible</div>
               </div>
               {blurLevel === 'light' && (
                 <span style={{ color: '#FF6B35', fontSize: '20px' }}>✓</span>
@@ -179,6 +224,7 @@ export default function HideChatPhotosPage() {
             </button>
 
             <button
+              type="button"
               onClick={() => handleBlurLevel('heavy')}
               style={{
                 width: '100%',
@@ -192,8 +238,8 @@ export default function HideChatPhotosPage() {
               }}
             >
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '17px', color: '#fff', marginBottom: '4px' }}>Heavy Blur</div>
-                <div style={{ fontSize: '13px', color: '#888' }}>Strong blur, content hidden</div>
+                <div style={{ fontSize: '17px', color: colors.text, marginBottom: '4px' }}>Heavy Blur</div>
+                <div style={{ fontSize: '13px', color: colors.textSecondary }}>Strong blur, content hidden</div>
               </div>
               {blurLevel === 'heavy' && (
                 <span style={{ color: '#FF6B35', fontSize: '20px' }}>✓</span>
@@ -205,11 +251,11 @@ export default function HideChatPhotosPage() {
         {/* Preview */}
         {isEnabled && (
           <div style={{
-            background: '#1c1c1e',
+            background: darkMode ? '#1c1c1e' : '#f5f5f5',
             borderRadius: '16px',
             padding: '20px',
           }}>
-            <div style={{ fontSize: '13px', color: '#888', fontWeight: 600, textTransform: 'uppercase', marginBottom: '16px' }}>
+            <div style={{ fontSize: '13px', color: colors.textSecondary, fontWeight: 600, textTransform: 'uppercase', marginBottom: '16px' }}>
               Preview
             </div>
             <div style={{
@@ -239,46 +285,11 @@ export default function HideChatPhotosPage() {
                 filter: blurLevel === 'light' ? 'blur(8px)' : 'blur(20px)',
               }} />
             </div>
-            <p style={{ fontSize: '12px', color: '#666', textAlign: 'center', marginTop: '12px' }}>
+            <p style={{ fontSize: '12px', color: colors.textSecondary, textAlign: 'center', marginTop: '12px' }}>
               Tap any photo in messages to reveal it
             </p>
           </div>
         )}
-
-        {/* Premium Badge */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)',
-          border: '1px solid rgba(255,107,53,0.3)',
-          borderRadius: '16px',
-          padding: '20px',
-          textAlign: 'center',
-          marginTop: '24px',
-        }}>
-          <div style={{ fontSize: '28px', marginBottom: '12px' }}>⭐</div>
-          <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-            Premium Feature
-          </h4>
-          <p style={{ fontSize: '14px', color: '#aaa', marginBottom: '16px', lineHeight: 1.6 }}>
-            Hide Message Photos is available with SLTR Premium
-          </p>
-          <a
-            href="/premium"
-            style={{
-              display: 'inline-block',
-              background: '#FF6B35',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '12px 32px',
-              color: '#fff',
-              fontSize: '15px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            Upgrade Now
-          </a>
-        </div>
       </div>
     </div>
   );

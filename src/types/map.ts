@@ -21,6 +21,7 @@ export interface MapProfile {
   lng: number;
   image: string | null;
   distance: number | null; // in feet
+  online: boolean;
 }
 
 // Current user's profile (for "You" pin)

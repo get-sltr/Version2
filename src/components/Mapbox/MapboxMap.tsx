@@ -135,7 +135,7 @@ export default function MapboxMap({
         onLoad={reportVisibleProfiles}
         style={{ width: '100%', height: '100%' }}
       >
-        {/* User Profiles as Photo Pins - Sniffies style */}
+        {/* User Profiles as Photo Pins - with orange pulsating ring for online users */}
         {viewMode === 'users' &&
           localProfiles
             .filter(p =>
@@ -155,17 +155,62 @@ export default function MapboxMap({
                 <div
                   onClick={() => onSelectProfile?.(profile)}
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: '50%',
-                    backgroundImage: `url(${profile.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    border: profile.online ? '3px solid #4caf50' : '2px solid #fff',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
+                    position: 'relative',
+                    width: 48,
+                    height: 48,
                     cursor: 'pointer'
                   }}
-                />
+                >
+                  {/* Pulsating glow rings for online users */}
+                  {profile.online && (
+                    <>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: 48,
+                          height: 48,
+                          borderRadius: '50%',
+                          background: 'rgba(255, 107, 53, 0.4)',
+                          animation: 'pulse-glow 2s ease-out infinite',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: 48,
+                          height: 48,
+                          borderRadius: '50%',
+                          background: 'rgba(255, 107, 53, 0.3)',
+                          animation: 'pulse-glow 2s ease-out infinite 0.5s',
+                        }}
+                      />
+                    </>
+                  )}
+                  {/* Profile photo */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      backgroundImage: `url(${profile.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      border: profile.online ? '3px solid #FF6B35' : '2px solid #fff',
+                      boxShadow: profile.online ? '0 0 12px rgba(255,107,53,0.6)' : '0 2px 6px rgba(0,0,0,0.4)',
+                      zIndex: 1,
+                    }}
+                  />
+                </div>
               </Marker>
             ))}
 

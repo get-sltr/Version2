@@ -147,6 +147,7 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
           lng,
           image: profile.photo_url,
           distance: distanceFeet,
+          online: true, // All profiles returned are online (filtered by last_seen within 5 mins)
         };
       })
       .filter((profile): profile is MapProfile => profile !== null)

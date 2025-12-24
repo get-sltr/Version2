@@ -41,17 +41,17 @@ export default function EditProfilePage() {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [showTribesDropdown, setShowTribesDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isDarkMode = colors.background === '#000' || colors.background === '#000000' || colors.background === '#121212' || colors.background.includes('0,0,0');
   const inputStyle = {
     width: '100%',
     background: 'transparent',
     border: 'none',
-    color: colors.background === '#fff' ? '#000' : '#fff',
+    color: isDarkMode ? '#FFFFFF' : '#000000',
     fontSize: '16px',
     padding: '15px 0',
     outline: 'none',
     boxSizing: 'border-box' as const,
   };
-  const isDarkMode = colors.background === '#000' || colors.background === '#000000';
   const statInputStyle: React.CSSProperties = {
     width: '100%',
     borderRadius: '8px',
@@ -159,9 +159,25 @@ export default function EditProfilePage() {
 
     loadProfile();
 
-    // Reload data when page regains focus (e.g., navigating back from tags/tribes)
-    const handleFocus = () => {
-      loadProfile();
+    // Only reload tags when page regains focus (e.g., navigating back from tags page)
+    // This preserves any unsaved changes to other fields while updating tags
+    const handleFocus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('tags')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.tags) {
+          setSelectedTags(profile.tags);
+        }
+      } catch (error) {
+        console.error('Error reloading tags:', error);
+      }
     };
     window.addEventListener('focus', handleFocus);
 
@@ -460,9 +476,41 @@ export default function EditProfilePage() {
 
       {/* My Tags */}
       <Section>
-        <a href="/profile/edit/tags" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="My Tags" value="Add tags" hasArrow colors={colors} />
+        <a href="/profile/edit/tags" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: `1px solid ${colors.border}` }}>
+            <span style={{ fontSize: '16px' }}>My Tags</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px', color: colors.textSecondary }}>
+                {selectedTags.length > 0 ? `${selectedTags.length}/10` : 'Add tags'}
+              </span>
+              <span style={{ color: colors.textSecondary, fontSize: '18px' }}>›</span>
+            </div>
+          </div>
         </a>
+        {/* Show preview of selected tags (up to 3) */}
+        {selectedTags.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '12px 0' }}>
+            {selectedTags.slice(0, 3).map(tag => (
+              <span
+                key={tag}
+                style={{
+                  background: 'rgba(255,107,53,0.15)',
+                  color: '#FF6B35',
+                  padding: '6px 12px',
+                  borderRadius: '16px',
+                  fontSize: '13px'
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+            {selectedTags.length > 3 && (
+              <span style={{ fontSize: '13px', color: colors.textSecondary, padding: '6px 0' }}>
+                +{selectedTags.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
       </Section>
 
       {/* STATS */}

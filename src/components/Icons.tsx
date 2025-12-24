@@ -384,11 +384,11 @@ export const IconTaps = ({ size = 140, className }: IconProps) => (
 );
 
 export const IconDTFN = ({ size = 140, className }: IconProps) => (
-  <svg 
-    width={size} 
-    height={size * 0.57} 
-    viewBox="0 0 140 80" 
-    fill="none" 
+  <svg
+    width={size}
+    height={size * 0.57}
+    viewBox="0 0 140 80"
+    fill="none"
     className={className}
   >
     <path d="M28 4 L14 32 L26 32" stroke="currentColor" strokeWidth="1"/>
@@ -396,6 +396,58 @@ export const IconDTFN = ({ size = 140, className }: IconProps) => (
     <path d="M32 28 L40 20" stroke="#FF6B35" strokeWidth="0.5"/>
     <path d="M36 38 L44 30" stroke="#FF6B35" strokeWidth="0.5"/>
     <text x="56" y="38" fontFamily="system-ui, sans-serif" fontSize="9" fontWeight="500" letterSpacing="3" fill="#FF6B35">DTFN</text>
+  </svg>
+);
+
+// Orbit Icon - Glowing planet with rings (for PnP indicator)
+export const IconOrbit = ({ size = 24, className, animated = false }: IconProps & { animated?: boolean }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 100 100"
+    width={size}
+    height={size}
+    className={className}
+    style={animated ? { animation: 'orbitGlow 2s ease-in-out infinite' } : undefined}
+  >
+    <defs>
+      <radialGradient id="orbitCore" cx="30%" cy="30%" r="70%">
+        <stop offset="0%" style={{ stopColor: '#fff' }}/>
+        <stop offset="30%" style={{ stopColor: '#ffb347' }}/>
+        <stop offset="70%" style={{ stopColor: '#ff6b35' }}/>
+        <stop offset="100%" style={{ stopColor: '#cc4420' }}/>
+      </radialGradient>
+      <linearGradient id="orbitRingA" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: '#ff6b35' }}/>
+        <stop offset="50%" style={{ stopColor: '#ffb347' }}/>
+        <stop offset="100%" style={{ stopColor: '#ff6b35' }}/>
+      </linearGradient>
+      <linearGradient id="orbitRingB" x1="100%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style={{ stopColor: '#ffb347' }}/>
+        <stop offset="50%" style={{ stopColor: '#ff8c5a' }}/>
+        <stop offset="100%" style={{ stopColor: '#ffb347' }}/>
+      </linearGradient>
+      <filter id="orbitGlowFilter" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feFlood floodColor="#ff6b35" floodOpacity="0.8"/>
+        <feComposite in2="blur" operator="in"/>
+        <feMerge>
+          <feMergeNode/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    {/* Orbit rings */}
+    <ellipse cx="50" cy="50" rx="42" ry="16" fill="none" stroke="url(#orbitRingA)" strokeWidth="4" transform="rotate(-25 50 50)" filter="url(#orbitGlowFilter)"/>
+    <ellipse cx="50" cy="50" rx="42" ry="16" fill="none" stroke="url(#orbitRingB)" strokeWidth="3" opacity="0.7" transform="rotate(35 50 50)" filter="url(#orbitGlowFilter)"/>
+    {/* Core */}
+    <circle cx="50" cy="50" r="14" fill="url(#orbitCore)" filter="url(#orbitGlowFilter)"/>
+    {/* Shine */}
+    <ellipse cx="45" cy="45" rx="5" ry="4" fill="#fff" opacity="0.7"/>
+    {/* Particles */}
+    <circle cx="12" cy="35" r="5" fill="#ffb347" filter="url(#orbitGlowFilter)"/>
+    <circle cx="11" cy="34" r="2" fill="#fff" opacity="0.8"/>
+    <circle cx="88" cy="65" r="4" fill="#ff8c5a" filter="url(#orbitGlowFilter)"/>
+    <circle cx="87" cy="64" r="1.5" fill="#fff" opacity="0.7"/>
   </svg>
 );
 
@@ -444,6 +496,7 @@ export const Icons = {
   Star: IconStar,
   Taps: IconTaps,
   DTFN: IconDTFN,
+  Orbit: IconOrbit,
 };
 
 export default Icons;

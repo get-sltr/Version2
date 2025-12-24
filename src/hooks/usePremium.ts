@@ -44,7 +44,7 @@ export function usePremium(): PremiumStatus {
       // Get profile with premium status
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('is_premium, premium_expires_at, messages_sent_today, filters_used_today, last_activity_date')
+        .select('is_premium, premium_expires_at, messages_sent_today, filters_used_today, last_activity_date, role')
         .eq('id', user.id)
         .single();
 
@@ -57,9 +57,11 @@ export function usePremium(): PremiumStatus {
       }
 
       // Check if premium is still valid
+      // Founders always have premium access
       const now = new Date();
+      const isFounder = profile.role === 'founder';
       const premiumExpiry = profile.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-      const isCurrentlyPremium = profile.is_premium && premiumExpiry && premiumExpiry > now;
+      const isCurrentlyPremium = isFounder || (profile.is_premium && premiumExpiry && premiumExpiry > now);
 
       setIsPremium(isCurrentlyPremium);
       setPremiumUntil(premiumExpiry);
@@ -124,11 +126,16 @@ export async function useMessage(): Promise<boolean> {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_premium, premium_expires_at, messages_sent_today')
+    .select('is_premium, premium_expires_at, messages_sent_today, role')
     .eq('id', user.id)
     .single();
 
   if (!profile) return false;
+
+  // Founders always have premium access
+  if (profile.role === 'founder') {
+    return true;
+  }
 
   // Premium users always allowed
   const premiumExpiry = profile.premium_expires_at ? new Date(profile.premium_expires_at) : null;
