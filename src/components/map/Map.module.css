@@ -740,3 +740,21 @@
     opacity: 1;
   }
 }
+
+/* -----------------------------------------------------------------------------
+   Mapbox Marker Click Fixes
+   ----------------------------------------------------------------------------- */
+
+:global(.mapboxgl-canvas-container) {
+  pointer-events: none;
+}
+
+:global(.mapboxgl-canvas) {
+  pointer-events: auto;
+}
+
+:global(.mapboxgl-marker) {
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 100;
+}
