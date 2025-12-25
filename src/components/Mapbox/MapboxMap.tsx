@@ -138,12 +138,13 @@ export default function MapboxMap({
         {/* User Profiles as Photo Pins - with orange pulsating ring for online users */}
         {viewMode === 'users' &&
           localProfiles
-            .filter(p =>
-              typeof p.lat === 'number' &&
-              typeof p.lng === 'number' &&
-              p.image &&
-              p.id !== currentUserProfile?.id // Exclude current user
-            )
+            .filter(p => {
+              const valid = typeof p.lat === 'number' &&
+                typeof p.lng === 'number' &&
+                p.image;
+              // Don't exclude current user - show all profiles
+              return valid;
+            })
             .map(profile => (
               <Marker
                 key={profile.id}
