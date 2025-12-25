@@ -2,17 +2,13 @@
    Global Styles
    ============================================================================= */
 
-/* Fix Mapbox marker clicks - canvas passes clicks through */
-.mapboxgl-canvas-container {
-  pointer-events: none;
-}
-
-.mapboxgl-canvas {
-  pointer-events: auto;
-}
-
+/* Fix Mapbox marker clicks */
 .mapboxgl-marker {
-  pointer-events: auto;
-  cursor: pointer;
-  z-index: 100;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 100 !important;
+}
+
+.mapboxgl-marker > div {
+  pointer-events: auto !important;
 }

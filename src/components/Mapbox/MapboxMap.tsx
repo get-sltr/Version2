@@ -162,7 +162,6 @@ export default function MapboxMap({
                     position: 'relative',
                     width: 48,
                     height: 48,
-                    pointerEvents: 'none'
                   }}
                 >
                   {/* Pulsating glow rings for online users */}
