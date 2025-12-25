@@ -205,6 +205,11 @@ export default function MapboxMap({
                   )}
                   {/* Profile photo */}
                   <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Photo clicked:', profile.id, profile.name);
+                      onSelectProfile?.(profile);
+                    }}
                     style={{
                       position: 'absolute',
                       top: '50%',
@@ -218,7 +223,8 @@ export default function MapboxMap({
                       backgroundPosition: 'center',
                       border: profile.online ? '3px solid #FF6B35' : '2px solid #fff',
                       boxShadow: profile.online ? '0 0 12px rgba(255,107,53,0.6)' : '0 2px 6px rgba(0,0,0,0.4)',
-                      zIndex: 1,
+                      zIndex: 10,
+                      cursor: 'pointer',
                     }}
                   />
                 </div>
