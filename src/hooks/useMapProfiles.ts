@@ -89,6 +89,7 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
         return;
       }
 
+      console.log('Map profiles loaded:', data?.length ?? 0, 'profiles');
       setRawProfiles(data ?? []);
     } catch (err) {
       console.error('Error fetching map profiles:', err);
