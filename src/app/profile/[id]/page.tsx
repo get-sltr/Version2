@@ -102,19 +102,15 @@ export default function ProfileViewPage() {
         if (tapData) setHasTapped(true);
       }
 
-      // Load profile with user_settings for pnp_visible
+      // Load profile
       const { data } = await supabase
         .from('profiles')
-        .select('*, user_settings(pnp_visible)')
+        .select('*')
         .eq('id', params.id)
         .single();
 
       if (data) {
-        // Flatten user_settings into the profile object
-        setProfile({
-          ...data,
-          pnp_visible: data.user_settings?.pnp_visible || false
-        });
+        setProfile(data);
       }
       setLoading(false);
     };
