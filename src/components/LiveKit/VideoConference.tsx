@@ -12,7 +12,7 @@ import {
   Chat,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
-import { Track } from 'livekit-client';
+import { Track, RoomOptions, VideoPresets } from 'livekit-client';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface VideoConferenceProps {
@@ -119,6 +119,17 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
     return null;
   }
 
+  // Room options to handle device issues gracefully
+  const roomOptions: RoomOptions = {
+    adaptiveStream: true,
+    dynacast: true,
+    videoCaptureDefaults: {
+      resolution: VideoPresets.h720.resolution,
+    },
+    // Don't fail if devices aren't available
+    stopLocalTrackOnUnpublish: true,
+  };
+
   return (
     <div style={{ height: '100vh', background: '#000' }}>
       <LiveKitRoom
@@ -127,10 +138,15 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
         connect={true}
         video={true}
         audio={true}
+        options={roomOptions}
         onDisconnected={onLeave}
-        onError={(error) => {
-          console.error('LiveKit error:', error);
-          setError(error.message);
+        onError={(err) => {
+          console.error('LiveKit error:', err);
+          // Don't set error state for device issues - just log them and continue
+          const msg = err.message?.toLowerCase() || '';
+          if (!msg.includes('device not found') && !msg.includes('media permissions') && !msg.includes('notfounderror')) {
+            setError(err.message);
+          }
         }}
         style={{ height: '100%' }}
         data-lk-theme="default"
@@ -139,7 +155,7 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
           {/* Main video area */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             {/* Header */}
-            <RoomHeader roomName={roomName} onLeave={onLeave} />
+            <RoomHeader roomName={roomName} />
 
             {/* Video Grid */}
             <div style={{ flex: 1, position: 'relative' }}>
@@ -236,10 +252,8 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
  */
 function RoomHeader({
   roomName,
-  onLeave,
 }: {
   roomName: string;
-  onLeave?: () => void;
 }) {
   const participants = useParticipants();
   const [duration, setDuration] = useState(0);

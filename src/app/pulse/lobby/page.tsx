@@ -18,15 +18,15 @@ interface Room {
 
 const ROOM_ICONS: Record<string, string> = {
   'club-sltr': '🎵',
-  'party-n-play': '🎉',
-  'smoke-n-stroke': '💨',
+  'the-orbit': '🎉',
+  'the-den': '💨',
   'after-hours': '🌙',
 };
 
 const ROOM_CATEGORIES: Record<string, string> = {
   'club-sltr': 'Main',
-  'party-n-play': 'Featured',
-  'smoke-n-stroke': 'Featured',
+  'the-orbit': 'Featured',
+  'the-den': 'Featured',
   'after-hours': 'Featured',
 };
 
@@ -56,8 +56,8 @@ export default function PulseLobbyPage() {
         // Fallback to default rooms
         setRooms([
           { id: 'club-sltr', name: 'Club SLTR', description: 'Main community hangout', theme: 'default', participantCount: 0, maxParticipants: 400, isLive: false },
-          { id: 'party-n-play', name: 'Party n Play', description: '420 & chill vibes', theme: 'neon', participantCount: 0, maxParticipants: 400, isLive: false },
-          { id: 'smoke-n-stroke', name: 'Smoke n Stroke', description: 'Late night sessions', theme: 'dark', participantCount: 0, maxParticipants: 400, isLive: false },
+          { id: 'the-orbit', name: 'The Orbit', description: '420 & chill vibes', theme: 'neon', participantCount: 0, maxParticipants: 400, isLive: false },
+          { id: 'the-den', name: 'The Den', description: 'Late night sessions', theme: 'dark', participantCount: 0, maxParticipants: 400, isLive: false },
           { id: 'after-hours', name: 'After Hours', description: 'When the clubs close', theme: 'purple', participantCount: 0, maxParticipants: 400, isLive: false },
         ]);
       } finally {
