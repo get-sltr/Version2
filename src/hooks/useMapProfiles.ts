@@ -2,7 +2,7 @@
 // useMapProfiles - Fetch and filter profiles for map display
 // =============================================================================
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { haversineMiles, milesToFeet, parseCoordinate } from '@/lib/geo';
 import type { MapProfile, Coordinates, MapFilterSettings } from '@/types/map';
@@ -59,10 +59,29 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
   const [rawProfiles, setRawProfiles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Refs to prevent infinite loops
+  const currentUserIdRef = useRef<string | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFetchRef = useRef<number>(0);
+
+  // Get current user ID once
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      currentUserIdRef.current = user?.id ?? null;
+    });
+  }, []);
 
   // Fetch raw profiles from Supabase
   const fetchProfiles = useCallback(async () => {
     if (!enabled) return;
+
+    // Debounce: don't fetch more than once per 5 seconds
+    const now = Date.now();
+    if (now - lastFetchRef.current < 5000) {
+      return;
+    }
+    lastFetchRef.current = now;
 
     try {
       setIsLoading(true);
@@ -100,6 +119,24 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
     }
   }, [enabled]);
 
+  // Debounced fetch for real-time updates
+  const debouncedFetch = useCallback((changedUserId?: string) => {
+    // Skip if it's the current user's own update
+    if (changedUserId && changedUserId === currentUserIdRef.current) {
+      return;
+    }
+
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new debounced fetch
+    debounceTimerRef.current = setTimeout(() => {
+      fetchProfiles();
+    }, 2000); // Wait 2 seconds before fetching
+  }, [fetchProfiles]);
+
   // Initial fetch and real-time subscription
   useEffect(() => {
     if (!enabled) return;
@@ -108,13 +145,47 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
 
     const channel = supabase
       .channel('public:profiles-map')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchProfiles)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'profiles' },
+        (payload) => debouncedFetch(payload.new?.id)
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'profiles' },
+        () => debouncedFetch()
+      )
+      // Only listen for significant updates (not location/last_seen)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles' },
+        (payload) => {
+          // Skip location-only updates (these happen constantly)
+          const old = payload.old as any;
+          const updated = payload.new as any;
+          
+          // Only refetch if something visible changed
+          const significantChange = 
+            old?.display_name !== updated?.display_name ||
+            old?.photo_url !== updated?.photo_url ||
+            old?.is_incognito !== updated?.is_incognito ||
+            old?.position !== updated?.position ||
+            old?.age !== updated?.age;
+          
+          if (significantChange) {
+            debouncedFetch(updated?.id);
+          }
+        }
+      )
       .subscribe();
 
     return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
       void supabase.removeChannel(channel);
     };
-  }, [enabled, fetchProfiles]);
+  }, [enabled, fetchProfiles, debouncedFetch]);
 
   // Transform and filter profiles
   const profiles = useMemo(() => {
