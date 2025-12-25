@@ -158,16 +158,11 @@ export default function MapboxMap({
                 }}
               >
                 <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Pin div clicked:', profile.id, profile.name);
-                    onSelectProfile?.(profile);
-                  }}
                   style={{
                     position: 'relative',
                     width: 48,
                     height: 48,
-                    cursor: 'pointer'
+                    pointerEvents: 'none'
                   }}
                 >
                   {/* Pulsating glow rings for online users */}
@@ -225,6 +220,7 @@ export default function MapboxMap({
                       boxShadow: profile.online ? '0 0 12px rgba(255,107,53,0.6)' : '0 2px 6px rgba(0,0,0,0.4)',
                       zIndex: 10,
                       cursor: 'pointer',
+                      pointerEvents: 'auto',
                     }}
                   />
                 </div>

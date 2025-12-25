@@ -2,18 +2,41 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
 /**
- * LocationPermission - Requests location permission on app load
+ * LocationPermission - Requests location permission after user logs in
  * Shows a prompt if permission is not granted, updates user's location in database
  */
 export function LocationPermission() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking');
+  const [user, setUser] = useState<User | null>(null);
 
+  // Listen for auth state changes
   useEffect(() => {
-    checkAndRequestLocation();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Check initial session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  // Only check location when we have an authenticated user
+  useEffect(() => {
+    if (user) {
+      checkAndRequestLocation();
+    } else {
+      // Reset state when user logs out
+      setShowPrompt(false);
+      setPermissionState('checking');
+    }
+  }, [user]);
 
   const checkAndRequestLocation = async () => {
     // Check if geolocation is supported
@@ -54,21 +77,28 @@ export function LocationPermission() {
   };
 
   const requestLocation = () => {
+    if (!user) {
+      console.warn('No user logged in, skipping location save');
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
 
-        // Update user's location in database
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from('profiles')
-            .update({
-              lat,
-              lng,
-              last_seen: new Date().toISOString(),
-            })
-            .eq('id', user.id);
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            lat,
+            lng,
+            last_seen: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+
+        if (error) {
+          console.error('Location update failed:', error);
+        } else {
+          console.log('Location saved:', { lat, lng, userId: user.id });
         }
 
         setShowPrompt(false);
@@ -97,7 +127,8 @@ export function LocationPermission() {
     setShowPrompt(false);
   };
 
-  if (!showPrompt) return null;
+  // Don't render anything if no user or no prompt needed
+  if (!user || !showPrompt) return null;
 
   return (
     <div
