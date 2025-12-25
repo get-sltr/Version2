@@ -151,10 +151,18 @@ export default function MapboxMap({
                 longitude={profile.lng}
                 latitude={profile.lat}
                 anchor="center"
-                onClick={() => onSelectProfile?.(profile)}
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  console.log('Marker clicked:', profile.id, profile.name);
+                  onSelectProfile?.(profile);
+                }}
               >
                 <div
-                  onClick={() => onSelectProfile?.(profile)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log('Pin div clicked:', profile.id, profile.name);
+                    onSelectProfile?.(profile);
+                  }}
                   style={{
                     position: 'relative',
                     width: 48,
