@@ -119,6 +119,11 @@ export default function EditProfilePage() {
 
         if (profile) {
           if (profile.photo_url) setProfilePhoto(profile.photo_url);
+          if (profile.photo_urls && Array.isArray(profile.photo_urls)) {
+            // Pad array to always have 4 slots
+            const photos = [...profile.photo_urls, '', '', '', ''].slice(0, 4);
+            setAdditionalPhotos(photos);
+          }
           if (profile.display_name) setDisplayName(profile.display_name);
           if (profile.about) setAboutMe(profile.about);
           if (profile.tribes) setSelectedTribes(profile.tribes);
@@ -224,6 +229,9 @@ export default function EditProfilePage() {
         : null;
       const formattedWeight = weightValue ? `${Number(weightValue)} lbs` : null;
 
+      // Filter out empty additional photos
+      const validAdditionalPhotos = additionalPhotos.filter(url => url && url.trim() !== '');
+
       // Save to Supabase
       const { error } = await supabase
         .from('profiles')
@@ -231,6 +239,7 @@ export default function EditProfilePage() {
           display_name: displayName.trim(),
           about: aboutMe.trim() || null,
           photo_url: profilePhoto || null,
+          photo_urls: validAdditionalPhotos,
           tribes: selectedTribes,
           tags: selectedTags,
           age: ageValue,
