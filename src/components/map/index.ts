@@ -9,3 +9,4 @@ export { ProfileDrawer } from './ProfileDrawer';
 export { GroupDrawer } from './GroupDrawer';
 export { VisibleProfilesBar } from './VisibleProfilesBar';
 export { MapControls } from './MapControls';
+export { MapFilterDrawer, type MapFilters } from './MapFilterDrawer';
