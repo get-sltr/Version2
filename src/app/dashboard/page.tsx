@@ -150,15 +150,15 @@ export default function Dashboard() {
 
     let query = supabase
       .from('profiles')
-      .select('*, user_settings(pnp_visible)')
+      .select('*')
       .not('photo_url', 'is', null);  // Only show profiles WITH photos
 
     // Apply filters based on activeFilter
     if (activeFilter === 'online') {
-      // Consider "online" if last_seen within last 5 minutes
-      const fiveMinutesAgo = new Date();
-      fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
-      query = query.gte('last_seen', fiveMinutesAgo.toISOString());
+      // Consider "online" if last_seen within last 24 hours (show active users)
+      const oneDayAgo = new Date();
+      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      query = query.gte('last_seen', oneDayAgo.toISOString());
     } else if (activeFilter === 'fresh') {
       // Show profiles created in the last 7 days
       const sevenDaysAgo = new Date();
@@ -178,12 +178,7 @@ export default function Dashboard() {
     }
 
     if (data) {
-      // Flatten user_settings into the profile object
-      const profilesWithPnP = data.map((profile: any) => ({
-        ...profile,
-        pnp_visible: profile.user_settings?.pnp_visible || false
-      }));
-      setProfiles(profilesWithPnP);
+      setProfiles(data);
     }
     setLoading(false);
   };

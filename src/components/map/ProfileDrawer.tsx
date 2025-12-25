@@ -7,8 +7,9 @@ import { feetToMiles } from '@/lib/geo';
 import type { ProfileDrawerProps } from '@/types/map';
 import styles from './Map.module.css';
 
-export function ProfileDrawer({ profile, onClose }: ProfileDrawerProps) {
+export function ProfileDrawer({ profile, onClose, accentColor }: ProfileDrawerProps) {
   const { colors } = useTheme();
+  const accent = accentColor || colors.accent || '#FF6B35';
 
   const distanceText =
     profile.distance !== null
@@ -48,8 +49,8 @@ export function ProfileDrawer({ profile, onClose }: ProfileDrawerProps) {
             </h2>
 
             <div className={styles.drawerStatus}>
-              <div className={styles.onlineDot} style={{ background: '#FF6B35' }} />
-              <span style={{ color: '#FF6B35' }}>Online</span>
+              <div className={styles.onlineDot} style={{ background: accent }} />
+              <span style={{ color: accent }}>Online</span>
               <span style={{ color: 'rgba(255,255,255,0.6)' }}>•</span>
               <span style={{ color: 'rgba(255,255,255,0.6)' }}>{distanceText}</span>
             </div>
@@ -57,7 +58,7 @@ export function ProfileDrawer({ profile, onClose }: ProfileDrawerProps) {
             {profile.position && (
               <div
                 className={styles.positionBadge}
-                style={{ borderColor: '#FF6B35', color: '#FF6B35' }}
+                style={{ borderColor: accent, color: accent }}
               >
                 {profile.position}
               </div>
@@ -71,7 +72,7 @@ export function ProfileDrawer({ profile, onClose }: ProfileDrawerProps) {
             <a
               href={`/messages/${profile.id}`}
               className={styles.primaryButton}
-              style={{ background: '#FF6B35' }}
+              style={{ background: accent }}
             >
               💬 Message
             </a>

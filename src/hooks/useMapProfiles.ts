@@ -68,14 +68,14 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
       setIsLoading(true);
       setError(null);
 
-      // Consider "online" if last_seen within last 5 minutes
-      const fiveMinutesAgo = new Date();
-      fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+      // Show profiles seen within last 24 hours for discovery
+      const oneDayAgo = new Date();
+      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
 
       const { data, error: fetchError } = await supabase
         .from('profiles')
-        .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito')
-        .gte('last_seen', fiveMinutesAgo.toISOString())
+        .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito, is_online')
+        .gte('last_seen', oneDayAgo.toISOString())
         .eq('is_incognito', false)
         .not('photo_url', 'is', null)
         .not('lat', 'is', null)
@@ -138,6 +138,11 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
           distanceFeet = Number.isFinite(miles) ? milesToFeet(miles) : null;
         }
 
+        // Consider online if last_seen within 5 minutes or is_online flag is true
+        const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+        const lastSeenTime = profile.last_seen ? new Date(profile.last_seen).getTime() : 0;
+        const isOnline = profile.is_online || lastSeenTime > fiveMinutesAgo;
+
         return {
           id: profile.id,
           name: profile.display_name || 'New User',
@@ -147,7 +152,7 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
           lng,
           image: profile.photo_url,
           distance: distanceFeet,
-          online: true, // All profiles returned are online (filtered by last_seen within 5 mins)
+          online: isOnline,
         };
       })
       .filter((profile): profile is MapProfile => profile !== null)
