@@ -84,6 +84,7 @@ export default function MapboxMap({
   const mapRef = useRef<any>(null);
   const [popup, setPopup] = useState<any>(null);
   const [localProfiles, setLocalProfiles] = useState<MapProfile[]>([]);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const lastCenterRef = useRef<CenterOn | null>(null);
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -169,21 +170,136 @@ export default function MapboxMap({
     lastCenterRef.current = { lat, lng, zoom };
   }, [centerOn]);
 
-  // Handle profile marker click
-  const handleProfileClick = useCallback((profile: MapProfile) => {
-    onSelectProfile?.(profile);
-  }, [onSelectProfile]);
+  // Hit detection radius in pixels
+  const HIT_RADIUS = 24;
 
-  // Handle group marker click
-  const handleGroupClick = useCallback((group: MapGroup) => {
-    setPopup({ type: 'group', lat: group.lat, lng: group.lng, data: group });
-    onSelectGroup?.(group);
-  }, [onSelectGroup]);
+  // Handle map click - detect marker hits via screen coordinates
+  const handleMapClick = useCallback((e: any) => {
+    const map = mapRef.current;
+    if (!map) return;
 
-  // Handle venue marker click
-  const handleVenueClick = useCallback((venue: MapVenue) => {
-    setPopup({ type: 'venue', lat: venue.lat, lng: venue.lng, data: venue });
-  }, []);
+    const clickPoint = e.point; // {x, y} screen coords
+
+    // Check profiles (if in users view mode)
+    if (viewMode === 'users') {
+      for (const profile of localProfiles) {
+        if (typeof profile.lat !== 'number' || typeof profile.lng !== 'number') continue;
+        if (!profile.image) continue;
+
+        const markerPos = map.project([profile.lng, profile.lat]);
+        const distance = Math.sqrt(
+          Math.pow(clickPoint.x - markerPos.x, 2) +
+          Math.pow(clickPoint.y - markerPos.y, 2)
+        );
+
+        if (distance < HIT_RADIUS) {
+          onSelectProfile?.(profile);
+          return;
+        }
+      }
+    }
+
+    // Check groups (if in groups view mode)
+    if (viewMode === 'groups') {
+      for (const group of groups) {
+        if (typeof group.lat !== 'number' || typeof group.lng !== 'number') continue;
+
+        const markerPos = map.project([group.lng, group.lat]);
+        const distance = Math.sqrt(
+          Math.pow(clickPoint.x - markerPos.x, 2) +
+          Math.pow(clickPoint.y - markerPos.y, 2)
+        );
+
+        if (distance < HIT_RADIUS) {
+          setPopup({ type: 'group', lat: group.lat, lng: group.lng, data: group });
+          onSelectGroup?.(group);
+          return;
+        }
+      }
+    }
+
+    // Check venues (always visible)
+    for (const venue of venues) {
+      if (typeof venue.lat !== 'number' || typeof venue.lng !== 'number') continue;
+
+      const markerPos = map.project([venue.lng, venue.lat]);
+      const distance = Math.sqrt(
+        Math.pow(clickPoint.x - markerPos.x, 2) +
+        Math.pow(clickPoint.y - markerPos.y, 2)
+      );
+
+      if (distance < HIT_RADIUS) {
+        setPopup({ type: 'venue', lat: venue.lat, lng: venue.lng, data: venue });
+        return;
+      }
+    }
+  }, [viewMode, localProfiles, groups, venues, onSelectProfile, onSelectGroup]);
+
+  // Handle mouse move - detect hover for cursor change
+  const handleMouseMove = useCallback((e: any) => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const point = e.point;
+    let foundHover = false;
+
+    // Check profiles
+    if (viewMode === 'users') {
+      for (const profile of localProfiles) {
+        if (typeof profile.lat !== 'number' || typeof profile.lng !== 'number') continue;
+        if (!profile.image) continue;
+
+        const markerPos = map.project([profile.lng, profile.lat]);
+        const distance = Math.sqrt(
+          Math.pow(point.x - markerPos.x, 2) +
+          Math.pow(point.y - markerPos.y, 2)
+        );
+
+        if (distance < HIT_RADIUS) {
+          foundHover = true;
+          break;
+        }
+      }
+    }
+
+    // Check groups
+    if (!foundHover && viewMode === 'groups') {
+      for (const group of groups) {
+        if (typeof group.lat !== 'number' || typeof group.lng !== 'number') continue;
+
+        const markerPos = map.project([group.lng, group.lat]);
+        const distance = Math.sqrt(
+          Math.pow(point.x - markerPos.x, 2) +
+          Math.pow(point.y - markerPos.y, 2)
+        );
+
+        if (distance < HIT_RADIUS) {
+          foundHover = true;
+          break;
+        }
+      }
+    }
+
+    // Check venues
+    if (!foundHover) {
+      for (const venue of venues) {
+        if (typeof venue.lat !== 'number' || typeof venue.lng !== 'number') continue;
+
+        const markerPos = map.project([venue.lng, venue.lat]);
+        const distance = Math.sqrt(
+          Math.pow(point.x - markerPos.x, 2) +
+          Math.pow(point.y - markerPos.y, 2)
+        );
+
+        if (distance < HIT_RADIUS) {
+          foundHover = true;
+          break;
+        }
+      }
+    }
+
+    setHoveredId(foundHover ? 'marker' : null);
+  }, [viewMode, localProfiles, groups, venues]);
 
   if (!token) {
     return (
@@ -208,9 +324,12 @@ export default function MapboxMap({
         maxZoom={18}
         onMoveEnd={reportVisibleProfiles}
         onLoad={reportVisibleProfiles}
+        onClick={handleMapClick}
+        onMouseMove={handleMouseMove}
+        cursor={hoveredId ? 'pointer' : 'grab'}
         style={{ width: '100%', height: '100%' }}
       >
-        {/* Profile Markers */}
+        {/* Profile Markers - visual only, clicks handled by map */}
         {viewMode === 'users' &&
           localProfiles
             .filter(p => typeof p.lat === 'number' && typeof p.lng === 'number' && p.image)
@@ -221,12 +340,7 @@ export default function MapboxMap({
                 latitude={profile.lat}
                 anchor="center"
               >
-                <button
-                  type="button"
-                  className={styles.markerButton}
-                  onClick={() => handleProfileClick(profile)}
-                  aria-label={`View ${profile.name}'s profile`}
-                >
+                <div className={styles.markerButton}>
                   {profile.online && (
                     <>
                       <div className={styles.pulseRing} />
@@ -239,11 +353,11 @@ export default function MapboxMap({
                     }`}
                     style={{ backgroundImage: `url(${profile.image})` }}
                   />
-                </button>
+                </div>
               </Marker>
             ))}
 
-        {/* Venue Markers */}
+        {/* Venue Markers - visual only, clicks handled by map */}
         {venues
           .filter(v => typeof v.lat === 'number' && typeof v.lng === 'number')
           .map(venue => (
@@ -253,10 +367,7 @@ export default function MapboxMap({
               latitude={venue.lat}
               anchor="center"
             >
-              <button
-                type="button"
-                onClick={() => handleVenueClick(venue)}
-                aria-label={`View ${venue.name}`}
+              <div
                 style={{
                   width: 36,
                   height: 36,
@@ -266,17 +377,15 @@ export default function MapboxMap({
                   WebkitBackdropFilter: 'blur(8px)',
                   border: '1px solid rgba(255, 255, 255, 0.3)',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '16px',
-                  padding: 0,
                 }}
                 title={venue.name}
               >
                 🍸
-              </button>
+              </div>
             </Marker>
           ))}
 
@@ -305,7 +414,7 @@ export default function MapboxMap({
           </Marker>
         )}
 
-        {/* Group Markers */}
+        {/* Group Markers - visual only, clicks handled by map */}
         {viewMode === 'groups' &&
           groups
             .filter(g => typeof g.lat === 'number' && typeof g.lng === 'number')
@@ -316,10 +425,7 @@ export default function MapboxMap({
                 latitude={group.lat}
                 anchor="center"
               >
-                <button
-                  type="button"
-                  onClick={() => handleGroupClick(group)}
-                  aria-label={`View ${group.name}`}
+                <div
                   style={{
                     width: 44,
                     height: 44,
@@ -327,17 +433,15 @@ export default function MapboxMap({
                     background: 'linear-gradient(135deg, #FF6B35, #FF8C42)',
                     border: '3px solid #fff',
                     boxShadow: '0 2px 8px rgba(255,107,53,0.5)',
-                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '18px',
-                    padding: 0,
                   }}
                   title={group.name}
                 >
                   👥
-                </button>
+                </div>
               </Marker>
             ))}
 

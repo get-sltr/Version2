@@ -764,6 +764,10 @@
   background: transparent;
   border: none;
   padding: 0;
+  z-index: 1;
+}
+
+.markerButton:focus {
   outline: none;
 }
 
