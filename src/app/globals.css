@@ -1,14 +1,3 @@
 /* =============================================================================
    Global Styles
    ============================================================================= */
-
-/* Fix Mapbox marker clicks */
-.mapboxgl-marker {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  z-index: 100 !important;
-}
-
-.mapboxgl-marker > div {
-  pointer-events: auto !important;
-}

@@ -4,14 +4,69 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import type { MapProfile, MapGroup, Coordinates } from '@/types/map';
+import styles from '../map/Map.module.css';
 
 // Dynamic imports to avoid SSR issues
-const MapComponent = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Map), { ssr: false }) as any;
-const Popup = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Popup), { ssr: false }) as any;
-const Marker = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.Marker), { ssr: false }) as any;
-const NavigationControl = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.NavigationControl), { ssr: false }) as any;
-const GeolocateControl = dynamic(() => import('react-map-gl/mapbox').then(mod => mod.GeolocateControl), { ssr: false }) as any;
+const MapComponent = dynamic(
+  () => import('react-map-gl/mapbox').then(mod => mod.Map),
+  { ssr: false }
+);
 
+const Marker = dynamic(
+  () => import('react-map-gl/mapbox').then(mod => mod.Marker),
+  { ssr: false }
+);
+
+const Popup = dynamic(
+  () => import('react-map-gl/mapbox').then(mod => mod.Popup),
+  { ssr: false }
+);
+
+const NavigationControl = dynamic(
+  () => import('react-map-gl/mapbox').then(mod => mod.NavigationControl),
+  { ssr: false }
+);
+
+const GeolocateControl = dynamic(
+  () => import('react-map-gl/mapbox').then(mod => mod.GeolocateControl),
+  { ssr: false }
+);
+
+// Local types
+interface MapVenue {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  category?: string;
+  address?: string;
+  isOpen?: boolean;
+  distance?: number;
+}
+
+interface CenterOn extends Coordinates {
+  zoom?: number;
+}
+
+interface CurrentUserMapProfile {
+  lat?: number;
+  lng?: number;
+  image?: string;
+}
+
+interface MapboxMapProps {
+  readonly profiles?: MapProfile[];
+  readonly groups?: MapGroup[];
+  readonly venues?: MapVenue[];
+  readonly viewMode?: 'users' | 'groups';
+  readonly mapCenter?: Coordinates | null;
+  readonly currentUserProfile?: CurrentUserMapProfile | null;
+  readonly centerOn?: CenterOn | null;
+  readonly onViewportChange?: (viewport: any) => void;
+  readonly onSelectProfile?: (profile: MapProfile) => void;
+  readonly onSelectGroup?: (group: MapGroup) => void;
+}
 
 export default function MapboxMap({
   profiles = [],
@@ -24,15 +79,16 @@ export default function MapboxMap({
   onViewportChange,
   onSelectProfile,
   onSelectGroup
-}: any) {
+}: MapboxMapProps) {
   const { colors } = useTheme();
   const mapRef = useRef<any>(null);
   const [popup, setPopup] = useState<any>(null);
-  const [localProfiles, setLocalProfiles] = useState<any[]>([]);
-  const lastCenterRef = useRef<{ lat: number; lng: number; zoom?: number } | null>(null);
+  const [localProfiles, setLocalProfiles] = useState<MapProfile[]>([]);
+  const lastCenterRef = useRef<CenterOn | null>(null);
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
+  // Calculate effective center
   const effectiveCenter = useMemo(() => {
     if (mapCenter) return mapCenter;
     if (currentUserProfile?.lat && currentUserProfile?.lng) {
@@ -41,7 +97,7 @@ export default function MapboxMap({
     return null;
   }, [mapCenter, currentUserProfile]);
 
-  // Initial position
+  // Initial view state
   const initialView = useMemo(
     () => ({
       latitude: effectiveCenter?.lat ?? 34.0522,
@@ -51,14 +107,15 @@ export default function MapboxMap({
     [effectiveCenter]
   );
 
-  // Theme-based basemap
-  const mapStyle =
-    colors.background === '#fff'
-      ? 'mapbox://styles/mapbox/light-v10'
-      : 'mapbox://styles/mapbox/dark-v10';
+  // Theme-based map style
+  const mapStyle = colors.background === '#fff'
+    ? 'mapbox://styles/mapbox/light-v10'
+    : 'mapbox://styles/mapbox/dark-v10';
 
+  // Report visible profiles callback
   const reportVisibleProfiles = useCallback(() => {
     if (!mapRef.current || !onViewportChange) return;
+
     const bounds = mapRef.current.getBounds?.();
     if (!bounds) return;
 
@@ -80,17 +137,20 @@ export default function MapboxMap({
     });
   }, [localProfiles, onViewportChange]);
 
-  // Sync profiles to local list (for GPU rendering)
+  // Sync profiles to local state
   useEffect(() => {
     setLocalProfiles(profiles);
   }, [profiles]);
 
+  // Report visible profiles when local profiles change
   useEffect(() => {
     reportVisibleProfiles();
   }, [localProfiles, reportVisibleProfiles]);
 
+  // Handle centerOn changes
   useEffect(() => {
     if (!centerOn || !mapRef.current) return;
+
     const { lat, lng, zoom } = centerOn;
     if (typeof lat !== 'number' || typeof lng !== 'number') return;
 
@@ -109,12 +169,26 @@ export default function MapboxMap({
     lastCenterRef.current = { lat, lng, zoom };
   }, [centerOn]);
 
+  // Handle profile marker click
+  const handleProfileClick = useCallback((profile: MapProfile) => {
+    onSelectProfile?.(profile);
+  }, [onSelectProfile]);
+
+  // Handle group marker click
+  const handleGroupClick = useCallback((group: MapGroup) => {
+    setPopup({ type: 'group', lat: group.lat, lng: group.lng, data: group });
+    onSelectGroup?.(group);
+  }, [onSelectGroup]);
+
+  // Handle venue marker click
+  const handleVenueClick = useCallback((venue: MapVenue) => {
+    setPopup({ type: 'venue', lat: venue.lat, lng: venue.lng, data: venue });
+  }, []);
 
   if (!token) {
     return (
       <div style={{ padding: 20, textAlign: 'center' }}>
-        Missing Mapbox Token.  
-        Add NEXT_PUBLIC_MAPBOX_TOKEN to .env.local
+        Missing Mapbox Token. Add NEXT_PUBLIC_MAPBOX_TOKEN to .env.local
       </div>
     );
   }
@@ -125,9 +199,10 @@ export default function MapboxMap({
         mapboxAccessToken={token}
         mapStyle={mapStyle}
         initialViewState={initialView}
-        ref={ref => {
-          if (!ref) return;
-          mapRef.current = ref.getMap();
+        ref={(ref: any) => {
+          if (ref) {
+            mapRef.current = ref.getMap();
+          }
         }}
         minZoom={2}
         maxZoom={18}
@@ -135,109 +210,53 @@ export default function MapboxMap({
         onLoad={reportVisibleProfiles}
         style={{ width: '100%', height: '100%' }}
       >
-        {/* User Profiles as Photo Pins - with orange pulsating ring for online users */}
+        {/* Profile Markers */}
         {viewMode === 'users' &&
           localProfiles
-            .filter(p => {
-              const valid = typeof p.lat === 'number' &&
-                typeof p.lng === 'number' &&
-                p.image;
-              // Don't exclude current user - show all profiles
-              return valid;
-            })
+            .filter(p => typeof p.lat === 'number' && typeof p.lng === 'number' && p.image)
             .map(profile => (
               <Marker
                 key={profile.id}
                 longitude={profile.lng}
                 latitude={profile.lat}
                 anchor="center"
-                onClick={(e) => {
-                  e.originalEvent.stopPropagation();
-                  console.log('Marker clicked:', profile.id, profile.name);
-                  onSelectProfile?.(profile);
-                }}
               >
-                <div
-                  style={{
-                    position: 'relative',
-                    width: 48,
-                    height: 48,
-                  }}
+                <button
+                  type="button"
+                  className={styles.markerButton}
+                  onClick={() => handleProfileClick(profile)}
+                  aria-label={`View ${profile.name}'s profile`}
                 >
-                  {/* Pulsating glow rings for online users */}
                   {profile.online && (
                     <>
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          width: 48,
-                          height: 48,
-                          borderRadius: '50%',
-                          background: 'rgba(255, 107, 53, 0.4)',
-                          animation: 'pulse-glow 2s ease-out infinite',
-                          pointerEvents: 'none',
-                        }}
-                      />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          width: 48,
-                          height: 48,
-                          borderRadius: '50%',
-                          background: 'rgba(255, 107, 53, 0.3)',
-                          animation: 'pulse-glow 2s ease-out infinite 0.5s',
-                          pointerEvents: 'none',
-                        }}
-                      />
+                      <div className={styles.pulseRing} />
+                      <div className={styles.pulseRingDelayed} />
                     </>
                   )}
-                  {/* Profile photo */}
                   <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log('Photo clicked:', profile.id, profile.name);
-                      onSelectProfile?.(profile);
-                    }}
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      width: 44,
-                      height: 44,
-                      borderRadius: '50%',
-                      backgroundImage: `url(${profile.image})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      border: profile.online ? '3px solid #FF6B35' : '2px solid #fff',
-                      boxShadow: profile.online ? '0 0 12px rgba(255,107,53,0.6)' : '0 2px 6px rgba(0,0,0,0.4)',
-                      zIndex: 10,
-                      cursor: 'pointer',
-                      pointerEvents: 'auto',
-                    }}
+                    className={`${styles.profilePhoto} ${
+                      profile.online ? styles.profilePhotoOnline : styles.profilePhotoOffline
+                    }`}
+                    style={{ backgroundImage: `url(${profile.image})` }}
                   />
-                </div>
+                </button>
               </Marker>
             ))}
 
-        {/* Venue markers (bars, clubs, etc.) */}
+        {/* Venue Markers */}
         {venues
-          .filter((v: any) => typeof v.lat === 'number' && typeof v.lng === 'number')
-          .map((venue: any) => (
+          .filter(v => typeof v.lat === 'number' && typeof v.lng === 'number')
+          .map(venue => (
             <Marker
               key={venue.id}
               longitude={venue.lng}
               latitude={venue.lat}
               anchor="center"
-              onClick={() => setPopup({ type: 'venue', lat: venue.lat, lng: venue.lng, data: venue })}
             >
-              <div
+              <button
+                type="button"
+                onClick={() => handleVenueClick(venue)}
+                aria-label={`View ${venue.name}`}
                 style={{
                   width: 36,
                   height: 36,
@@ -252,101 +271,55 @@ export default function MapboxMap({
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '16px',
+                  padding: 0,
                 }}
                 title={venue.name}
               >
                 🍸
-              </div>
+              </button>
             </Marker>
           ))}
 
-        {/* Current user pin - with orange pulsating glow */}
+        {/* Current User Marker */}
         {viewMode === 'users' && effectiveCenter && currentUserProfile && (
-          <Marker longitude={effectiveCenter.lng} latitude={effectiveCenter.lat} anchor="center">
+          <Marker
+            longitude={effectiveCenter.lng}
+            latitude={effectiveCenter.lat}
+            anchor="center"
+          >
             <div style={{ position: 'relative', width: 48, height: 48 }}>
-              {/* Pulsating glow rings */}
+              <div className={styles.pulseRing} />
+              <div className={styles.pulseRingDelayed} />
               <div
+                className={styles.currentUserPhoto}
                 style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: 48,
-                  height: 48,
-                  borderRadius: '50%',
-                  background: 'rgba(255, 107, 53, 0.4)',
-                  animation: 'pulse-glow 2s ease-out infinite',
-                  pointerEvents: 'none',
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: 48,
-                  height: 48,
-                  borderRadius: '50%',
-                  background: 'rgba(255, 107, 53, 0.3)',
-                  animation: 'pulse-glow 2s ease-out infinite 0.5s',
-                  pointerEvents: 'none',
-                }}
-              />
-              {/* Profile photo */}
-              <div
-                style={{
-                  position: 'relative',
-                  width: 48,
-                  height: 48,
-                  borderRadius: '50%',
-                  backgroundImage: currentUserProfile.image ? `url(${currentUserProfile.image})` : 'none',
+                  backgroundImage: currentUserProfile.image
+                    ? `url(${currentUserProfile.image})`
+                    : 'none',
                   backgroundColor: currentUserProfile.image ? 'transparent' : '#FF6B35',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  border: '3px solid #FF6B35',
-                  boxShadow: '0 0 12px rgba(255,107,53,0.6)',
-                  zIndex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
                 }}
               >
                 {!currentUserProfile.image && '👤'}
               </div>
-              <style>{`
-                @keyframes pulse-glow {
-                  0% {
-                    transform: translate(-50%, -50%) scale(1);
-                    opacity: 0.6;
-                  }
-                  100% {
-                    transform: translate(-50%, -50%) scale(2);
-                    opacity: 0;
-                  }
-                }
-              `}</style>
             </div>
           </Marker>
         )}
 
-        {/* Groups as markers when in groups view mode */}
+        {/* Group Markers */}
         {viewMode === 'groups' &&
           groups
-            .filter((g: any) => typeof g.lat === 'number' && typeof g.lng === 'number')
-            .map((group: any) => (
+            .filter(g => typeof g.lat === 'number' && typeof g.lng === 'number')
+            .map(group => (
               <Marker
                 key={group.id}
                 longitude={group.lng}
                 latitude={group.lat}
                 anchor="center"
-                onClick={() => {
-                  setPopup({ type: 'group', lat: group.lat, lng: group.lng, data: group });
-                  onSelectGroup?.(group);
-                }}
               >
-                <div
+                <button
+                  type="button"
+                  onClick={() => handleGroupClick(group)}
+                  aria-label={`View ${group.name}`}
                   style={{
                     width: 44,
                     height: 44,
@@ -359,14 +332,16 @@ export default function MapboxMap({
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '18px',
+                    padding: 0,
                   }}
                   title={group.name}
                 >
                   👥
-                </div>
+                </button>
               </Marker>
             ))}
 
+        {/* Popup */}
         {popup && (
           <Popup
             latitude={popup.lat}
@@ -386,40 +361,17 @@ export default function MapboxMap({
                 width: 200
               }}
             >
-              {popup.type === 'profile' ? (
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <div
-                    style={{
-                      width: 45,
-                      height: 45,
-                      borderRadius: '50%',
-                      backgroundImage: `url(${
-                        popup.data.image ||
-                        (popup.data.id % 2 ? '/images/5.jpg' : '/images/6.jpg')
-                      })`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      border: '2px solid #000'
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>
-                      {popup.data.name}, {popup.data.age}
-                    </div>
-                    <div style={{ fontSize: 12, opacity: 0.7 }}>
-                      {popup.data.position}
-                    </div>
-                  </div>
-                </div>
-              ) : popup.type === 'venue' ? (
+              {popup.type === 'venue' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <span style={{ fontSize: 20 }}>🍸</span>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{popup.data.name}</div>
                   </div>
-                  <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
-                    {popup.data.category}
-                  </div>
+                  {popup.data.category && (
+                    <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
+                      {popup.data.category}
+                    </div>
+                  )}
                   {popup.data.address && (
                     <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>
                       {popup.data.address}
@@ -440,12 +392,15 @@ export default function MapboxMap({
                     )}
                   </div>
                 </div>
-              ) : (
+              )}
+              {popup.type === 'group' && (
                 <div>
                   <div style={{ fontWeight: 700, marginBottom: 6 }}>{popup.data.name}</div>
-                  <div style={{ fontSize: 12, opacity: 0.7 }}>
-                    Hosted by {popup.data.host}
-                  </div>
+                  {popup.data.host && (
+                    <div style={{ fontSize: 12, opacity: 0.7 }}>
+                      Hosted by {popup.data.host}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
