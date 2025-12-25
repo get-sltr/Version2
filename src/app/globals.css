@@ -1,0 +1,18 @@
+/* =============================================================================
+   Global Styles
+   ============================================================================= */
+
+/* Fix Mapbox marker clicks - canvas passes clicks through */
+.mapboxgl-canvas-container {
+  pointer-events: none;
+}
+
+.mapboxgl-canvas {
+  pointer-events: auto;
+}
+
+.mapboxgl-marker {
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 100;
+}

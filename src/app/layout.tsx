@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import './globals.css';
 import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistration';
 import { LocationPermission } from '../components/LocationPermission';
 import { OneSignalProvider } from '../components/OneSignalProvider';
