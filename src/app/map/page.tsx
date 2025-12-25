@@ -37,7 +37,8 @@ export default function MapViewPage() {
 
   // Handle map center from different sources
   const handleCenterUpdate = useCallback((coords: Coordinates) => {
-    setMapCenter((prev) => prev ?? coords); // Don't override if already set
+    setMapCenter(coords);
+    setCenterOn(coords); // Also fly to this location
   }, []);
 
   // Track user location

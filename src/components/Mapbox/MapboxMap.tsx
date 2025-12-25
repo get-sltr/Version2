@@ -175,6 +175,7 @@ export default function MapboxMap({
                           borderRadius: '50%',
                           background: 'rgba(255, 107, 53, 0.4)',
                           animation: 'pulse-glow 2s ease-out infinite',
+                          pointerEvents: 'none',
                         }}
                       />
                       <div
@@ -188,6 +189,7 @@ export default function MapboxMap({
                           borderRadius: '50%',
                           background: 'rgba(255, 107, 53, 0.3)',
                           animation: 'pulse-glow 2s ease-out infinite 0.5s',
+                          pointerEvents: 'none',
                         }}
                       />
                     </>
@@ -264,6 +266,7 @@ export default function MapboxMap({
                   borderRadius: '50%',
                   background: 'rgba(255, 107, 53, 0.4)',
                   animation: 'pulse-glow 2s ease-out infinite',
+                  pointerEvents: 'none',
                 }}
               />
               <div
@@ -277,6 +280,7 @@ export default function MapboxMap({
                   borderRadius: '50%',
                   background: 'rgba(255, 107, 53, 0.3)',
                   animation: 'pulse-glow 2s ease-out infinite 0.5s',
+                  pointerEvents: 'none',
                 }}
               />
               {/* Profile photo */}
