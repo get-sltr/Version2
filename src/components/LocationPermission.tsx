@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
+const LOCATION_PROMPT_DISMISSED_KEY = 'sltr_location_prompt_dismissed';
+const DISMISS_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 /**
  * LocationPermission - Requests location permission after user logs in
  * Shows a prompt if permission is not granted, updates user's location in database
@@ -12,6 +15,18 @@ export function LocationPermission() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking');
   const [user, setUser] = useState<User | null>(null);
+
+  // Check if user recently dismissed the prompt
+  const wasRecentlyDismissed = (): boolean => {
+    try {
+      const dismissed = localStorage.getItem(LOCATION_PROMPT_DISMISSED_KEY);
+      if (!dismissed) return false;
+      const dismissedAt = parseInt(dismissed, 10);
+      return Date.now() - dismissedAt < DISMISS_DURATION_MS;
+    } catch {
+      return false;
+    }
+  };
 
   // Listen for auth state changes
   useEffect(() => {
@@ -52,7 +67,10 @@ export function LocationPermission() {
         setPermissionState(permission.state as 'prompt' | 'granted' | 'denied');
 
         if (permission.state === 'prompt') {
-          setShowPrompt(true);
+          // Only show prompt if not recently dismissed
+          if (!wasRecentlyDismissed()) {
+            setShowPrompt(true);
+          }
         } else if (permission.state === 'granted') {
           // Already granted, get location silently
           requestLocation();
@@ -68,11 +86,15 @@ export function LocationPermission() {
         };
       } catch {
         // Permissions API not fully supported, try requesting directly
-        setShowPrompt(true);
+        if (!wasRecentlyDismissed()) {
+          setShowPrompt(true);
+        }
       }
     } else {
-      // No permissions API, show prompt
-      setShowPrompt(true);
+      // No permissions API, show prompt if not recently dismissed
+      if (!wasRecentlyDismissed()) {
+        setShowPrompt(true);
+      }
     }
   };
 
@@ -125,6 +147,12 @@ export function LocationPermission() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
+    // Remember dismissal for 24 hours
+    try {
+      localStorage.setItem(LOCATION_PROMPT_DISMISSED_KEY, Date.now().toString());
+    } catch {
+      // Ignore localStorage errors
+    }
   };
 
   // Don't render anything if no user or no prompt needed

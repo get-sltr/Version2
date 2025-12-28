@@ -232,25 +232,39 @@ export default function EditProfilePage() {
       // Filter out empty additional photos
       const validAdditionalPhotos = additionalPhotos.filter(url => url && url.trim() !== '');
 
+      console.log('Saving photos:', { profilePhoto, validAdditionalPhotos });
+
+      // Build update object
+      const updateData: Record<string, unknown> = {
+        display_name: displayName.trim(),
+        about: aboutMe.trim() || null,
+        photo_url: profilePhoto || null,
+        tribes: selectedTribes,
+        tags: selectedTags,
+        age: ageValue,
+        height: formattedHeight,
+        weight: formattedWeight,
+        body_type: bodyTypeValue || null,
+        position: positionValue || null,
+        ethnicity: ethnicityValue || null,
+        relationship_status: relationshipValue || null
+      };
+
+      // Only add photo_urls if we have photos
+      if (validAdditionalPhotos.length > 0) {
+        updateData.photo_urls = validAdditionalPhotos;
+      }
+
+      console.log('Update data:', updateData);
+
       // Save to Supabase
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('profiles')
-        .update({
-          display_name: displayName.trim(),
-          about: aboutMe.trim() || null,
-          photo_url: profilePhoto || null,
-          photo_urls: validAdditionalPhotos,
-          tribes: selectedTribes,
-          tags: selectedTags,
-          age: ageValue,
-          height: formattedHeight,
-          weight: formattedWeight,
-          body_type: bodyTypeValue || null,
-          position: positionValue || null,
-          ethnicity: ethnicityValue || null,
-          relationship_status: relationshipValue || null
-        })
-        .eq('id', user.id);
+        .update(updateData)
+        .eq('id', user.id)
+        .select();
+
+      console.log('Save result:', { error, data });
 
       if (error) {
         console.error('Save error:', error);
