@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
@@ -15,6 +15,7 @@ export function LocationPermission() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking');
   const [user, setUser] = useState<User | null>(null);
+  const isRequestingLocation = useRef(false);
 
   // Check if user recently dismissed the prompt
   const wasRecentlyDismissed = (): boolean => {
@@ -104,6 +105,12 @@ export function LocationPermission() {
       return;
     }
 
+    // Prevent duplicate requests
+    if (isRequestingLocation.current) {
+      return;
+    }
+    isRequestingLocation.current = true;
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
@@ -125,6 +132,7 @@ export function LocationPermission() {
 
         setShowPrompt(false);
         setPermissionState('granted');
+        isRequestingLocation.current = false;
       },
       (error) => {
         console.warn('Location error:', error.message);
@@ -132,6 +140,7 @@ export function LocationPermission() {
           setPermissionState('denied');
         }
         setShowPrompt(false);
+        isRequestingLocation.current = false;
       },
       {
         enableHighAccuracy: true,

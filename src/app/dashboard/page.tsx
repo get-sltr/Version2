@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -118,10 +118,12 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Re-fetch when filter changes
+  // Re-fetch when filter changes or current user updates
   useEffect(() => {
-    fetchProfiles();
-  }, [activeFilter]);
+    if (currentUser) {
+      fetchProfiles();
+    }
+  }, [fetchProfiles, currentUser]);
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -146,12 +148,19 @@ export default function Dashboard() {
     setCurrentUser(profile);
   };
 
-  const fetchProfiles = async () => {
+  const fetchProfiles = useCallback(async () => {
+    // Get current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     let query = supabase
       .from('profiles')
       .select('*')
-      .not('photo_url', 'is', null);  // Only show profiles WITH photos
+      .not('photo_url', 'is', null)  // Only show profiles WITH photos
+      .eq('is_incognito', false);  // Exclude incognito users
 
     // Apply filters based on activeFilter
     if (activeFilter === 'online') {
@@ -169,19 +178,115 @@ export default function Dashboard() {
       query = query.gt('dtfn_active_until', new Date().toISOString());
     }
 
-    query = query.order('last_seen', { ascending: false }).limit(50);
+    // Apply position filter if selected
+    if (selectedPositions.length > 0) {
+      // Map position IDs to database values
+      const positionMap: Record<string, string> = {
+        'top': 'top',
+        'vers-top': 'vers-top',
+        'versatile': 'versatile',
+        'vers-bottom': 'vers-bottom',
+        'bottom': 'bottom',
+        'side': 'side'
+      };
+      const dbPositions = selectedPositions.map(p => positionMap[p] || p).filter(Boolean);
+      if (dbPositions.length > 0) {
+        query = query.in('position', dbPositions);
+      }
+    }
+
+    // Apply age filter if set
+    if (ageMin) {
+      query = query.gte('age', parseInt(ageMin, 10));
+    }
+    if (ageMax) {
+      query = query.lte('age', parseInt(ageMax, 10));
+    }
+
+    // Apply tribe filter if selected (tribes are stored as JSONB array)
+    if (selectedTribes.length > 0) {
+      // For JSONB array contains, we need to use a different approach
+      // This will filter profiles that have any of the selected tribes
+      const tribeConditions = selectedTribes.map(tribe => 
+        `tribes @> '["${tribe}"]'`
+      ).join(' OR ');
+      // Note: This requires a raw SQL approach, but Supabase client doesn't support it directly
+      // We'll filter in JavaScript instead for now
+    }
+
+    // Get user's location for distance-based sorting
+    const userLat = currentUser?.lat;
+    const userLng = currentUser?.lng;
+    const hasLocation = userLat && userLng && 
+                       typeof userLat === 'number' && typeof userLng === 'number' &&
+                       !isNaN(userLat) && !isNaN(userLng);
+
+    // Order by last_seen (most recent first)
+    // If user has location, we'll sort by distance in JavaScript
+    query = query.order('last_seen', { ascending: false }).limit(200);  // Increased limit for better results
 
     const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching profiles:', error);
+      setProfiles([]);
+      setLoading(false);
+      return;
     }
 
     if (data) {
-      setProfiles(data);
+      let filtered = data;
+
+      // Apply tribe filter in JavaScript (since Supabase client doesn't support JSONB contains easily)
+      if (selectedTribes.length > 0) {
+        filtered = filtered.filter(profile => {
+          if (!profile.tribes || !Array.isArray(profile.tribes)) return false;
+          return selectedTribes.some(tribe => profile.tribes.includes(tribe));
+        });
+      }
+
+      // Sort by distance if user has location, otherwise by last_seen
+      if (hasLocation) {
+        filtered = filtered
+          .map(profile => {
+            const profileLat = typeof profile.lat === 'number' ? profile.lat : parseFloat(profile.lat);
+            const profileLng = typeof profile.lng === 'number' ? profile.lng : parseFloat(profile.lng);
+            
+            if (!profileLat || !profileLng || isNaN(profileLat) || isNaN(profileLng)) {
+              return { ...profile, distance: Infinity };
+            }
+
+            // Calculate distance using Haversine formula
+            const R = 3958.8; // Earth radius in miles
+            const dLat = (profileLat - userLat) * Math.PI / 180;
+            const dLon = (profileLng - userLng) * Math.PI / 180;
+            const a = 
+              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(userLat * Math.PI / 180) * Math.cos(profileLat * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c;
+
+            return { ...profile, distance };
+          })
+          .sort((a, b) => {
+            // Sort by distance first, then by last_seen
+            if (a.distance !== b.distance) {
+              return a.distance - b.distance;
+            }
+            const aTime = new Date(a.last_seen || 0).getTime();
+            const bTime = new Date(b.last_seen || 0).getTime();
+            return bTime - aTime;
+          });
+      }
+
+      // Limit to 50 for display
+      setProfiles(filtered.slice(0, 50));
+    } else {
+      setProfiles([]);
     }
     setLoading(false);
-  };
+  }, [activeFilter, selectedPositions, selectedTribes, ageMin, ageMax, currentUser]);
 
   const getProfileImage = (profile: any, index: number) => {
     // Use photo_url from profile or fallback to placeholder

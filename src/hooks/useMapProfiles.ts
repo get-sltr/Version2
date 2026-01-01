@@ -87,19 +87,21 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
       setIsLoading(true);
       setError(null);
 
-      // Show profiles seen within last 24 hours for discovery
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+      // Show profiles seen within last 7 days for discovery (more like Grindr/Sniffies)
+      // This gives a better user experience with more profiles visible
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito, is_online')
-        .gte('last_seen', oneDayAgo.toISOString())
+        .gte('last_seen', sevenDaysAgo.toISOString())
         .eq('is_incognito', false)
         .not('photo_url', 'is', null)
         .not('lat', 'is', null)
         .not('lng', 'is', null)
-        .limit(250);
+        // DO NOT EXCLUDE CURRENT USER
+        .limit(500);  // Increased limit for better coverage
 
       if (fetchError) {
         console.warn('Failed to load profiles for map:', fetchError);

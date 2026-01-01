@@ -12,8 +12,9 @@ export function useLocationPresence(options?: UseLocationPresenceOptions) {
     let watchId: number | null = null;
     let firstFixDone = false;
     let cancelled = false;
+    let permissionStatus: PermissionStatus | null = null;
 
-    const start = async () => {
+    const startWatching = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || cancelled) return;
 
@@ -22,42 +23,93 @@ export function useLocationPresence(options?: UseLocationPresenceOptions) {
         return;
       }
 
-      watchId = navigator.geolocation.watchPosition(
-        async pos => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
+      // Don't start if already watching
+      if (watchId !== null) return;
 
-          if (!firstFixDone && options?.onFirstFix) {
-            options.onFirstFix({ lat, lng });
-            firstFixDone = true;
-          }
-
-          try {
-            await supabase
-              .from('profiles')
-              .update({
-                lat,
-                lng,
-                is_online: true,
-                last_seen: new Date().toISOString()
-              })
-              .eq('id', user.id);
-          } catch (err) {
-            console.warn('location update failed', err);
-          }
-        },
-        err => {
-          console.warn('geolocation error', err);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 10_000,
-          timeout: 20_000
+      // Check permission state before requesting location
+      let hasPermission = false;
+      
+      if ('permissions' in navigator) {
+        try {
+          permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+          hasPermission = permissionStatus.state === 'granted';
+          
+          // Listen for permission changes
+          permissionStatus.onchange = () => {
+            if (permissionStatus?.state === 'granted' && !watchId && !cancelled) {
+              // Permission was granted, start watching
+              void startWatching();
+            } else if (permissionStatus?.state === 'denied' || permissionStatus?.state === 'prompt') {
+              // Permission was denied or reset, stop watching
+              if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+              }
+            }
+          };
+        } catch {
+          // Permissions API not fully supported, will try to watch anyway
+          // but this will trigger a prompt if permission not granted
         }
-      );
+      }
+
+      // Only start watching if permission is granted
+      // If permissions API is not available, we'll try but it may prompt
+      if (hasPermission || !('permissions' in navigator)) {
+        try {
+          watchId = navigator.geolocation.watchPosition(
+            async pos => {
+              if (cancelled) return;
+              
+              const lat = pos.coords.latitude;
+              const lng = pos.coords.longitude;
+
+              if (!firstFixDone && options?.onFirstFix) {
+                options.onFirstFix({ lat, lng });
+                firstFixDone = true;
+              }
+
+              try {
+                await supabase
+                  .from('profiles')
+                  .update({
+                    lat,
+                    lng,
+                    is_online: true,
+                    last_seen: new Date().toISOString()
+                  })
+                  .eq('id', user.id);
+              } catch (err) {
+                console.warn('location update failed', err);
+              }
+            },
+            err => {
+              console.warn('geolocation error', err);
+              // If permission denied, stop trying
+              if (err.code === 1) {
+                if (watchId !== null) {
+                  navigator.geolocation.clearWatch(watchId);
+                  watchId = null;
+                }
+              }
+            },
+            {
+              enableHighAccuracy: true,
+              maximumAge: 10_000,
+              timeout: 20_000
+            }
+          );
+        } catch (err) {
+          console.warn('Failed to start location watching:', err);
+        }
+      } else {
+        // Permission not granted, don't request it here
+        // Let LocationPermission component handle the permission request
+        console.log('Location permission not granted, waiting for user to grant permission');
+      }
     };
 
-    start();
+    void startWatching();
 
     const markOffline = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -83,7 +135,13 @@ export function useLocationPresence(options?: UseLocationPresenceOptions) {
 
     return () => {
       cancelled = true;
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      if (permissionStatus) {
+        permissionStatus.onchange = null;
+      }
       window.removeEventListener('beforeunload', handleBeforeUnload);
       void markOffline();
     };
