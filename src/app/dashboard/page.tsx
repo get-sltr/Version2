@@ -137,33 +137,26 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Re-fetch when filter changes or current user updates
-  useEffect(() => {
-    if (currentUser) {
-      fetchProfiles();
-    }
-  }, [fetchProfiles, currentUser]);
-
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push('/login');
       return;
     }
-    
+
     // Mark user as online
     await supabase
       .from('profiles')
       .update({ is_online: true, last_seen: new Date().toISOString() })
       .eq('id', user.id);
-    
+
     // Get user's profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
-    
+
     setCurrentUser(profile);
   };
 
@@ -306,6 +299,13 @@ export default function Dashboard() {
     }
     setLoading(false);
   }, [activeFilter, selectedPositions, selectedTribes, ageMin, ageMax, currentUser]);
+
+  // Re-fetch when filter changes or current user updates
+  useEffect(() => {
+    if (currentUser) {
+      fetchProfiles();
+    }
+  }, [fetchProfiles, currentUser]);
 
   const getProfileImage = (profile: any, index: number) => {
     // Use photo_url from profile or fallback to placeholder
