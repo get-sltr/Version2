@@ -9,17 +9,18 @@ import posthog from 'posthog-js';
 export default function PremiumPage() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [selectedPlan, setSelectedPlan] = useState<'week' | '1month' | '3months' | '6months'>('6months');
+  const [selectedPlan, setSelectedPlan] = useState<'launch_special' | 'week' | '1month' | '3months' | '6months'>('launch_special');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const plans = {
-    week: { price: 4.99, total: 4.99, discount: null, per: 'week' },
-    '1month': { price: 9.99, total: 9.99, discount: '64%', per: 'month' },
-    '3months': { price: 7.99, total: 23.97, discount: '77%', per: 'month' },
-    '6months': { price: 5.99, total: 35.97, discount: '82%', per: 'month' }
+    launch_special: { price: 4.99, total: 4.99, discount: null, per: 'month', label: 'Launch Special', isPromo: true },
+    week: { price: 4.99, total: 4.99, discount: null, per: 'week', label: '1 Week' },
+    '1month': { price: 9.99, total: 9.99, discount: '64%', per: 'month', label: '1 Month' },
+    '3months': { price: 7.99, total: 23.97, discount: '77%', per: 'month', label: '3 Months' },
+    '6months': { price: 5.99, total: 35.97, discount: '82%', per: 'month', label: '6 Months' }
   };
 
   useEffect(() => {
@@ -310,6 +311,63 @@ export default function PremiumPage() {
 
         {/* Plan Selection */}
         <div style={{ marginBottom: '24px' }}>
+          {/* Launch Special - Featured Promo */}
+          <div
+            onClick={() => setSelectedPlan('launch_special')}
+            style={{
+              background: selectedPlan === 'launch_special' ? 'linear-gradient(135deg, rgba(255,107,53,0.25) 0%, rgba(255,215,0,0.15) 100%)' : 'linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,215,0,0.05) 100%)',
+              border: `2px solid ${selectedPlan === 'launch_special' ? '#FF6B35' : '#FFD700'}`,
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '16px',
+              cursor: 'pointer',
+              position: 'relative',
+              transition: 'all 0.2s',
+              boxShadow: selectedPlan === 'launch_special' ? '0 0 20px rgba(255,107,53,0.3)' : '0 0 15px rgba(255,215,0,0.15)'
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              top: '-12px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'linear-gradient(135deg, #FF6B35, #FFD700)',
+              borderRadius: '20px',
+              padding: '6px 16px',
+              fontSize: '11px',
+              fontWeight: 800,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap'
+            }}>
+              Limited Time Offer
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  border: `2px solid ${selectedPlan === 'launch_special' ? '#FF6B35' : '#FFD700'}`,
+                  background: selectedPlan === 'launch_special' ? '#FF6B35' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {selectedPlan === 'launch_special' && <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#fff' }} />}
+                </div>
+                <div>
+                  <span style={{ fontSize: '17px', fontWeight: 700, display: 'block' }}>Launch Special</span>
+                  <span style={{ fontSize: '12px', color: '#FFD700' }}>1 Month Premium Access</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '20px', fontWeight: 800, color: '#FF6B35' }}>$4.99</span>
+                <span style={{ fontSize: '12px', color: '#888', display: 'block' }}>50% off</span>
+              </div>
+            </div>
+          </div>
+
           {/* 1 Week */}
           <div
             onClick={() => setSelectedPlan('week')}
@@ -530,7 +588,10 @@ export default function PremiumPage() {
           color: '#aaa'
         }}>
           ${plans[selectedPlan].total} total
-          {selectedPlan !== 'week' && ` • ${selectedPlan === '1month' ? '1' : selectedPlan === '3months' ? '3' : '6'} ${selectedPlan === '1month' ? 'month' : 'months'}`}
+          {selectedPlan === 'launch_special' && ' • 1 month'}
+          {selectedPlan === '1month' && ' • 1 month'}
+          {selectedPlan === '3months' && ' • 3 months'}
+          {selectedPlan === '6months' && ' • 6 months'}
         </div>
 
         {/* Error Message */}
@@ -587,6 +648,8 @@ export default function PremiumPage() {
         }}>
           <strong style={{ color: '#aaa' }}>Auto-Renewal Notice:</strong> {selectedPlan === 'week' ? (
             'The 1-week plan is a one-time purchase and does not auto-renew.'
+          ) : selectedPlan === 'launch_special' ? (
+            'The Launch Special is a one-time promotional offer for 1 month of Premium access and does not auto-renew.'
           ) : (
             `Your subscription will automatically renew at $${plans[selectedPlan].total} every ${selectedPlan === '1month' ? 'month' : selectedPlan === '3months' ? '3 months' : '6 months'} unless cancelled at least 24 hours before the renewal date.`
           )}
