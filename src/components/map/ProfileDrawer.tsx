@@ -18,14 +18,6 @@ export function ProfileDrawer({ profile, onClose, accentColor }: ProfileDrawerPr
 
   return (
     <>
-      {/* Backdrop */}
-      <button
-        type="button"
-        aria-label="Close profile drawer"
-        onClick={onClose}
-        className={styles.drawerBackdrop}
-      />
-
       {/* Drawer */}
       <div className={styles.drawer}>
         {/* Close Button */}
@@ -71,13 +63,17 @@ export function ProfileDrawer({ profile, onClose, accentColor }: ProfileDrawerPr
           <div className={styles.drawerActions}>
             <a
               href={`/messages/${profile.id}`}
+              className={styles.secondaryButton}
+              style={{ width: 56, height: 56 }}
+            >
+              💬
+            </a>
+            <a
+              href={`/profile/${profile.id}`}
               className={styles.primaryButton}
               style={{ background: accent }}
             >
-              💬 Message
-            </a>
-            <a href={`/profile/${profile.id}`} className={styles.secondaryButton}>
-              👁️ View Profile
+              View Profile
             </a>
           </div>
         </div>

@@ -148,6 +148,22 @@ export async function createGroup(groupData: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
+  // Get host's profile for location
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('lat, lng, city')
+    .eq('id', user.id)
+    .single();
+
+  // Validate coordinates are actual numbers
+  const hasValidLocation =
+    profile?.lat != null &&
+    profile?.lng != null &&
+    typeof profile.lat === 'number' &&
+    typeof profile.lng === 'number' &&
+    !Number.isNaN(profile.lat) &&
+    !Number.isNaN(profile.lng);
+
   const { data, error } = await supabase
     .from('groups')
     .insert({
@@ -156,10 +172,10 @@ export async function createGroup(groupData: {
       type: groupData.type,
       category: groupData.category || null,
       description: groupData.description || null,
-      location: groupData.location || null,
+      location_name: profile?.city || groupData.location || null,
       address: groupData.address || null,
-      lat: groupData.lat || null,
-      lng: groupData.lng || null,
+      lat: hasValidLocation ? profile.lat : null,
+      lng: hasValidLocation ? profile.lng : null,
       event_date: groupData.event_date || null,
       event_time: groupData.event_time || null,
       max_attendees: groupData.max_attendees || 10,

@@ -50,6 +50,7 @@ interface CenterOn extends Coordinates {
 }
 
 interface CurrentUserMapProfile {
+  id?: string;
   lat?: number;
   lng?: number;
   image?: string;
@@ -66,6 +67,7 @@ interface MapboxMapProps {
   readonly onViewportChange?: (viewport: any) => void;
   readonly onSelectProfile?: (profile: MapProfile) => void;
   readonly onSelectGroup?: (group: MapGroup) => void;
+  readonly onEmptyClick?: () => void;
 }
 
 export default function MapboxMap({
@@ -78,7 +80,8 @@ export default function MapboxMap({
   centerOn,
   onViewportChange,
   onSelectProfile,
-  onSelectGroup
+  onSelectGroup,
+  onEmptyClick
 }: MapboxMapProps) {
   const { colors } = useTheme();
   const mapRef = useRef<any>(null);
@@ -185,6 +188,8 @@ export default function MapboxMap({
       for (const profile of localProfiles) {
         if (typeof profile.lat !== 'number' || typeof profile.lng !== 'number') continue;
         if (!profile.image) continue;
+        // Skip current user's profile - they have their own marker and shouldn't open drawer
+        if (currentUserProfile?.id && profile.id === currentUserProfile.id) continue;
 
         const markerPos = map.project([profile.lng, profile.lat]);
         const distance = Math.sqrt(
@@ -233,7 +238,10 @@ export default function MapboxMap({
         return;
       }
     }
-  }, [viewMode, localProfiles, groups, venues, onSelectProfile, onSelectGroup]);
+
+    // No marker hit - notify parent to close drawer
+    onEmptyClick?.();
+  }, [viewMode, localProfiles, groups, venues, currentUserProfile, onSelectProfile, onSelectGroup, onEmptyClick]);
 
   // Handle mouse move - detect hover for cursor change
   const handleMouseMove = useCallback((e: any) => {

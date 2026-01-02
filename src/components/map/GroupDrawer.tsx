@@ -11,14 +11,6 @@ export function GroupDrawer({ group, onClose }: GroupDrawerProps) {
 
   return (
     <>
-      {/* Backdrop */}
-      <button
-        type="button"
-        aria-label="Close group drawer"
-        onClick={onClose}
-        className={styles.drawerBackdrop}
-      />
-
       {/* Drawer */}
       <div className={styles.drawer}>
         {/* Close Button */}

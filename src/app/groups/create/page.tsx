@@ -9,8 +9,6 @@ export default function CreateGroupPage() {
   const router = useRouter();
   const [groupName, setGroupName] = useState('');
   const [groupType, setGroupType] = useState<GroupType>('Hangout');
-  const [location, setLocation] = useState('');
-  const [address, setAddress] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [maxAttendees, setMaxAttendees] = useState('10');
@@ -37,7 +35,7 @@ export default function CreateGroupPage() {
   };
 
   const handleCreate = async () => {
-    if (!groupName || !location || !date || !time) {
+    if (!groupName || !date || !time) {
       alert('Please fill in all required fields');
       return;
     }
@@ -50,8 +48,6 @@ export default function CreateGroupPage() {
       const newGroup = await createGroup({
         name: groupName,
         type: groupType,
-        location,
-        address: address || undefined,
         event_date: date,
         event_time: time,
         max_attendees: Number.parseInt(maxAttendees) || 10,
@@ -206,51 +202,6 @@ export default function CreateGroupPage() {
                 {type}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* Location */}
-        <div style={{ marginBottom: '24px' }}>
-          <label htmlFor="location" style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#aaa' }}>
-            Location * (City/Area)
-          </label>
-          <input
-            id="location"
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g., West Hollywood"
-            style={{
-              width: '100%',
-              background: '#1c1c1e',
-              border: '1px solid #333',
-              borderRadius: '12px',
-              padding: '16px',
-              color: '#fff',
-              fontSize: '16px',
-              outline: 'none',
-              marginBottom: '12px'
-            }}
-          />
-          <input
-            id="address"
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Full address (optional)"
-            style={{
-              width: '100%',
-              background: '#1c1c1e',
-              border: '1px solid #333',
-              borderRadius: '12px',
-              padding: '16px',
-              color: '#fff',
-              fontSize: '16px',
-              outline: 'none'
-            }}
-          />
-          <div style={{ fontSize: '12px', color: '#666', marginTop: '6px' }}>
-            💡 Full address will only be shared with attendees
           </div>
         </div>
 
@@ -444,18 +395,18 @@ export default function CreateGroupPage() {
       }}>
         <button
           onClick={handleCreate}
-          disabled={!groupName || !location || !date || !time || isSubmitting}
+          disabled={!groupName || !date || !time || isSubmitting}
           style={{
             width: '100%',
-            background: (!groupName || !location || !date || !time || isSubmitting) ? '#333' : '#FF6B35',
+            background: (!groupName || !date || !time || isSubmitting) ? '#333' : '#FF6B35',
             border: 'none',
             borderRadius: '12px',
             padding: '18px',
             color: '#fff',
             fontSize: '16px',
             fontWeight: 600,
-            cursor: (!groupName || !location || !date || !time || isSubmitting) ? 'not-allowed' : 'pointer',
-            opacity: (!groupName || !location || !date || !time || isSubmitting) ? 0.5 : 1
+            cursor: (!groupName || !date || !time || isSubmitting) ? 'not-allowed' : 'pointer',
+            opacity: (!groupName || !date || !time || isSubmitting) ? 0.5 : 1
           }}
         >
           {isSubmitting ? 'Creating...' : 'Create Group'}

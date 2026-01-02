@@ -120,6 +120,7 @@ export default function MapViewPage() {
           centerOn={centerOn}
           onSelectProfile={handleSelectProfile}
           onSelectGroup={handleSelectGroup}
+          onEmptyClick={handleCloseDrawer}
         />
 
         {/* Profile Drawer */}
