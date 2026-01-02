@@ -67,7 +67,7 @@ export async function GET() {
       .from('profiles')
       .select('*', { count: 'exact', head: true })
       .eq('is_premium', true)
-      .gte('premium_expires_at', new Date().toISOString());
+      .gte('premium_until', new Date().toISOString());
 
     // Get online users (active in last 15 minutes)
     const fifteenMinutesAgo = new Date();

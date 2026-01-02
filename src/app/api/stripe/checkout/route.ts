@@ -14,13 +14,15 @@ import {
 
 const STRIPE_API_VERSION = '2024-12-18.acacia' as Stripe.LatestApiVersion
 
-const VALID_PLANS = ['week', '1month', '3months', '6months'] as const
+const VALID_PLANS = ['week', '1month', '3months', '6months', 'launch_special'] as const
 type Plan = (typeof VALID_PLANS)[number]
 
 const SUBSCRIPTION_PLANS: ReadonlySet<Plan> = new Set<Plan>([
+  'week',
   '1month',
   '3months',
   '6months',
+  'launch_special',
 ])
 
 interface CheckoutRequestBody {
@@ -63,6 +65,7 @@ function loadEnv(): Env {
       '1month': requireEnv('STRIPE_PRICE_1MONTH'),
       '3months': requireEnv('STRIPE_PRICE_3MONTHS'),
       '6months': requireEnv('STRIPE_PRICE_6MONTHS'),
+      'launch_special': requireEnv('STRIPE_PRICE_LAUNCH_SPECIAL'),
     },
   }
 

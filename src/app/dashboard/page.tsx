@@ -11,6 +11,25 @@ import OrbitBadge from '@/components/OrbitBadge';
 import { DTFNButton, DTFNBadge } from '@/components/dtfn';
 import { usePremium } from '@/hooks/usePremium';
 
+/**
+ * Format distance for display
+ * - Under 1 mile: shows feet (e.g., "500 ft")
+ * - 1+ miles: shows miles with 1 decimal (e.g., "2.3 mi")
+ * - No data: shows "Nearby"
+ */
+function formatDistance(distance: number | undefined): string {
+  if (distance === undefined || distance === Infinity || Number.isNaN(distance)) {
+    return 'Nearby';
+  }
+
+  if (distance < 1) {
+    const feet = Math.round(distance * 5280);
+    return `${feet} ft`;
+  }
+
+  return `${distance.toFixed(1)} mi`;
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const { colors } = useTheme();
@@ -1089,9 +1108,9 @@ export default function Dashboard() {
                     {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
                   </span>
                 </div>
-                {/* Distance placeholder - would need geolocation */}
+                {/* Distance display */}
                 <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '2px' }}>
-                  Nearby
+                  {formatDistance(profile.distance)}
                 </div>
               </div>
             </a>

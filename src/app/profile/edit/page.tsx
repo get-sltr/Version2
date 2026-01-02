@@ -41,6 +41,26 @@ export default function EditProfilePage() {
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [showTribesDropdown, setShowTribesDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Expectations
+  const [lookingFor, setLookingFor] = useState<string[]>([]);
+  const [meetAt, setMeetAt] = useState<string[]>([]);
+  const [acceptsNsfw, setAcceptsNsfw] = useState<boolean>(false);
+
+  // Identity
+  const [gender, setGender] = useState('');
+  const [pronouns, setPronouns] = useState('');
+
+  // Health
+  const [lastTested, setLastTested] = useState('');
+  const [healthPractices, setHealthPractices] = useState<string[]>([]);
+  const [vaccinations, setVaccinations] = useState<string[]>([]);
+
+  // Social Links
+  const [instagram, setInstagram] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [facebook, setFacebook] = useState('');
+  const [spotify, setSpotify] = useState('');
   const isDarkMode = colors.background === '#000' || colors.background === '#000000' || colors.background === '#121212' || colors.background.includes('0,0,0');
   const inputStyle = {
     width: '100%',
@@ -154,6 +174,26 @@ export default function EditProfilePage() {
           setEthnicityValue(profile.ethnicity || '');
           setRelationshipValue(profile.relationship_status || '');
           setHivStatusValue(profile.hiv_status || '');
+
+          // Expectations
+          if (profile.looking_for) setLookingFor(profile.looking_for);
+          if (profile.meet_at) setMeetAt(profile.meet_at);
+          if (typeof profile.accepts_nsfw === 'boolean') setAcceptsNsfw(profile.accepts_nsfw);
+
+          // Identity
+          if (profile.gender) setGender(profile.gender);
+          if (profile.pronouns) setPronouns(profile.pronouns);
+
+          // Health
+          if (profile.last_tested) setLastTested(profile.last_tested);
+          if (profile.health_practices) setHealthPractices(profile.health_practices);
+          if (profile.vaccinations) setVaccinations(profile.vaccinations);
+
+          // Social Links
+          if (profile.instagram) setInstagram(profile.instagram);
+          if (profile.twitter) setTwitter(profile.twitter);
+          if (profile.facebook) setFacebook(profile.facebook);
+          if (profile.spotify) setSpotify(profile.spotify);
         }
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -247,7 +287,23 @@ export default function EditProfilePage() {
         body_type: bodyTypeValue || null,
         position: positionValue || null,
         ethnicity: ethnicityValue || null,
-        relationship_status: relationshipValue || null
+        relationship_status: relationshipValue || null,
+        // Expectations
+        looking_for: lookingFor,
+        meet_at: meetAt,
+        accepts_nsfw: acceptsNsfw,
+        // Identity
+        gender: gender || null,
+        pronouns: pronouns || null,
+        // Health
+        last_tested: lastTested || null,
+        health_practices: healthPractices,
+        vaccinations: vaccinations,
+        // Social Links
+        instagram: instagram || null,
+        twitter: twitter || null,
+        facebook: facebook || null,
+        spotify: spotify || null
       };
 
       // Only add photo_urls if we have photos
@@ -784,58 +840,110 @@ export default function EditProfilePage() {
       {/* EXPECTATIONS */}
       <SectionTitle icon="👥" title="EXPECTATIONS" colors={colors} />
       <Section card>
-        <a href="/profile/edit/looking-for" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="I'm Looking For" value="Dates, Friends, Hookups" hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/meet-at" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Meet At" value="My Place, Your Place, Bar" hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/nsfw" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Accepts NSFW Pics" value="Yes" hasArrow colors={colors} />
-        </a>
+        <MultiSelectField
+          label="I'm Looking For"
+          options={['Dates', 'Friends', 'Hookups', 'Chat', 'Networking', 'Relationship']}
+          selected={lookingFor}
+          onChange={(v) => { setLookingFor(v); markAsChanged(); }}
+          colors={colors}
+        />
+        <MultiSelectField
+          label="Meet At"
+          options={['My Place', 'Your Place', 'Bar', 'Coffee Shop', 'Public Place', 'Outdoors']}
+          selected={meetAt}
+          onChange={(v) => { setMeetAt(v); markAsChanged(); }}
+          colors={colors}
+        />
+        <ToggleRow label="Accepts NSFW Pics" value={acceptsNsfw} onChange={(v) => { setAcceptsNsfw(v); markAsChanged(); }} colors={colors} />
       </Section>
 
       {/* IDENTITY */}
       <SectionTitle icon="✨" title="IDENTITY" colors={colors} />
       <Section card>
-        <a href="/profile/edit/gender" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Gender" value="Man" hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/pronouns" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Pronouns" value="He/Him" hasArrow colors={colors} />
-        </a>
+        <StatField label="Gender" colors={colors}>
+          <select
+            value={gender}
+            onChange={(e) => { setGender(e.target.value); markAsChanged(); }}
+            style={statSelectStyle}
+          >
+            <option value="">Select gender</option>
+            <option value="Man">Man</option>
+            <option value="Woman">Woman</option>
+            <option value="Non-binary">Non-binary</option>
+            <option value="Trans Man">Trans Man</option>
+            <option value="Trans Woman">Trans Woman</option>
+            <option value="Genderqueer">Genderqueer</option>
+            <option value="Genderfluid">Genderfluid</option>
+            <option value="Other">Other</option>
+          </select>
+        </StatField>
+        <StatField label="Pronouns" colors={colors}>
+          <select
+            value={pronouns}
+            onChange={(e) => { setPronouns(e.target.value); markAsChanged(); }}
+            style={statSelectStyle}
+          >
+            <option value="">Select pronouns</option>
+            <option value="He/Him">He/Him</option>
+            <option value="She/Her">She/Her</option>
+            <option value="They/Them">They/Them</option>
+            <option value="He/They">He/They</option>
+            <option value="She/They">She/They</option>
+            <option value="Any">Any</option>
+            <option value="Ask Me">Ask Me</option>
+          </select>
+        </StatField>
       </Section>
 
       {/* HEALTH */}
       <SectionTitle icon="🏥" title="HEALTH" colors={colors} />
       <Section card>
-        <a href="/profile/edit/hiv-status" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="HIV Status" value={hivStatusValue || 'Not specified'} hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/last-tested" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Last Tested Date" value="January 2023" hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/testing-reminders" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Testing Reminders" value="Off" hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/health-practices" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Health Practices" value="Not specified" hasArrow colors={colors} />
-        </a>
-        <a href="/profile/edit/vaccinations" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Vaccinations" value="Not specified" hasArrow colors={colors} />
-        </a>
-        <a href="/settings/help" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <RowItem label="Sexual Health FAQ" value="" hasArrow colors={colors} />
-        </a>
+        <StatField label="HIV Status" colors={colors}>
+          <select
+            value={hivStatusValue}
+            onChange={(e) => { setHivStatusValue(e.target.value); markAsChanged(); }}
+            style={statSelectStyle}
+          >
+            <option value="">Select status</option>
+            <option value="Negative">Negative</option>
+            <option value="Negative on PrEP">Negative on PrEP</option>
+            <option value="Positive">Positive</option>
+            <option value="Positive Undetectable">Positive Undetectable</option>
+            <option value="Unknown">Unknown</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </StatField>
+        <StatField label="Last Tested Date" colors={colors}>
+          <input
+            type="date"
+            value={lastTested}
+            onChange={(e) => { setLastTested(e.target.value); markAsChanged(); }}
+            style={statInputStyle}
+          />
+        </StatField>
+        <MultiSelectField
+          label="Health Practices"
+          options={['Condoms', 'PrEP', 'PEP', 'Regular Testing', 'Monogamy', 'TasP', 'Ask Me']}
+          selected={healthPractices}
+          onChange={(v) => { setHealthPractices(v); markAsChanged(); }}
+          colors={colors}
+        />
+        <MultiSelectField
+          label="Vaccinations"
+          options={['COVID-19', 'Monkeypox', 'HPV', 'Hepatitis A', 'Hepatitis B', 'Meningitis', 'Flu']}
+          selected={vaccinations}
+          onChange={(v) => { setVaccinations(v); markAsChanged(); }}
+          colors={colors}
+        />
       </Section>
 
       {/* SOCIAL LINKS */}
       <SectionTitle icon="🔗" title="SOCIAL LINKS" colors={colors} />
       <Section card>
-        <SocialRow icon="📷" label="Instagram" placeholder="Enter your Instagram username" colors={colors} />
-        <SocialRow icon="✖" label="X" placeholder="Enter your X handle" colors={colors} />
-        <SocialRow icon="📘" label="Facebook" placeholder="Enter your Facebook username" colors={colors} />
-        <SocialRow icon="🎵" label="Spotify" placeholder="Add your top songs" colors={colors} />
+        <SocialRow icon="📷" label="Instagram" placeholder="@username" value={instagram} onChange={(v) => { setInstagram(v); markAsChanged(); }} colors={colors} />
+        <SocialRow icon="✖" label="X" placeholder="@handle" value={twitter} onChange={(v) => { setTwitter(v); markAsChanged(); }} colors={colors} />
+        <SocialRow icon="📘" label="Facebook" placeholder="username" value={facebook} onChange={(v) => { setFacebook(v); markAsChanged(); }} colors={colors} />
+        <SocialRow icon="🎵" label="Spotify" placeholder="profile link" value={spotify} onChange={(v) => { setSpotify(v); markAsChanged(); }} colors={colors} />
       </Section>
 
       {/* Save Button (Fixed) */}
@@ -956,15 +1064,69 @@ function ToggleRow({ label, value, onChange, colors }: { label: string; value: b
   );
 }
 
-function SocialRow({ icon, label, placeholder, colors }: { icon: string; label: string; placeholder: string; colors: ThemeColors }) {
+function SocialRow({ icon, label, placeholder, value, onChange, colors }: { icon: string; label: string; placeholder: string; value: string; onChange: (v: string) => void; colors: ThemeColors }) {
+  const isDarkMode = colors.background === '#000' || colors.background === '#000000' || colors.background === '#121212';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '14px 0', borderBottom: `1px solid ${colors.border}` }}>
       <span style={{ fontSize: '24px' }}>{icon}</span>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: '16px', fontWeight: 500 }}>{label}</div>
-        <div style={{ fontSize: '13px', color: colors.textSecondary }}>{placeholder}</div>
+        <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '6px' }}>{label}</div>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+            background: isDarkMode ? 'rgba(255,255,255,0.08)' : '#f8f8f8',
+            color: isDarkMode ? '#FFFFFF' : '#000000',
+            fontSize: '14px',
+            outline: 'none'
+          }}
+        />
       </div>
-      <span style={{ color: colors.textSecondary, fontSize: '18px' }}>›</span>
+    </div>
+  );
+}
+
+function MultiSelectField({ label, options, selected, onChange, colors }: { label: string; options: string[]; selected: string[]; onChange: (v: string[]) => void; colors: ThemeColors }) {
+  const isDarkMode = colors.background === '#000' || colors.background === '#000000' || colors.background === '#121212';
+
+  const toggleOption = (option: string) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter(s => s !== option));
+    } else {
+      onChange([...selected, option]);
+    }
+  };
+
+  return (
+    <div style={{ padding: '14px 0', borderBottom: `1px solid ${colors.border}` }}>
+      <div style={{ fontSize: '13px', fontWeight: 600, color: colors.textSecondary, marginBottom: '12px' }}>{label}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+        {options.map(option => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => toggleOption(option)}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '20px',
+              border: selected.includes(option) ? '2px solid #FF6B35' : `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+              background: selected.includes(option) ? 'rgba(255,107,53,0.15)' : 'transparent',
+              color: selected.includes(option) ? '#FF6B35' : colors.text,
+              fontSize: '14px',
+              fontWeight: selected.includes(option) ? 600 : 400,
+              cursor: 'pointer'
+            }}
+          >
+            {selected.includes(option) && '✓ '}{option}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
