@@ -1,180 +1,176 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
-const LOCATION_PROMPT_DISMISSED_KEY = 'sltr_location_prompt_dismissed';
-const DISMISS_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+const STORAGE_KEY = 'sltr_location_state';
+
+interface LocationState {
+  granted: boolean;
+  dismissedUntil: number | null; // timestamp when dismiss expires
+}
 
 /**
- * LocationPermission - Requests location permission after user logs in
- * Shows a prompt if permission is not granted, updates user's location in database
+ * Persist location permission state to localStorage
+ * - granted: user has allowed location access
+ * - dismissedUntil: user dismissed prompt, don't ask until this timestamp
+ */
+function getStoredState(): LocationState {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { granted: false, dismissedUntil: null };
+}
+
+function saveState(state: Partial<LocationState>) {
+  try {
+    const current = getStoredState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...state }));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
+ * LocationPermission - Handles location permission flow
+ *
+ * Logic:
+ * 1. If already granted (localStorage), silently update location
+ * 2. If browser permission is 'granted', mark as granted and update
+ * 3. If browser permission is 'prompt' and not dismissed, show our prompt
+ * 4. If user dismisses, don't ask again for 24 hours
  */
 export function LocationPermission() {
   const [showPrompt, setShowPrompt] = useState(false);
-  const [permissionState, setPermissionState] = useState<'prompt' | 'granted' | 'denied' | 'checking'>('checking');
   const [user, setUser] = useState<User | null>(null);
-  const isRequestingLocation = useRef(false);
+  const hasChecked = useRef(false);
+  const isRequesting = useRef(false);
 
-  // Check if user recently dismissed the prompt
-  const wasRecentlyDismissed = (): boolean => {
-    try {
-      const dismissed = localStorage.getItem(LOCATION_PROMPT_DISMISSED_KEY);
-      if (!dismissed) return false;
-      const dismissedAt = parseInt(dismissed, 10);
-      return Date.now() - dismissedAt < DISMISS_DURATION_MS;
-    } catch {
-      return false;
-    }
-  };
-
-  // Listen for auth state changes
+  // Get user on mount
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
     });
 
-    // Check initial session
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Only check location when we have an authenticated user
-  useEffect(() => {
-    if (user) {
-      checkAndRequestLocation();
+  // Save location to database
+  const updateLocation = useCallback(async (lat: number, lng: number) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ lat, lng, last_seen: new Date().toISOString() })
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('Location update failed:', error);
     } else {
-      // Reset state when user logs out
-      setShowPrompt(false);
-      setPermissionState('checking');
+      saveState({ granted: true });
     }
   }, [user]);
 
-  const checkAndRequestLocation = async () => {
-    // Check if geolocation is supported
-    if (!navigator.geolocation) {
-      console.warn('Geolocation not supported');
-      return;
-    }
-
-    // Check permission state if available
-    if ('permissions' in navigator) {
-      try {
-        const permission = await navigator.permissions.query({ name: 'geolocation' });
-        setPermissionState(permission.state as 'prompt' | 'granted' | 'denied');
-
-        if (permission.state === 'prompt') {
-          // Only show prompt if not recently dismissed
-          if (!wasRecentlyDismissed()) {
-            setShowPrompt(true);
-          }
-        } else if (permission.state === 'granted') {
-          // Already granted, get location silently
-          requestLocation();
-        }
-
-        // Listen for permission changes
-        permission.onchange = () => {
-          setPermissionState(permission.state as 'prompt' | 'granted' | 'denied');
-          if (permission.state === 'granted') {
-            setShowPrompt(false);
-            requestLocation();
-          }
-        };
-      } catch {
-        // Permissions API not fully supported, try requesting directly
-        if (!wasRecentlyDismissed()) {
-          setShowPrompt(true);
-        }
-      }
-    } else {
-      // No permissions API, show prompt if not recently dismissed
-      if (!wasRecentlyDismissed()) {
-        setShowPrompt(true);
-      }
-    }
-  };
-
-  const requestLocation = () => {
-    if (!user) {
-      console.warn('No user logged in, skipping location save');
-      return;
-    }
-
-    // Prevent duplicate requests
-    if (isRequestingLocation.current) {
-      return;
-    }
-    isRequestingLocation.current = true;
+  // Request location from browser
+  const requestLocation = useCallback(() => {
+    if (isRequesting.current) return;
+    isRequesting.current = true;
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude: lat, longitude: lng } = position.coords;
-
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            lat,
-            lng,
-            last_seen: new Date().toISOString(),
-          })
-          .eq('id', user.id);
-
-        if (error) {
-          console.error('Location update failed:', error);
-        } else {
-          console.log('Location saved:', { lat, lng, userId: user.id });
-        }
-
+      (position) => {
+        updateLocation(position.coords.latitude, position.coords.longitude);
         setShowPrompt(false);
-        setPermissionState('granted');
-        isRequestingLocation.current = false;
+        isRequesting.current = false;
       },
       (error) => {
         console.warn('Location error:', error.message);
-        if (error.code === 1) {
-          setPermissionState('denied');
-        }
         setShowPrompt(false);
-        isRequestingLocation.current = false;
+        isRequesting.current = false;
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  };
+  }, [updateLocation]);
 
-  const handleEnableLocation = () => {
+  // Main permission check
+  useEffect(() => {
+    if (!user || hasChecked.current) return;
+    hasChecked.current = true;
+
+    const check = async () => {
+      if (!navigator.geolocation) return;
+
+      const state = getStoredState();
+
+      // Already granted - just update location silently
+      if (state.granted) {
+        requestLocation();
+        return;
+      }
+
+      // Recently dismissed - don't show prompt
+      if (state.dismissedUntil && Date.now() < state.dismissedUntil) {
+        return;
+      }
+
+      // Check browser permission state
+      if ('permissions' in navigator) {
+        try {
+          const permission = await navigator.permissions.query({ name: 'geolocation' });
+
+          if (permission.state === 'granted') {
+            saveState({ granted: true });
+            requestLocation();
+          } else if (permission.state === 'prompt') {
+            setShowPrompt(true);
+          }
+          // If 'denied', do nothing
+
+        } catch {
+          // Permissions API failed, show prompt
+          setShowPrompt(true);
+        }
+      } else {
+        // No Permissions API, show prompt
+        setShowPrompt(true);
+      }
+    };
+
+    check();
+  }, [user, requestLocation]);
+
+  // Reset when user changes
+  useEffect(() => {
+    if (!user) {
+      hasChecked.current = false;
+      setShowPrompt(false);
+    }
+  }, [user]);
+
+  const handleEnable = () => {
     requestLocation();
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    // Remember dismissal for 24 hours
-    try {
-      localStorage.setItem(LOCATION_PROMPT_DISMISSED_KEY, Date.now().toString());
-    } catch {
-      // Ignore localStorage errors
-    }
+    // Dismiss for 24 hours
+    saveState({ dismissedUntil: Date.now() + 24 * 60 * 60 * 1000 });
   };
 
-  // Don't render anything if no user or no prompt needed
   if (!user || !showPrompt) return null;
 
   return (
     <div
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         background: 'rgba(0,0,0,0.8)',
         display: 'flex',
         alignItems: 'center',
@@ -194,7 +190,6 @@ export function LocationPermission() {
           border: '1px solid rgba(255,107,53,0.3)',
         }}
       >
-        {/* Icon */}
         <div
           style={{
             width: '80px',
@@ -211,35 +206,18 @@ export function LocationPermission() {
           📍
         </div>
 
-        {/* Title */}
-        <h2
-          style={{
-            fontSize: '24px',
-            fontWeight: 700,
-            color: '#fff',
-            marginBottom: '12px',
-          }}
-        >
+        <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>
           Enable Location
         </h2>
 
-        {/* Description */}
-        <p
-          style={{
-            fontSize: '15px',
-            color: 'rgba(255,255,255,0.7)',
-            lineHeight: 1.6,
-            marginBottom: '28px',
-          }}
-        >
+        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '28px' }}>
           SLTR uses your location to show you nearby profiles on the grid and map.
           Your exact location is never shared with other users.
         </p>
 
-        {/* Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <button
-            onClick={handleEnableLocation}
+            onClick={handleEnable}
             style={{
               width: '100%',
               padding: '16px',
@@ -271,14 +249,7 @@ export function LocationPermission() {
           </button>
         </div>
 
-        {/* Note */}
-        <p
-          style={{
-            fontSize: '12px',
-            color: 'rgba(255,255,255,0.4)',
-            marginTop: '20px',
-          }}
-        >
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '20px' }}>
           You can change this later in Settings
         </p>
       </div>
