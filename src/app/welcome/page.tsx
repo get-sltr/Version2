@@ -237,7 +237,7 @@ export default function WelcomePage() {
                       flexShrink: 0,
                     }}
                   >
-                    <IconCheck size={12} style={{ color: '#FF6B35' }} />
+                    <span style={{ color: '#FF6B35' }}><IconCheck size={12} /></span>
                   </div>
                   <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.9)' }}>{feature}</span>
                 </motion.div>
