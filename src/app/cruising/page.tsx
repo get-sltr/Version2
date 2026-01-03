@@ -374,7 +374,7 @@ export default function CruisingUpdatesPage() {
           </div>
         ))}
 
-        {/* New Messages Banner */}
+        {/* New Updates Banner */}
         <div style={{
           position: 'sticky',
           bottom: '80px',
@@ -385,8 +385,12 @@ export default function CruisingUpdatesPage() {
           justifyContent: 'center',
           pointerEvents: 'none'
         }}>
-          <a
-            href="/messages"
+          <button
+            onClick={() => {
+              // Scroll to top and refresh updates
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // TODO: Fetch new updates from API when implemented
+            }}
             style={{
               background: '#007AFF',
               borderRadius: '24px',
@@ -394,7 +398,8 @@ export default function CruisingUpdatesPage() {
               color: '#fff',
               fontSize: '15px',
               fontWeight: 600,
-              textDecoration: 'none',
+              border: 'none',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -402,8 +407,8 @@ export default function CruisingUpdatesPage() {
               pointerEvents: 'all'
             }}
           >
-            ↓ See New Messages
-          </a>
+            ↓ See New Updates
+          </button>
         </div>
       </div>
 
