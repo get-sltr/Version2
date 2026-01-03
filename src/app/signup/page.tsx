@@ -102,7 +102,7 @@ export default function SignupPage() {
         });
       }
 
-      router.push(`/verify?email=${encodeURIComponent(email)}`);
+      router.push('/welcome');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An error occurred during sign up';
       if (errorMessage.toLowerCase().includes('already') || errorMessage.toLowerCase().includes('exist')) {
