@@ -56,7 +56,7 @@ export default function CreateGroupPage() {
         max_age: maxAge,
         tags: selectedTags,
         is_private: false,
-        requires_approval: false
+        requires_approval: true
       });
 
       router.push(`/groups/${newGroup.id}`);

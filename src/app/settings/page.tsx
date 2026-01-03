@@ -8,7 +8,7 @@ import { IconBack, IconUser, IconArrowRight } from '@/components/Icons';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { darkMode, toggleDarkMode, colors } = useTheme();
+  const { colors } = useTheme();
   const [profile, setProfile] = useState<any>(null);
   const [user, setUser] = useState<any>(null);
   const [savedPhrases, setSavedPhrases] = useState<string[]>([]);
@@ -145,7 +145,7 @@ export default function SettingsPage() {
           <MenuItem label="Show Me" value="Top, Bottom, Versatile, Top Vers, Btm Vers, Side" hasArrow />
         </a>
         {/* Age Range - Inline Inputs */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: '1px solid rgba(60, 60, 60, 0.6)' }}>
           <span style={{ fontSize: '16px', color: colors.text }}>Age Range</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <input
@@ -161,7 +161,7 @@ export default function SettingsPage() {
                 textAlign: 'center',
                 border: `1px solid ${colors.border}`,
                 borderRadius: '8px',
-                background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                background: '#1c1c1e',
                 color: colors.text,
                 outline: 'none'
               }}
@@ -180,7 +180,7 @@ export default function SettingsPage() {
                 textAlign: 'center',
                 border: `1px solid ${colors.border}`,
                 borderRadius: '8px',
-                background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                background: '#1c1c1e',
                 color: colors.text,
                 outline: 'none'
               }}
@@ -188,7 +188,7 @@ export default function SettingsPage() {
           </div>
         </div>
         {/* Max Distance - Inline Input */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: '1px solid rgba(60, 60, 60, 0.6)' }}>
           <span style={{ fontSize: '16px', color: colors.text }}>Maximum Distance</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <input
@@ -204,7 +204,7 @@ export default function SettingsPage() {
                 textAlign: 'center',
                 border: `1px solid ${colors.border}`,
                 borderRadius: '8px',
-                background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                background: '#1c1c1e',
                 color: colors.text,
                 outline: 'none'
               }}
@@ -224,7 +224,7 @@ export default function SettingsPage() {
           <a href="/settings/saved-phrases" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
             <div style={{
               padding: '12px 0',
-              borderBottom: `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}`,
+              borderBottom: '1px solid rgba(60, 60, 60, 0.6)',
               fontSize: '13px',
               color: colors.textSecondary,
               fontStyle: 'italic'
@@ -241,72 +241,6 @@ export default function SettingsPage() {
           <MenuItem label="Push Notifications" hasArrow />
         </a>
       </Section>
-
-      {/* Display - Dark Mode Toggle (Prominent) */}
-      <div style={{ padding: '20px', marginBottom: '12px' }}>
-        <div style={{ fontSize: '13px', fontWeight: 600, color: colors.textSecondary, marginBottom: '10px', paddingLeft: '5px' }}>DISPLAY</div>
-        <button
-          onClick={toggleDarkMode}
-          style={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '20px',
-            background: darkMode
-              ? 'linear-gradient(135deg, rgba(40, 40, 45, 0.95) 0%, rgba(28, 28, 30, 0.95) 100%)'
-              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 248, 248, 0.98) 100%)',
-            borderRadius: '16px',
-            border: `1px solid ${darkMode ? 'rgba(80, 80, 80, 0.5)' : 'rgba(200, 200, 200, 0.6)'}`,
-            cursor: 'pointer',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '12px',
-              background: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '22px'
-            }}>
-              {darkMode ? '🌙' : '☀️'}
-            </div>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '17px', fontWeight: 600, color: colors.text }}>
-                {darkMode ? 'Dark Mode' : 'Light Mode'}
-              </div>
-              <div style={{ fontSize: '13px', color: colors.textSecondary, marginTop: '2px' }}>
-                Tap to switch to {darkMode ? 'light' : 'dark'} theme
-              </div>
-            </div>
-          </div>
-          <div style={{
-            width: '56px',
-            height: '32px',
-            background: darkMode ? '#FF6B35' : '#ccc',
-            borderRadius: '16px',
-            position: 'relative',
-            transition: 'background 0.3s'
-          }}>
-            <div style={{
-              width: '28px',
-              height: '28px',
-              background: '#fff',
-              borderRadius: '50%',
-              position: 'absolute',
-              top: '2px',
-              left: darkMode ? '26px' : '2px',
-              transition: 'left 0.3s',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-            }} />
-          </div>
-        </button>
-      </div>
 
       {/* Privacy */}
       <Section title="PRIVACY">
@@ -373,13 +307,10 @@ export default function SettingsPage() {
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const { colors, darkMode } = useTheme();
-  // Glass background adapts to theme
-  const glassBg = darkMode
-    ? 'rgba(28, 28, 30, 0.9)'  // Dark glass
-    : 'rgba(255, 255, 255, 0.95)';  // Light glass
+  const { colors } = useTheme();
+  const glassBg = 'rgba(28, 28, 30, 0.9)';
   const boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
-  const borderColor = darkMode ? 'rgba(80, 80, 80, 0.5)' : 'rgba(200, 200, 200, 0.6)';
+  const borderColor = 'rgba(80, 80, 80, 0.5)';
 
   return (
     <div style={{ padding: '20px', marginBottom: '12px' }}>
@@ -400,8 +331,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function MenuItem({ label, value, hasArrow }: { label: string; value?: string; hasArrow?: boolean }) {
-  const { colors, darkMode } = useTheme();
-  const borderStyle = `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}`;
+  const { colors } = useTheme();
+  const borderStyle = '1px solid rgba(60, 60, 60, 0.6)';
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: borderStyle }}>
@@ -415,7 +346,7 @@ function MenuItem({ label, value, hasArrow }: { label: string; value?: string; h
 }
 
 function ToggleMenuItem({ label, storageKey }: { label: string; storageKey: string }) {
-  const { colors, darkMode } = useTheme();
+  const { colors } = useTheme();
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
@@ -429,7 +360,7 @@ function ToggleMenuItem({ label, storageKey }: { label: string; storageKey: stri
     localStorage.setItem(storageKey, newValue ? 'yes' : 'no');
   };
 
-  const borderStyle = `1px solid ${darkMode ? 'rgba(60, 60, 60, 0.6)' : 'rgba(200, 200, 200, 0.8)'}`;
+  const borderStyle = '1px solid rgba(60, 60, 60, 0.6)';
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: borderStyle }}>
@@ -439,7 +370,7 @@ function ToggleMenuItem({ label, storageKey }: { label: string; storageKey: stri
         style={{
           width: '51px',
           height: '31px',
-          background: enabled ? colors.accent : (darkMode ? '#333' : '#ccc'),
+          background: enabled ? colors.accent : '#333',
           borderRadius: '16px',
           border: 'none',
           position: 'relative',

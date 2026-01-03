@@ -38,14 +38,15 @@ export interface MapGroup {
   id: number | string;
   name: string;
   host: string;
-  hostImage: string;
+  hostId?: string;
+  hostImage: string | null;
   type: string;
-  category: string;
+  category: string | null;
   attendees: number;
   maxAttendees: number;
-  time: string;
-  location: string;
-  description: string;
+  time: string | null;
+  location: string | null;
+  description: string | null;
   lat: number;
   lng: number;
 }

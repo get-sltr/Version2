@@ -76,7 +76,7 @@ export default function EditProfilePage() {
     width: '100%',
     borderRadius: '8px',
     border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
-    background: isDarkMode ? 'rgba(255,255,255,0.08)' : '#f8f8f8',
+    backgroundColor: isDarkMode ? 'rgba(255,255,255,0.08)' : '#f8f8f8',
     color: isDarkMode ? '#FFFFFF' : '#000000',
     fontSize: '15px',
     padding: '12px 14px',
@@ -90,6 +90,7 @@ export default function EditProfilePage() {
     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='${isDarkMode ? '%23FFFFFF' : '%23000000'}' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'right 14px center',
+    backgroundSize: '12px 12px',
     paddingRight: '36px',
     cursor: 'pointer'
   };

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function AboutPage() {
-  const { darkMode, toggleDarkMode, colors } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <main style={{
@@ -22,7 +22,7 @@ export default function AboutPage() {
         left: 0,
         right: 0,
         padding: '20px 30px',
-        background: darkMode ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
+        background: 'rgba(0,0,0,0.9)',
         backdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${colors.border}`,
         display: 'flex',
@@ -41,26 +41,6 @@ export default function AboutPage() {
           s l t r
         </Link>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            style={{
-              background: 'none',
-              border: `1px solid ${colors.border}`,
-              borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
-              color: colors.text
-            }}
-            aria-label="Toggle dark mode"
-          >
-            {darkMode ? '☀' : '☾'}
-          </button>
           <Link href="/login" style={{
             fontSize: '13px',
             color: colors.text,
@@ -104,7 +84,7 @@ export default function AboutPage() {
           transform: 'translateX(-50%)',
           width: '600px',
           height: '600px',
-          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.08)'} 0%, transparent 70%)`,
+          background: 'radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%)',
           borderRadius: '50%',
           filter: 'blur(60px)',
           pointerEvents: 'none'
@@ -330,7 +310,7 @@ export default function AboutPage() {
                 width: '48px',
                 height: '48px',
                 borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                background: 'rgba(255,107,53,0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -364,7 +344,7 @@ export default function AboutPage() {
                 width: '48px',
                 height: '48px',
                 borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                background: 'rgba(255,107,53,0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -398,7 +378,7 @@ export default function AboutPage() {
                 width: '48px',
                 height: '48px',
                 borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                background: 'rgba(255,107,53,0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -432,7 +412,7 @@ export default function AboutPage() {
                 width: '48px',
                 height: '48px',
                 borderRadius: '12px',
-                background: darkMode ? 'rgba(255,107,53,0.15)' : 'rgba(255,107,53,0.1)',
+                background: 'rgba(255,107,53,0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -497,7 +477,7 @@ export default function AboutPage() {
 
             <div style={{
               padding: '40px',
-              background: darkMode ? 'rgba(255,107,53,0.08)' : 'rgba(255,107,53,0.05)',
+              background: 'rgba(255,107,53,0.08)',
               borderLeft: `3px solid ${colors.accent}`,
               borderRadius: '0 8px 8px 0'
             }}>
@@ -531,7 +511,7 @@ export default function AboutPage() {
           transform: 'translate(-50%, -50%)',
           width: '400px',
           height: '400px',
-          background: `radial-gradient(circle, ${darkMode ? 'rgba(255,107,53,0.1)' : 'rgba(255,107,53,0.06)'} 0%, transparent 60%)`,
+          background: 'radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 60%)',
           borderRadius: '50%',
           filter: 'blur(60px)',
           pointerEvents: 'none'

@@ -68,55 +68,77 @@ export default function ProfileViewPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [hasTapped, setHasTapped] = useState(false);
   const [showTapMenu, setShowTapMenu] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Validate and extract profile ID
+  const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+
   useEffect(() => {
     const loadProfile = async () => {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setCurrentUserId(user.id);
-
-        // Check if already favorited
-        const { data: favData } = await supabase
-          .from('favorites')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('favorited_user_id', params.id)
-          .single();
-
-        if (favData) setIsFavorited(true);
-
-        // Check if already tapped
-        const { data: tapData } = await supabase
-          .from('taps')
-          .select('id')
-          .eq('sender_id', user.id)
-          .eq('recipient_id', params.id)
-          .single();
-
-        if (tapData) setHasTapped(true);
+      // Validate profileId
+      if (!profileId) {
+        setError('Invalid profile ID');
+        setLoading(false);
+        return;
       }
 
-      // Load profile
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', params.id)
-        .single();
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentUserId(user.id);
 
-      if (data) {
-        setProfile(data);
+          // Check if already favorited (use maybeSingle to avoid error on no results)
+          const { data: favData } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('favorited_user_id', profileId)
+            .maybeSingle();
+
+          if (favData) setIsFavorited(true);
+
+          // Check if already tapped
+          const { data: tapData } = await supabase
+            .from('taps')
+            .select('id')
+            .eq('sender_id', user.id)
+            .eq('recipient_id', profileId)
+            .maybeSingle();
+
+          if (tapData) setHasTapped(true);
+        }
+
+        // Load profile
+        const { data, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', profileId)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error('Error loading profile:', profileError);
+          setError('Failed to load profile');
+        } else if (data) {
+          setProfile(data);
+        } else {
+          setError('Profile not found');
+        }
+      } catch (err) {
+        console.error('Error in loadProfile:', err);
+        setError('An error occurred');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadProfile();
-  }, [params.id]);
+  }, [profileId]);
 
   // Handle Tap
   const handleTap = async (tapType: string) => {
@@ -131,7 +153,7 @@ export default function ProfileViewPage() {
           .from('taps')
           .delete()
           .eq('sender_id', currentUserId)
-          .eq('recipient_id', params.id);
+          .eq('recipient_id', profileId);
         setHasTapped(false);
       } else {
         // Add tap
@@ -139,7 +161,7 @@ export default function ProfileViewPage() {
           .from('taps')
           .insert({
             sender_id: currentUserId,
-            recipient_id: params.id,
+            recipient_id: profileId,
             tap_type: tapType
           });
         setHasTapped(true);
@@ -147,7 +169,7 @@ export default function ProfileViewPage() {
         // Capture tap_sent event in PostHog
         posthog.capture('tap_sent', {
           tap_type: tapType,
-          recipient_id: params.id,
+          recipient_id: profileId,
         });
       }
     } catch (error) {
@@ -168,7 +190,7 @@ export default function ProfileViewPage() {
           .from('favorites')
           .delete()
           .eq('user_id', currentUserId)
-          .eq('favorited_user_id', params.id);
+          .eq('favorited_user_id', profileId);
         setIsFavorited(false);
       } else {
         // Add favorite
@@ -176,13 +198,13 @@ export default function ProfileViewPage() {
           .from('favorites')
           .insert({
             user_id: currentUserId,
-            favorited_user_id: params.id
+            favorited_user_id: profileId
           });
         setIsFavorited(true);
 
         // Capture favorite_added event in PostHog
         posthog.capture('favorite_added', {
-          favorited_user_id: params.id,
+          favorited_user_id: profileId,
         });
       }
     } catch (error) {
@@ -206,7 +228,7 @@ export default function ProfileViewPage() {
     );
   }
 
-  if (!profile) {
+  if (error || !profile) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -216,18 +238,27 @@ export default function ProfileViewPage() {
         justifyContent: 'center',
         color: '#fff',
         flexDirection: 'column',
-        gap: '20px'
+        gap: '20px',
+        padding: '20px',
+        textAlign: 'center'
       }}>
-        <div style={{ fontSize: '48px' }}>Profile not found</div>
+        <div style={{ fontSize: '24px', fontWeight: 600 }}>
+          {error || 'Profile not found'}
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', maxWidth: '300px' }}>
+          This profile may have been deleted or is no longer available.
+        </p>
         <button
           onClick={() => router.back()}
           style={{
-            padding: '10px 20px',
+            padding: '12px 24px',
             background: '#FF6B35',
             color: '#fff',
             border: 'none',
             borderRadius: '8px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 600
           }}
         >
           Go Back
@@ -614,7 +645,7 @@ export default function ProfileViewPage() {
 
         {/* Message Button */}
         <button
-          onClick={() => router.push(`/messages/${params.id}`)}
+          onClick={() => router.push(`/messages/${profileId}`)}
           style={{
             padding: '12px',
             background: '#FF6B35',

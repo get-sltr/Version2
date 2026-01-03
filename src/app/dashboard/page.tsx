@@ -47,6 +47,7 @@ export default function Dashboard() {
   const [ageMax, setAgeMax] = useState('');
   const [showTribesDropdown, setShowTribesDropdown] = useState(false);
   const [selectedTribes, setSelectedTribes] = useState<string[]>([]);
+  const [hostingUserIds, setHostingUserIds] = useState<Set<string>>(new Set());
 
   const filters = [
     { id: 'online', label: 'Online' },
@@ -85,11 +86,29 @@ export default function Dashboard() {
     { id: 'queer', label: 'Queer' }
   ];
 
+  // Fetch users who are hosting active groups
+  const fetchHostingUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('groups')
+        .select('host_id')
+        .eq('is_active', true);
+
+      if (!error && data) {
+        const hostIds = new Set(data.map(g => g.host_id).filter(Boolean) as string[]);
+        setHostingUserIds(hostIds);
+      }
+    } catch (err) {
+      console.error('Error fetching hosting users:', err);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       await checkUser();
       await fetchProfiles();
-      
+      await fetchHostingUsers();
+
       // Subscribe to real-time profile changes for current user
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser) return;
@@ -1080,6 +1099,27 @@ export default function Dashboard() {
               {profile.pnp_visible && (
                 <div style={{ position: 'absolute', top: '6px', left: '6px', zIndex: 2 }}>
                   <OrbitBadge size="sm" />
+                </div>
+              )}
+
+              {/* Hosting badge - pulsing indicator */}
+              {hostingUserIds.has(profile.id) && (
+                <div style={{
+                  position: 'absolute',
+                  top: profile.pnp_visible ? '32px' : '6px',
+                  left: '6px',
+                  zIndex: 2,
+                  background: 'rgba(255, 107, 53, 0.9)',
+                  borderRadius: '4px',
+                  padding: '3px 6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  animation: 'hostingPulse 2s ease-in-out infinite',
+                  boxShadow: '0 0 10px rgba(255, 107, 53, 0.6)'
+                }}>
+                  <span style={{ fontSize: '8px' }}>👥</span>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>HOSTING</span>
                 </div>
               )}
 
