@@ -13,29 +13,31 @@ import type {
  * Get all active groups
  */
 export async function getGroups(limit = 50): Promise<GroupWithHost[]> {
-  const { data, error } = await supabase
+  // First get groups
+  const { data: groups, error } = await supabase
     .from('groups')
-    .select(`
-      *,
-      host:profiles!groups_host_id_fkey (
-        id,
-        display_name,
-        age,
-        position,
-        photo_url,
-        is_online,
-        is_dtfn
-      )
-    `)
+    .select('*')
     .eq('is_active', true)
     .order('event_date', { ascending: true })
     .limit(limit);
 
   if (error) throw error;
+  if (!groups || groups.length === 0) return [];
 
-  return (data || []).map((group: any) => ({
+  // Get unique host IDs
+  const hostIds = [...new Set(groups.map(g => g.host_id).filter(Boolean))];
+
+  // Fetch host profiles separately
+  const { data: hosts } = await supabase
+    .from('profiles')
+    .select('id, display_name, age, position, photo_url, is_online, is_dtfn')
+    .in('id', hostIds);
+
+  const hostMap = new Map((hosts || []).map(h => [h.id, h]));
+
+  return groups.map((group: any) => ({
     ...group,
-    host: group.host as ProfilePreview
+    host: hostMap.get(group.host_id) || null
   }));
 }
 
@@ -43,31 +45,35 @@ export async function getGroups(limit = 50): Promise<GroupWithHost[]> {
  * Get a single group by ID
  */
 export async function getGroup(groupId: number): Promise<GroupWithHost | null> {
-  const { data, error } = await supabase
+  // First get the group
+  const { data: group, error } = await supabase
     .from('groups')
-    .select(`
-      *,
-      host:profiles!groups_host_id_fkey (
-        id,
-        display_name,
-        age,
-        position,
-        photo_url,
-        is_online,
-        is_dtfn
-      )
-    `)
+    .select('*')
     .eq('id', groupId)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === 'PGRST116') return null;
+    console.error('Error fetching group:', error);
     throw error;
   }
 
+  if (!group) return null;
+
+  // Fetch host profile separately
+  let host: ProfilePreview | null = null;
+  if (group.host_id) {
+    const { data: hostData } = await supabase
+      .from('profiles')
+      .select('id, display_name, age, position, photo_url, is_online, is_dtfn')
+      .eq('id', group.host_id)
+      .maybeSingle();
+
+    host = hostData || null;
+  }
+
   return {
-    ...data,
-    host: data.host as ProfilePreview
+    ...group,
+    host
   };
 }
 
@@ -95,33 +101,39 @@ export async function getMyJoinedGroups(): Promise<GroupWithHost[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  const { data, error } = await supabase
+  // Get memberships
+  const { data: memberships, error } = await supabase
     .from('group_members')
-    .select(`
-      group:groups (
-        *,
-        host:profiles!groups_host_id_fkey (
-          id,
-          display_name,
-          age,
-          position,
-          photo_url,
-          is_online,
-          is_dtfn
-        )
-      )
-    `)
+    .select('group_id')
     .eq('user_id', user.id)
     .eq('status', 'approved');
 
   if (error) throw error;
+  if (!memberships || memberships.length === 0) return [];
 
-  return (data || [])
-    .filter((item: any) => item.group)
-    .map((item: any) => ({
-      ...item.group,
-      host: item.group.host as ProfilePreview
-    }));
+  const groupIds = memberships.map(m => m.group_id);
+
+  // Get groups
+  const { data: groups } = await supabase
+    .from('groups')
+    .select('*')
+    .in('id', groupIds);
+
+  if (!groups || groups.length === 0) return [];
+
+  // Get hosts
+  const hostIds = [...new Set(groups.map(g => g.host_id).filter(Boolean))];
+  const { data: hosts } = await supabase
+    .from('profiles')
+    .select('id, display_name, age, position, photo_url, is_online, is_dtfn')
+    .in('id', hostIds);
+
+  const hostMap = new Map((hosts || []).map(h => [h.id, h]));
+
+  return groups.map((group: any) => ({
+    ...group,
+    host: hostMap.get(group.host_id) || null
+  }));
 }
 
 /**
@@ -316,31 +328,30 @@ export async function getGroupMembers(
 ): Promise<(GroupMember & { profile: ProfilePreview })[]> {
   let query = supabase
     .from('group_members')
-    .select(`
-      *,
-      profile:profiles!group_members_user_id_fkey (
-        id,
-        display_name,
-        age,
-        position,
-        photo_url,
-        is_online,
-        is_dtfn
-      )
-    `)
+    .select('*')
     .eq('group_id', groupId);
 
   if (status) {
     query = query.eq('status', status);
   }
 
-  const { data, error } = await query.order('joined_at', { ascending: true });
+  const { data: members, error } = await query.order('joined_at', { ascending: true });
 
   if (error) throw error;
+  if (!members || members.length === 0) return [];
 
-  return (data || []).map((member: any) => ({
+  // Get member profiles separately
+  const userIds = members.map(m => m.user_id);
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, display_name, age, position, photo_url, is_online, is_dtfn')
+    .in('id', userIds);
+
+  const profileMap = new Map((profiles || []).map(p => [p.id, p]));
+
+  return members.map((member: any) => ({
     ...member,
-    profile: member.profile as ProfilePreview
+    profile: profileMap.get(member.user_id) || null
   }));
 }
 
@@ -426,16 +437,25 @@ export async function getNearbyGroups(
  * Check if user is a member of a group
  */
 export async function isGroupMember(groupId: number): Promise<GroupMemberStatus | null> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
 
-  const { data, error } = await supabase
-    .from('group_members')
-    .select('status')
-    .eq('group_id', groupId)
-    .eq('user_id', user.id)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from('group_members')
+      .select('status')
+      .eq('group_id', groupId)
+      .eq('user_id', user.id)
+      .maybeSingle();
 
-  if (error || !data) return null;
-  return data.status as GroupMemberStatus;
+    if (error) {
+      console.warn('Error checking group membership:', error);
+      return null;
+    }
+
+    return data?.status as GroupMemberStatus || null;
+  } catch (err) {
+    console.warn('Failed to check group membership:', err);
+    return null;
+  }
 }
