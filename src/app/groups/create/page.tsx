@@ -45,6 +45,8 @@ export default function CreateGroupPage() {
     try {
       const { min: minAge, max: maxAge } = parseAgeRange(ageRange);
 
+      console.log('Creating group with data:', { groupName, groupType, date, time });
+
       const newGroup = await createGroup({
         name: groupName,
         type: groupType,
@@ -58,6 +60,12 @@ export default function CreateGroupPage() {
         is_private: false,
         requires_approval: true
       });
+
+      console.log('Group created:', newGroup);
+
+      if (!newGroup || !newGroup.id) {
+        throw new Error('Group was created but no ID was returned');
+      }
 
       router.push(`/groups/${newGroup.id}`);
     } catch (error: any) {

@@ -148,21 +148,26 @@ export async function createGroup(groupData: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  // Get host's profile for location
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('lat, lng, city')
-    .eq('id', user.id)
-    .single();
+  // Try to get host's profile for location (but don't fail if it doesn't work)
+  let profileLat: number | null = null;
+  let profileLng: number | null = null;
+  let profileCity: string | null = null;
 
-  // Validate coordinates are actual numbers
-  const hasValidLocation =
-    profile?.lat != null &&
-    profile?.lng != null &&
-    typeof profile.lat === 'number' &&
-    typeof profile.lng === 'number' &&
-    !Number.isNaN(profile.lat) &&
-    !Number.isNaN(profile.lng);
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('lat, lng, city')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profile) {
+      profileLat = typeof profile.lat === 'number' && !Number.isNaN(profile.lat) ? profile.lat : null;
+      profileLng = typeof profile.lng === 'number' && !Number.isNaN(profile.lng) ? profile.lng : null;
+      profileCity = profile.city || null;
+    }
+  } catch (err) {
+    console.warn('Could not fetch profile for group creation:', err);
+  }
 
   const { data, error } = await supabase
     .from('groups')
@@ -172,10 +177,10 @@ export async function createGroup(groupData: {
       type: groupData.type,
       category: groupData.category || null,
       description: groupData.description || null,
-      location: profile?.city || groupData.location || null,
+      location: profileCity || groupData.location || null,
       address: groupData.address || null,
-      lat: hasValidLocation ? profile.lat : null,
-      lng: hasValidLocation ? profile.lng : null,
+      lat: profileLat,
+      lng: profileLng,
       event_date: groupData.event_date || null,
       event_time: groupData.event_time || null,
       max_attendees: groupData.max_attendees || 10,
@@ -185,10 +190,18 @@ export async function createGroup(groupData: {
       is_private: groupData.is_private || false,
       requires_approval: groupData.requires_approval || false
     })
-    .select()
+    .select('*')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Group creation error:', error);
+    throw new Error(error.message || 'Failed to create group');
+  }
+
+  if (!data) {
+    throw new Error('Group was created but no data was returned');
+  }
+
   return data;
 }
 
