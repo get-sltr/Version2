@@ -56,7 +56,7 @@ export function GroupDrawer({ group, onClose }: GroupDrawerProps) {
           {/* Host Info */}
           <section className={styles.drawerSection}>
             <h3 style={{ color: colors.text }}>Host</h3>
-            <a href={`/profile/${group.id}`} className={styles.hostCard}>
+            <a href={`/profile/${group.hostId}`} className={styles.hostCard}>
               <div
                 className={styles.hostAvatar}
                 style={{ backgroundImage: `url(${group.hostImage})` }}

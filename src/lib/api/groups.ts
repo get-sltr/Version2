@@ -172,7 +172,7 @@ export async function createGroup(groupData: {
       type: groupData.type,
       category: groupData.category || null,
       description: groupData.description || null,
-      location_name: profile?.city || groupData.location || null,
+      location: profile?.city || groupData.location || null,
       address: groupData.address || null,
       lat: hasValidLocation ? profile.lat : null,
       lng: hasValidLocation ? profile.lng : null,
