@@ -35,10 +35,10 @@ export interface CurrentUserProfile {
 
 // Group event on the map
 export interface MapGroup {
-  id: number | string;
+  id: string;
   name: string;
   host: string;
-  hostId?: string;
+  hostId: string;
   hostImage: string | null;
   type: string;
   category: string | null;

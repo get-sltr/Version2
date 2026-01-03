@@ -87,6 +87,9 @@ export type ReportReason =
 /** Group member status */
 export type GroupMemberStatus = 'pending' | 'approved' | 'rejected' | 'left';
 
+/** Group member role */
+export type GroupMemberRole = 'member' | 'admin' | 'host';
+
 /** Report status */
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed';
 
@@ -231,7 +234,7 @@ export interface SavedPhrase {
  * Group event
  */
 export interface Group {
-  id: number;
+  id: string;
   name: string;
   type: GroupType;
   category: GroupCategory | null;
@@ -278,11 +281,12 @@ export interface GroupWithHost extends Group {
  * Group for map display
  */
 export interface MapGroup {
-  id: number;
+  id: string;
   name: string;
   type: GroupType;
   category: GroupCategory | null;
   host: string;
+  hostId: string;
   hostImage: string | null;
   attendees: number;
   maxAttendees: number;
@@ -298,11 +302,10 @@ export interface MapGroup {
  */
 export interface GroupMember {
   id: string;
-  group_id: number;
+  group_id: string;
   user_id: string;
-  status: GroupMemberStatus;
+  role: GroupMemberRole;
   joined_at: string;
-  left_at: string | null;
 }
 
 /**
@@ -421,7 +424,7 @@ export interface Notification {
   from_user_id: string | null;
   message_id: string | null;
   tap_id: string | null;
-  group_id: number | null;
+  group_id: string | null;
 
   // Content
   title: string | null;
@@ -494,7 +497,7 @@ export interface Report {
   reporter_id: string;
   reported_user_id: string | null;
   reported_message_id: string | null;
-  reported_group_id: number | null;
+  reported_group_id: string | null;
 
   reason: ReportReason;
   description: string | null;
@@ -591,7 +594,7 @@ export interface Database {
       groups: {
         Row: Group;
         Insert: Omit<Group, 'id' | 'created_at' | 'updated_at' | 'attendees'> & {
-          id?: number;
+          id?: string;
           created_at?: string;
           updated_at?: string;
           attendees?: number;
@@ -603,7 +606,7 @@ export interface Database {
         Insert: Omit<GroupMember, 'id' | 'joined_at'> & {
           joined_at?: string;
         };
-        Update: Partial<Omit<GroupMember, 'id' | 'group_id' | 'user_id'>>;
+        Update: Partial<Pick<GroupMember, 'role'>>;
       };
       messages: {
         Row: Message;

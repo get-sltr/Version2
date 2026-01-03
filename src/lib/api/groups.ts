@@ -4,10 +4,23 @@ import type {
   GroupWithHost,
   GroupMember,
   GroupType,
-  GroupCategory,
-  GroupMemberStatus,
+  GroupMemberRole,
   ProfilePreview
 } from '@/types/database';
+
+/**
+ * Fetch profile preview by ID
+ */
+async function fetchProfilePreview(userId: string): Promise<ProfilePreview | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, display_name, age, position, photo_url, is_online, is_dtfn')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data as ProfilePreview;
+}
 
 /**
  * Get all active groups
@@ -15,36 +28,52 @@ import type {
 export async function getGroups(limit = 50): Promise<GroupWithHost[]> {
   const { data, error } = await supabase
     .from('groups')
-    .select(`
-      *,
-      host:profiles!groups_host_id_fkey (
-        id, display_name, age, position, photo_url, is_online, is_dtfn
-      )
-    `)
+    .select('*')
     .eq('is_active', true)
     .order('event_date', { ascending: true })
     .limit(limit);
 
   if (error) throw error;
 
-  return (data || []).map((group: any) => ({
+  // Fetch host profiles in parallel
+  const groups = data || [];
+  const hostIds = Array.from(new Set(groups.map(g => g.host_id).filter(Boolean)));
+
+  const hostProfiles = await Promise.all(
+    hostIds.map(id => fetchProfilePreview(id))
+  );
+
+  const hostMap = new Map<string, ProfilePreview>();
+  hostIds.forEach((id, i) => {
+    if (hostProfiles[i]) hostMap.set(id, hostProfiles[i]!);
+  });
+
+  return groups.map(group => ({
     ...group,
-    host: group.host as ProfilePreview
+    host: hostMap.get(group.host_id) || {
+      id: group.host_id,
+      display_name: 'Unknown',
+      age: null,
+      position: null,
+      photo_url: null,
+      is_online: false,
+      is_dtfn: false
+    }
   }));
 }
 
 /**
  * Get a single group by ID
  */
-export async function getGroup(groupId: number): Promise<GroupWithHost | null> {
+export async function getGroup(groupId: string): Promise<GroupWithHost | null> {
+  if (!groupId || typeof groupId !== 'string') {
+    console.error('Invalid group ID:', groupId);
+    return null;
+  }
+
   const { data, error } = await supabase
     .from('groups')
-    .select(`
-      *,
-      host:profiles!groups_host_id_fkey (
-        id, display_name, age, position, photo_url, is_online, is_dtfn
-      )
-    `)
+    .select('*')
     .eq('id', groupId)
     .maybeSingle();
 
@@ -55,9 +84,20 @@ export async function getGroup(groupId: number): Promise<GroupWithHost | null> {
 
   if (!data) return null;
 
+  // Fetch host profile separately
+  const host = await fetchProfilePreview(data.host_id);
+
   return {
     ...data,
-    host: data.host as ProfilePreview
+    host: host || {
+      id: data.host_id,
+      display_name: 'Unknown',
+      age: null,
+      position: null,
+      photo_url: null,
+      is_online: false,
+      is_dtfn: false
+    }
   };
 }
 
@@ -85,27 +125,49 @@ export async function getMyJoinedGroups(): Promise<GroupWithHost[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  const { data, error } = await supabase
+  // Get member records
+  const { data: memberData, error: memberError } = await supabase
     .from('group_members')
-    .select(`
-      group:groups!group_members_group_id_fkey (
-        *,
-        host:profiles!groups_host_id_fkey (
-          id, display_name, age, position, photo_url, is_online, is_dtfn
-        )
-      )
-    `)
-    .eq('user_id', user.id)
-    .eq('status', 'approved');
+    .select('group_id')
+    .eq('user_id', user.id);
 
-  if (error) throw error;
+  if (memberError) throw memberError;
+  if (!memberData || memberData.length === 0) return [];
 
-  return (data || [])
-    .filter((item: any) => item.group)
-    .map((item: any) => ({
-      ...item.group,
-      host: item.group.host as ProfilePreview
-    }));
+  // Get groups
+  const groupIds = memberData.map(m => m.group_id);
+  const { data: groupsData, error: groupsError } = await supabase
+    .from('groups')
+    .select('*')
+    .in('id', groupIds);
+
+  if (groupsError) throw groupsError;
+
+  // Fetch host profiles
+  const groups = groupsData || [];
+  const hostIds = Array.from(new Set(groups.map(g => g.host_id).filter(Boolean)));
+
+  const hostProfiles = await Promise.all(
+    hostIds.map(id => fetchProfilePreview(id))
+  );
+
+  const hostMap = new Map<string, ProfilePreview>();
+  hostIds.forEach((id, i) => {
+    if (hostProfiles[i]) hostMap.set(id, hostProfiles[i]!);
+  });
+
+  return groups.map(group => ({
+    ...group,
+    host: hostMap.get(group.host_id) || {
+      id: group.host_id,
+      display_name: 'Unknown',
+      age: null,
+      position: null,
+      photo_url: null,
+      is_online: false,
+      is_dtfn: false
+    }
+  }));
 }
 
 /**
@@ -114,7 +176,7 @@ export async function getMyJoinedGroups(): Promise<GroupWithHost[]> {
 export async function createGroup(groupData: {
   name: string;
   type: GroupType;
-  category?: GroupCategory;
+  category?: string;
   description?: string;
   location?: string;
   address?: string;
@@ -132,7 +194,7 @@ export async function createGroup(groupData: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  // Try to get host's profile for location (but don't fail if it doesn't work)
+  // Try to get host's profile for location
   let profileLat: number | null = null;
   let profileLng: number | null = null;
   let profileCity: string | null = null;
@@ -193,7 +255,7 @@ export async function createGroup(groupData: {
  * Update a group
  */
 export async function updateGroup(
-  groupId: number,
+  groupId: string,
   updates: Partial<Omit<Group, 'id' | 'host_id' | 'created_at'>>
 ): Promise<Group> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -214,7 +276,7 @@ export async function updateGroup(
 /**
  * Cancel a group
  */
-export async function cancelGroup(groupId: number): Promise<void> {
+export async function cancelGroup(groupId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -233,14 +295,14 @@ export async function cancelGroup(groupId: number): Promise<void> {
 /**
  * Join a group
  */
-export async function joinGroup(groupId: number): Promise<GroupMember> {
+export async function joinGroup(groupId: string): Promise<GroupMember> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
   // Check if group exists and has space
   const { data: group, error: groupError } = await supabase
     .from('groups')
-    .select('attendees, max_attendees, requires_approval')
+    .select('attendees, max_attendees')
     .eq('id', groupId)
     .eq('is_active', true)
     .single();
@@ -250,14 +312,12 @@ export async function joinGroup(groupId: number): Promise<GroupMember> {
     throw new Error('Group is full');
   }
 
-  const status: GroupMemberStatus = group.requires_approval ? 'pending' : 'approved';
-
   const { data, error } = await supabase
     .from('group_members')
     .insert({
       group_id: groupId,
       user_id: user.id,
-      status
+      role: 'member'
     })
     .select()
     .single();
@@ -275,16 +335,13 @@ export async function joinGroup(groupId: number): Promise<GroupMember> {
 /**
  * Leave a group
  */
-export async function leaveGroup(groupId: number): Promise<void> {
+export async function leaveGroup(groupId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
   const { error } = await supabase
     .from('group_members')
-    .update({
-      status: 'left',
-      left_at: new Date().toISOString()
-    })
+    .delete()
     .eq('group_id', groupId)
     .eq('user_id', user.id);
 
@@ -295,37 +352,48 @@ export async function leaveGroup(groupId: number): Promise<void> {
  * Get group members
  */
 export async function getGroupMembers(
-  groupId: number,
-  status?: GroupMemberStatus
+  groupId: string,
+  role?: GroupMemberRole
 ): Promise<(GroupMember & { profile: ProfilePreview })[]> {
   let query = supabase
     .from('group_members')
-    .select(`
-      *,
-      profile:profiles!group_members_user_id_fkey (
-        id, display_name, age, position, photo_url, is_online, is_dtfn
-      )
-    `)
+    .select('*')
     .eq('group_id', groupId);
 
-  if (status) {
-    query = query.eq('status', status);
+  if (role) {
+    query = query.eq('role', role);
   }
 
   const { data, error } = await query.order('joined_at', { ascending: true });
 
   if (error) throw error;
 
-  return (data || []).map((member: any) => ({
+  // Fetch profiles separately
+  const members = data || [];
+  const userIds = members.map(m => m.user_id);
+
+  const profiles = await Promise.all(
+    userIds.map(id => fetchProfilePreview(id))
+  );
+
+  return members.map((member, i) => ({
     ...member,
-    profile: member.profile as ProfilePreview
+    profile: profiles[i] || {
+      id: member.user_id,
+      display_name: 'Unknown',
+      age: null,
+      position: null,
+      photo_url: null,
+      is_online: false,
+      is_dtfn: false
+    }
   }));
 }
 
 /**
- * Approve a group member (host only)
+ * Promote a group member to admin (host only)
  */
-export async function approveMember(groupId: number, userId: string): Promise<void> {
+export async function promoteMember(groupId: string, userId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -337,23 +405,22 @@ export async function approveMember(groupId: number, userId: string): Promise<vo
     .single();
 
   if (groupError || group.host_id !== user.id) {
-    throw new Error('Only the host can approve members');
+    throw new Error('Only the host can promote members');
   }
 
   const { error } = await supabase
     .from('group_members')
-    .update({ status: 'approved' })
+    .update({ role: 'admin' })
     .eq('group_id', groupId)
-    .eq('user_id', userId)
-    .eq('status', 'pending');
+    .eq('user_id', userId);
 
   if (error) throw error;
 }
 
 /**
- * Reject a group member (host only)
+ * Remove a group member (host only)
  */
-export async function rejectMember(groupId: number, userId: string): Promise<void> {
+export async function removeMember(groupId: string, userId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
@@ -365,12 +432,12 @@ export async function rejectMember(groupId: number, userId: string): Promise<voi
     .single();
 
   if (groupError || group.host_id !== user.id) {
-    throw new Error('Only the host can reject members');
+    throw new Error('Only the host can remove members');
   }
 
   const { error } = await supabase
     .from('group_members')
-    .update({ status: 'rejected' })
+    .delete()
     .eq('group_id', groupId)
     .eq('user_id', userId);
 
@@ -403,14 +470,19 @@ export async function getNearbyGroups(
 /**
  * Check if user is a member of a group
  */
-export async function isGroupMember(groupId: number): Promise<GroupMemberStatus | null> {
+export async function isGroupMember(groupId: string): Promise<GroupMemberRole | null> {
   try {
+    if (!groupId || typeof groupId !== 'string') {
+      console.warn('Invalid group ID passed to isGroupMember:', groupId);
+      return null;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
     const { data, error } = await supabase
       .from('group_members')
-      .select('status')
+      .select('role')
       .eq('group_id', groupId)
       .eq('user_id', user.id)
       .maybeSingle();
@@ -420,7 +492,7 @@ export async function isGroupMember(groupId: number): Promise<GroupMemberStatus 
       return null;
     }
 
-    return data?.status as GroupMemberStatus || null;
+    return (data?.role as GroupMemberRole) || null;
   } catch (err) {
     console.warn('Failed to check group membership:', err);
     return null;

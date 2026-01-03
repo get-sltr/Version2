@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import {
@@ -8,17 +8,15 @@ import {
   joinGroup,
   leaveGroup,
   getGroupMembers,
-  approveMember,
-  rejectMember,
   isGroupMember
 } from '@/lib/api/groups';
-import type { GroupWithHost, GroupMemberStatus, ProfilePreview } from '@/types/database';
+import type { GroupWithHost, GroupMemberRole, ProfilePreview } from '@/types/database';
 
 interface GroupMemberWithProfile {
   id: string;
-  group_id: number;
+  group_id: string;
   user_id: string;
-  status: GroupMemberStatus;
+  role: GroupMemberRole;
   joined_at: string;
   profile: ProfilePreview;
 }
@@ -30,64 +28,67 @@ export default function GroupDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [memberStatus, setMemberStatus] = useState<GroupMemberStatus | null>(null);
+  const [memberRole, setMemberRole] = useState<GroupMemberRole | null>(null);
   const [members, setMembers] = useState<GroupMemberWithProfile[]>([]);
-  const [pendingMembers, setPendingMembers] = useState<GroupMemberWithProfile[]>([]);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const groupId = typeof params.id === 'string' ? parseInt(params.id, 10) : null;
-  const isHost = currentUserId && group?.host_id === currentUserId;
-  const isApproved = memberStatus === 'approved';
-  const isPending = memberStatus === 'pending';
+  // Use ref to track if data has been loaded to prevent duplicate fetches
+  const hasLoaded = useRef(false);
 
-  useEffect(() => {
-    const loadGroup = async () => {
-      if (!groupId || isNaN(groupId)) {
-        setError('Invalid group ID');
+  // Group ID is a UUID string - get it once
+  const groupId = typeof params.id === 'string' ? params.id : null;
+
+  // Derived state
+  const isHost = currentUserId && group?.host_id === currentUserId;
+  const isMember = memberRole !== null;
+
+  // Load group data - use useCallback to stabilize the function reference
+  const loadGroup = useCallback(async () => {
+    if (!groupId || hasLoaded.current) return;
+
+    hasLoaded.current = true;
+    setLoading(true);
+
+    try {
+      // Get current user first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+
+      // Load group data
+      const groupData = await getGroup(groupId);
+      if (!groupData) {
+        setError('Group not found');
         setLoading(false);
         return;
       }
+      setGroup(groupData);
 
-      try {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setCurrentUserId(user.id);
-
-          // Check membership status
-          const status = await isGroupMember(groupId);
-          setMemberStatus(status);
-        }
-
-        // Load group data
-        const groupData = await getGroup(groupId);
-        if (!groupData) {
-          setError('Group not found');
-          setLoading(false);
-          return;
-        }
-        setGroup(groupData);
-
-        // Load approved members
-        const approvedMembers = await getGroupMembers(groupId, 'approved');
-        setMembers(approvedMembers as GroupMemberWithProfile[]);
-
-        // If host, load pending members
-        if (user && groupData.host_id === user.id) {
-          const pending = await getGroupMembers(groupId, 'pending');
-          setPendingMembers(pending as GroupMemberWithProfile[]);
-        }
-      } catch (err) {
-        console.error('Error loading group:', err);
-        setError('Failed to load group');
-      } finally {
-        setLoading(false);
+      // Check membership role if user is logged in
+      if (user) {
+        const role = await isGroupMember(groupId);
+        setMemberRole(role);
       }
-    };
 
-    loadGroup();
+      // Load all members
+      const allMembers = await getGroupMembers(groupId);
+      setMembers(allMembers as GroupMemberWithProfile[]);
+    } catch (err) {
+      console.error('Error loading group:', err);
+      setError('Failed to load group');
+    } finally {
+      setLoading(false);
+    }
   }, [groupId]);
+
+  // Run load once on mount
+  useEffect(() => {
+    if (groupId && !hasLoaded.current) {
+      loadGroup();
+    }
+  }, [groupId, loadGroup]);
 
   const handleJoinRequest = async () => {
     if (!groupId || actionLoading) return;
@@ -95,15 +96,13 @@ export default function GroupDetailPage() {
 
     try {
       const result = await joinGroup(groupId);
-      setMemberStatus(result.status);
+      setMemberRole(result.role);
 
-      if (result.status === 'approved') {
-        // Refresh members list
-        const approvedMembers = await getGroupMembers(groupId, 'approved');
-        setMembers(approvedMembers as GroupMemberWithProfile[]);
-        if (group) {
-          setGroup({ ...group, attendees: group.attendees + 1 });
-        }
+      // Refresh members list
+      const allMembers = await getGroupMembers(groupId);
+      setMembers(allMembers as GroupMemberWithProfile[]);
+      if (group) {
+        setGroup({ ...group, attendees: group.attendees + 1 });
       }
     } catch (err: any) {
       alert(err.message || 'Failed to join group');
@@ -118,57 +117,17 @@ export default function GroupDetailPage() {
 
     try {
       await leaveGroup(groupId);
-      setMemberStatus(null);
+      setMemberRole(null);
       setShowLeaveConfirm(false);
 
       // Refresh members list
-      const approvedMembers = await getGroupMembers(groupId, 'approved');
-      setMembers(approvedMembers as GroupMemberWithProfile[]);
+      const allMembers = await getGroupMembers(groupId);
+      setMembers(allMembers as GroupMemberWithProfile[]);
       if (group) {
         setGroup({ ...group, attendees: Math.max(0, group.attendees - 1) });
       }
     } catch (err: any) {
       alert(err.message || 'Failed to leave group');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleApproveMember = async (userId: string) => {
-    if (!groupId || actionLoading) return;
-    setActionLoading(true);
-
-    try {
-      await approveMember(groupId, userId);
-
-      // Refresh both lists
-      const pending = await getGroupMembers(groupId, 'pending');
-      setPendingMembers(pending as GroupMemberWithProfile[]);
-      const approved = await getGroupMembers(groupId, 'approved');
-      setMembers(approved as GroupMemberWithProfile[]);
-
-      if (group) {
-        setGroup({ ...group, attendees: group.attendees + 1 });
-      }
-    } catch (err: any) {
-      alert(err.message || 'Failed to approve member');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRejectMember = async (userId: string) => {
-    if (!groupId || actionLoading) return;
-    setActionLoading(true);
-
-    try {
-      await rejectMember(groupId, userId);
-
-      // Refresh pending list
-      const pending = await getGroupMembers(groupId, 'pending');
-      setPendingMembers(pending as GroupMemberWithProfile[]);
-    } catch (err: any) {
-      alert(err.message || 'Failed to reject member');
     } finally {
       setActionLoading(false);
     }
@@ -270,49 +229,6 @@ export default function GroupDetailPage() {
 
       {/* Content */}
       <div style={{ padding: '20px' }}>
-        {/* Pending Status Banner */}
-        {isPending && (
-          <div style={{ background: 'rgba(255,193,7,0.15)', border: '1px solid rgba(255,193,7,0.3)', borderRadius: '12px', padding: '16px', marginBottom: '20px', textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', marginBottom: '8px' }}>⏳</div>
-            <div style={{ fontSize: '16px', fontWeight: 600, color: '#FFC107', marginBottom: '4px' }}>Request Pending</div>
-            <div style={{ fontSize: '13px', color: '#aaa' }}>Waiting for host approval</div>
-          </div>
-        )}
-
-        {/* Host: Pending Requests */}
-        {isHost && pendingMembers.length > 0 && (
-          <div style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.3)', borderRadius: '16px', padding: '20px', marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: '#FF6B35' }}>
-              🔔 Pending Requests ({pendingMembers.length})
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {pendingMembers.map((member) => (
-                <div key={member.user_id} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#1c1c1e', padding: '12px', borderRadius: '12px' }}>
-                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundImage: `url(${member.profile?.photo_url || '/images/default-avatar.png'})`, backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '15px', fontWeight: 600 }}>{member.profile?.display_name || 'Unknown'}</div>
-                    {member.profile?.age && <div style={{ fontSize: '13px', color: '#888' }}>{member.profile.age} years old</div>}
-                  </div>
-                  <button
-                    onClick={() => handleApproveMember(member.user_id)}
-                    disabled={actionLoading}
-                    style={{ background: '#4CAF50', border: 'none', borderRadius: '8px', padding: '8px 16px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    ✓
-                  </button>
-                  <button
-                    onClick={() => handleRejectMember(member.user_id)}
-                    disabled={actionLoading}
-                    style={{ background: '#FF3B30', border: 'none', borderRadius: '8px', padding: '8px 16px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Time & Location */}
         <div style={{ background: '#1c1c1e', borderRadius: '16px', padding: '20px', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', paddingBottom: '20px', borderBottom: '1px solid #333', marginBottom: '20px' }}>
@@ -338,7 +254,7 @@ export default function GroupDetailPage() {
         {group.description && (
           <div style={{ background: '#1c1c1e', borderRadius: '16px', padding: '20px', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>About</h3>
-            <p style={{ color: '#aaa', fontSize: '15px', lineHeight: 1.6, marginBottom: '16px' }}>{group.description}</p>
+            <p style={{ color: '#aaa', fontSize: '15px', lineHeight: 1.6, marginBottom: '16px', whiteSpace: 'pre-wrap' }}>{group.description}</p>
             {group.tags && group.tags.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {group.tags.map((tag: string) => (
@@ -386,8 +302,8 @@ export default function GroupDetailPage() {
           </div>
         )}
 
-        {/* Group Messages - only for approved members */}
-        {isApproved && (
+        {/* Group Messages - only for members */}
+        {isMember && (
           <div style={{ background: '#1c1c1e', borderRadius: '16px', padding: '20px', marginBottom: '100px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Group Messages</h3>
             <a href={`/messages/group-${group.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#000', borderRadius: '12px', textDecoration: 'none', color: '#fff' }}>
@@ -404,7 +320,7 @@ export default function GroupDetailPage() {
         )}
 
         {/* Spacer for fixed button */}
-        {!isApproved && <div style={{ height: '100px' }} />}
+        {!isMember && <div style={{ height: '100px' }} />}
       </div>
 
       {/* Fixed Action Button */}
@@ -415,7 +331,7 @@ export default function GroupDetailPage() {
               💬 Group Chat
             </a>
           </div>
-        ) : isApproved ? (
+        ) : isMember ? (
           <div style={{ display: 'flex', gap: '12px' }}>
             <a href={`/messages/group-${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               💬 Open Messages
@@ -424,10 +340,6 @@ export default function GroupDetailPage() {
               Leave
             </button>
           </div>
-        ) : isPending ? (
-          <button disabled style={{ width: '100%', background: '#333', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, cursor: 'not-allowed', opacity: 0.7 }}>
-            ⏳ Request Pending
-          </button>
         ) : (
           <button
             onClick={handleJoinRequest}
@@ -445,7 +357,7 @@ export default function GroupDetailPage() {
               opacity: (actionLoading || group.attendees >= group.max_attendees) ? 0.5 : 1
             }}
           >
-            {actionLoading ? 'Requesting...' : group.attendees >= group.max_attendees ? 'Group Full' : 'Request to Join'}
+            {actionLoading ? 'Joining...' : group.attendees >= group.max_attendees ? 'Group Full' : 'Join Group'}
           </button>
         )}
       </div>
