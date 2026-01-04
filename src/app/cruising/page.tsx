@@ -2,101 +2,135 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { getCruisingUpdates, postCruisingUpdate, deleteCruisingUpdate } from '@/lib/api/cruisingUpdates';
+import type { CruisingUpdateWithUser } from '@/lib/api/cruisingUpdates';
 
 export default function CruisingUpdatesPage() {
   const router = useRouter();
   const [sortBy, setSortBy] = useState<'time' | 'distance'>('time');
   const [updateText, setUpdateText] = useState('');
+  const [isHosting, setIsHosting] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [updates, setUpdates] = useState<any[]>([]);
+  const [updates, setUpdates] = useState<CruisingUpdateWithUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [posting, setPosting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
+  // Get user location
   useEffect(() => {
-    // Generate mock cruising updates
-    const mockUpdates = [
-      {
-        id: 1,
-        userId: 1,
-        name: null, // Anonymous - shows body stats
-        stats: '5\'7", 165lb, average, bottom',
-        image: '/images/5.jpg',
-        text: 'I\'m hosting.',
-        timestamp: '8 minutes ago',
-        distance: '0.75 miles',
-        online: true,
-        isHosting: true
-      },
-      {
-        id: 2,
-        userId: 2,
-        name: '21',
-        stats: null,
-        image: '/images/6.jpg',
-        text: '19-24 make out/oral. hung/fit bro hmu',
-        timestamp: '4 minutes ago',
-        distance: '2.00 miles',
-        online: true,
-        isHosting: false
-      },
-      {
-        id: 3,
-        userId: 3,
-        name: null,
-        stats: '62, 5\'5", 185lb, 6" cut, chubby, gay, side, d...',
-        image: '/images/5.jpg',
-        text: 'I\'m at echo lake park right now',
-        timestamp: '2 minutes ago',
-        distance: '2.50 miles',
-        online: true,
-        isHosting: false
-      },
-      {
-        id: 4,
-        userId: 4,
-        name: 'Bottom',
-        stats: null,
-        image: '/images/6.jpg',
-        text: 'I\'m hosting.',
-        timestamp: 'a minute ago',
-        distance: '1.50 miles',
-        online: true,
-        isHosting: true
-      },
-      {
-        id: 5,
-        userId: 5,
-        name: null,
-        stats: '5\'9", 195lb, 6.5" uncut, average, vers',
-        image: '/images/5.jpg',
-        text: 'I\'m hosting.',
-        timestamp: 'a few seconds ago',
-        distance: '1.75 miles',
-        online: true,
-        isHosting: true
-      }
-    ];
-    
-    setUpdates(mockUpdates);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => console.log('Location denied')
+      );
+    }
   }, []);
 
-  const handlePostUpdate = () => {
-    if (!updateText.trim()) return;
-    
-    // Add new update
-    const newUpdate = {
-      id: Date.now(),
-      userId: 999,
-      name: 'You',
-      stats: null,
-      image: '/images/5.jpg',
-      text: updateText,
-      timestamp: 'just now',
-      distance: '0 miles',
-      online: true,
-      isHosting: false
+  // Load updates
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setCurrentUserId(user.id);
+
+      try {
+        const data = await getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy);
+        if (mounted) setUpdates(data);
+      } catch (err) {
+        console.error('Failed to load updates:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
-    
-    setUpdates([newUpdate, ...updates]);
-    setUpdateText('');
+
+    load();
+
+    // Subscribe to new updates
+    const channel = supabase
+      .channel('cruising-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'cruising_updates'
+      }, () => {
+        getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy)
+          .then(data => { if (mounted) setUpdates(data); });
+      })
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [sortBy, userLocation]);
+
+  // Post update
+  const handlePostUpdate = async () => {
+    if (!updateText.trim() || posting) return;
+
+    setPosting(true);
+    try {
+      await postCruisingUpdate(updateText, isHosting, userLocation?.lat, userLocation?.lng);
+      setUpdateText('');
+      setIsHosting(false);
+      // Refresh updates
+      const data = await getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy);
+      setUpdates(data);
+    } catch (err: any) {
+      alert(err.message || 'Failed to post update');
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  // Delete update
+  const handleDelete = async (updateId: string) => {
+    if (!confirm('Delete this update?')) return;
+    try {
+      await deleteCruisingUpdate(updateId);
+      setUpdates(prev => prev.filter(u => u.id !== updateId));
+    } catch (err) {
+      alert('Failed to delete');
+    }
+  };
+
+  // Format time
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffSeconds < 60) return 'just now';
+    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
+    if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
+    return date.toLocaleDateString();
+  };
+
+  // Format distance
+  const formatDistance = (miles?: number) => {
+    if (!miles) return '';
+    if (miles < 0.1) return 'nearby';
+    return `${miles.toFixed(1)} mi`;
+  };
+
+  // Build user display info
+  const getUserDisplay = (update: CruisingUpdateWithUser) => {
+    const { user } = update;
+    if (user.display_name) return user.display_name;
+
+    // Build stats string from profile
+    const parts: string[] = [];
+    if (user.age) parts.push(String(user.age));
+    if ((user as any).height) parts.push((user as any).height);
+    if ((user as any).weight) parts.push(`${(user as any).weight}lb`);
+    if ((user as any).body_type) parts.push((user as any).body_type);
+    if (user.position) parts.push(user.position);
+
+    return parts.length > 0 ? parts.join(', ') : 'Anonymous';
   };
 
   return (
@@ -104,7 +138,7 @@ export default function CruisingUpdatesPage() {
       minHeight: '100vh',
       background: '#000',
       color: '#fff',
-      fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif",
+      fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
       display: 'flex',
       flexDirection: 'column'
     }}>
@@ -135,17 +169,11 @@ export default function CruisingUpdatesPage() {
         >
           ←
         </button>
-        
-        <h1 style={{
-          fontSize: '18px',
-          fontWeight: 700,
-          margin: 0,
-          flex: 1,
-          textAlign: 'center'
-        }}>
+
+        <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0, flex: 1, textAlign: 'center' }}>
           Cruising Updates
         </h1>
-        
+
         <button
           onClick={() => setShowSortMenu(!showSortMenu)}
           style={{
@@ -161,18 +189,10 @@ export default function CruisingUpdatesPage() {
           ☰
         </button>
 
-        {/* Sort Menu Dropdown */}
+        {/* Sort Menu */}
         {showSortMenu && (
           <>
-            <div 
-              onClick={() => setShowSortMenu(false)}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.6)',
-                zIndex: 998
-              }}
-            />
+            <div onClick={() => setShowSortMenu(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 998 }} />
             <div style={{
               position: 'absolute',
               top: '60px',
@@ -185,10 +205,7 @@ export default function CruisingUpdatesPage() {
               boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
             }}>
               <button
-                onClick={() => {
-                  setSortBy('time');
-                  setShowSortMenu(false);
-                }}
+                onClick={() => { setSortBy('time'); setShowSortMenu(false); }}
                 style={{
                   width: '100%',
                   background: sortBy === 'time' ? 'rgba(255,107,53,0.2)' : 'transparent',
@@ -204,10 +221,7 @@ export default function CruisingUpdatesPage() {
                 Sort by Time
               </button>
               <button
-                onClick={() => {
-                  setSortBy('distance');
-                  setShowSortMenu(false);
-                }}
+                onClick={() => { setSortBy('distance'); setShowSortMenu(false); }}
                 style={{
                   width: '100%',
                   background: sortBy === 'distance' ? 'rgba(255,107,53,0.2)' : 'transparent',
@@ -226,190 +240,140 @@ export default function CruisingUpdatesPage() {
         )}
       </header>
 
-      {/* Sort By Indicator */}
-      <div style={{
-        padding: '12px 20px',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        fontSize: '13px',
-        color: '#888'
-      }}>
-        Sort by: <span style={{ color: '#fff', marginLeft: '6px', textDecoration: 'underline' }}>
-          {sortBy === 'time' ? 'Time' : 'Distance'}
-        </span>
+      {/* Sort Indicator */}
+      <div style={{ padding: '12px 20px', display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#888' }}>
+        <span>{updates.length} active updates</span>
+        <span>Sort by: <span style={{ color: '#fff' }}>{sortBy === 'time' ? 'Time' : 'Distance'}</span></span>
       </div>
 
       {/* Updates Feed */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        paddingBottom: '140px'
-      }}>
-        {updates.map((update, index) => (
-          <div
-            key={update.id}
-            style={{
-              padding: '16px 20px',
-              borderBottom: '1px solid #1c1c1e',
-              display: 'flex',
-              gap: '12px',
-              position: 'relative'
-            }}
-          >
-            {/* Profile Image */}
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '160px' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>Loading...</div>
+        ) : updates.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
+            <div style={{ fontSize: '16px', marginBottom: '8px' }}>No active updates</div>
+            <div style={{ fontSize: '14px' }}>Be the first to post!</div>
+          </div>
+        ) : (
+          updates.map((update) => (
+            <div
+              key={update.id}
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid #1c1c1e',
+                display: 'flex',
+                gap: '12px',
+                position: 'relative'
+              }}
+            >
+              {/* Profile Image */}
+              <Link href={`/profile/${update.user_id}`} style={{ position: 'relative', flexShrink: 0 }}>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
                   borderRadius: '50%',
-                  backgroundImage: `url(${update.image})`,
+                  backgroundImage: `url(${update.user.photo_url || '/images/default-avatar.png'})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  border: '2px solid #333'
-                }}
-              />
-              {/* Online Indicator */}
-              {update.online && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  background: '#007AFF',
-                  border: '2px solid #000'
+                  border: update.is_hosting ? '2px solid #FF6B35' : '2px solid #333'
                 }} />
-              )}
-              {/* Hosting Badge */}
-              {update.isHosting && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  right: -4,
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: '#FF6B35',
-                  border: '2px solid #000',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '14px'
-                }}>
-                  🔊
+                {update.user.is_online && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: '#4CD964',
+                    border: '2px solid #000'
+                  }} />
+                )}
+              </Link>
+
+              {/* Content */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  <div style={{ fontSize: '14px', color: '#aaa' }}>
+                    {getUserDisplay(update)}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666', whiteSpace: 'nowrap' }}>
+                    {formatTime(update.created_at)}
+                    {update.distance !== undefined && ` • ${formatDistance(update.distance)}`}
+                  </div>
                 </div>
+
+                <div style={{
+                  fontSize: '15px',
+                  color: update.is_hosting ? '#FF6B35' : '#fff',
+                  fontWeight: update.is_hosting ? 600 : 400,
+                  lineHeight: 1.4
+                }}>
+                  {update.is_hosting && '🏠 '}{update.text}
+                </div>
+              </div>
+
+              {/* Delete (own updates) */}
+              {update.user_id === currentUserId && (
+                <button
+                  onClick={() => handleDelete(update.id)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#666',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  ✕
+                </button>
               )}
             </div>
+          ))
+        )}
 
-            {/* Update Content */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {/* Name/Stats */}
-              <div style={{
+        {/* Refresh Button - Liquid Glass Effect */}
+        {!loading && (
+          <div style={{
+            position: 'sticky',
+            bottom: '140px',
+            display: 'flex',
+            justifyContent: 'center',
+            padding: '16px',
+            pointerEvents: 'none'
+          }}>
+            <button
+              onClick={async () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                const data = await getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy);
+                setUpdates(data);
+              }}
+              style={{
+                background: 'rgba(255,107,53,0.15)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,107,53,0.4)',
+                borderRadius: '24px',
+                padding: '10px 24px',
+                color: '#FF6B35',
                 fontSize: '14px',
-                color: '#aaa',
-                marginBottom: '8px',
+                fontWeight: 600,
+                cursor: 'pointer',
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: '12px'
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {update.name || update.stats}
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  fontStyle: 'italic',
-                  color: '#888',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {update.timestamp}, {update.distance}
-                </div>
-              </div>
-
-              {/* Update Text */}
-              <div style={{
-                fontSize: '16px',
-                color: update.isHosting ? '#FF6B35' : '#4A9EFF',
-                marginBottom: '8px',
-                lineHeight: 1.4
-              }}>
-                {update.text}
-              </div>
-            </div>
-
-            {/* Navigate Button */}
-            <button
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#666',
-                fontSize: '28px',
-                cursor: 'pointer',
-                padding: 0,
-                flexShrink: 0,
-                lineHeight: 1
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 24px rgba(255,107,53,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+                pointerEvents: 'all',
+                transition: 'all 0.3s ease'
               }}
             >
-              🎯
-            </button>
-
-            {/* More Menu */}
-            <button
-              style={{
-                position: 'absolute',
-                bottom: '16px',
-                right: '20px',
-                background: 'none',
-                border: 'none',
-                color: '#666',
-                fontSize: '20px',
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              ⋯
+              ↻ Refresh Updates
             </button>
           </div>
-        ))}
-
-        {/* New Updates Banner */}
-        <div style={{
-          position: 'sticky',
-          bottom: '80px',
-          left: 0,
-          right: 0,
-          padding: '20px',
-          display: 'flex',
-          justifyContent: 'center',
-          pointerEvents: 'none'
-        }}>
-          <button
-            onClick={() => {
-              // Scroll to top and refresh updates
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              // TODO: Fetch new updates from API when implemented
-            }}
-            style={{
-              background: '#007AFF',
-              borderRadius: '24px',
-              padding: '12px 24px',
-              color: '#fff',
-              fontSize: '15px',
-              fontWeight: 600,
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 20px rgba(0,122,255,0.4)',
-              pointerEvents: 'all'
-            }}
-          >
-            ↓ See New Updates
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Post Input */}
@@ -420,50 +384,75 @@ export default function CruisingUpdatesPage() {
         right: 0,
         background: '#000',
         borderTop: '1px solid #1c1c1e',
-        padding: '16px 20px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
+        padding: '12px 20px',
+        paddingBottom: 'max(12px, env(safe-area-inset-bottom))'
       }}>
-        <input
-          type="text"
-          value={updateText}
-          onChange={(e) => setUpdateText(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handlePostUpdate()}
-          placeholder="Post a Cruising Update..."
-          style={{
-            flex: 1,
-            background: '#1c1c1e',
-            border: 'none',
-            borderRadius: '24px',
-            padding: '14px 20px',
-            color: '#fff',
-            fontSize: '15px',
-            outline: 'none'
-          }}
-        />
-        <button
-          onClick={handlePostUpdate}
-          disabled={!updateText.trim()}
-          style={{
-            background: updateText.trim() ? '#FF6B35' : '#333',
-            border: 'none',
-            borderRadius: '50%',
-            width: '48px',
-            height: '48px',
-            color: '#fff',
-            fontSize: '20px',
-            cursor: updateText.trim() ? 'pointer' : 'not-allowed',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            opacity: updateText.trim() ? 1 : 0.5,
-            transition: 'all 0.2s'
-          }}
-        >
-          ➤
-        </button>
+        {/* Hosting Toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+          <button
+            onClick={() => setIsHosting(!isHosting)}
+            style={{
+              background: isHosting ? '#FF6B35' : '#1c1c1e',
+              border: isHosting ? 'none' : '1px solid #333',
+              borderRadius: '20px',
+              padding: '8px 16px',
+              color: '#fff',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🏠 {isHosting ? 'Hosting' : 'Not Hosting'}
+          </button>
+          <span style={{ fontSize: '12px', color: '#666' }}>
+            {userLocation ? '📍 Location enabled' : '📍 Enable location for distance'}
+          </span>
+        </div>
+
+        {/* Input Row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <input
+            type="text"
+            value={updateText}
+            onChange={(e) => setUpdateText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !posting && handlePostUpdate()}
+            placeholder="Post an update..."
+            maxLength={200}
+            style={{
+              flex: 1,
+              background: '#1c1c1e',
+              border: 'none',
+              borderRadius: '24px',
+              padding: '14px 20px',
+              color: '#fff',
+              fontSize: '15px',
+              outline: 'none'
+            }}
+          />
+          <button
+            onClick={handlePostUpdate}
+            disabled={!updateText.trim() || posting}
+            style={{
+              background: updateText.trim() && !posting ? '#FF6B35' : '#333',
+              border: 'none',
+              borderRadius: '50%',
+              width: '48px',
+              height: '48px',
+              color: '#fff',
+              fontSize: '20px',
+              cursor: updateText.trim() && !posting ? 'pointer' : 'not-allowed',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            {posting ? '...' : '➤'}
+          </button>
+        </div>
       </div>
     </div>
   );

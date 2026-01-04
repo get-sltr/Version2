@@ -306,7 +306,7 @@ export default function GroupDetailPage() {
         {isMember && (
           <div style={{ background: '#1c1c1e', borderRadius: '16px', padding: '20px', marginBottom: '100px' }}>
             <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Group Messages</h3>
-            <a href={`/messages/group-${group.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#000', borderRadius: '12px', textDecoration: 'none', color: '#fff' }}>
+            <a href={`/messages/group/${group.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: '#000', borderRadius: '12px', textDecoration: 'none', color: '#fff' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ fontSize: '28px' }}>💬</div>
                 <div>
@@ -327,13 +327,13 @@ export default function GroupDetailPage() {
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(0deg, rgba(0,0,0,0.95) 70%, transparent)', backdropFilter: 'blur(20px)' }}>
         {isHost ? (
           <div style={{ display: 'flex', gap: '12px' }}>
-            <a href={`/messages/group-${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <a href={`/messages/group/${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               💬 Group Chat
             </a>
           </div>
         ) : isMember ? (
           <div style={{ display: 'flex', gap: '12px' }}>
-            <a href={`/messages/group-${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <a href={`/messages/group/${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               💬 Open Messages
             </a>
             <button onClick={() => setShowLeaveConfirm(true)} style={{ background: 'rgba(255,59,48,0.15)', border: '1px solid #FF3B30', borderRadius: '12px', padding: '18px 24px', color: '#FF3B30', fontSize: '16px', fontWeight: 600, cursor: 'pointer' }}>

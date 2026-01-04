@@ -110,17 +110,20 @@ export default function CreateGroupPage() {
         </h1>
         <button
           onClick={handleCreate}
+          disabled={isSubmitting}
           style={{
-            background: 'none',
+            background: '#FF6B35',
             border: 'none',
-            color: '#FF6B35',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: 0
+            color: '#fff',
+            fontSize: '14px',
+            fontWeight: 700,
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            opacity: isSubmitting ? 0.5 : 1
           }}
         >
-          Create
+          {isSubmitting ? '...' : 'Create'}
         </button>
       </header>
 
@@ -398,27 +401,35 @@ export default function CreateGroupPage() {
         left: 0,
         right: 0,
         padding: '20px',
-        background: 'linear-gradient(0deg, rgba(0,0,0,0.95) 70%, transparent)',
-        backdropFilter: 'blur(20px)'
+        paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+        background: 'linear-gradient(0deg, rgba(0,0,0,0.98) 80%, transparent)',
+        backdropFilter: 'blur(20px)',
+        zIndex: 1000
       }}>
         <button
           onClick={handleCreate}
-          disabled={!groupName || !date || !time || isSubmitting}
+          disabled={isSubmitting}
           style={{
             width: '100%',
-            background: (!groupName || !date || !time || isSubmitting) ? '#333' : '#FF6B35',
+            background: isSubmitting ? '#333' : '#FF6B35',
             border: 'none',
             borderRadius: '12px',
             padding: '18px',
             color: '#fff',
             fontSize: '16px',
-            fontWeight: 600,
-            cursor: (!groupName || !date || !time || isSubmitting) ? 'not-allowed' : 'pointer',
-            opacity: (!groupName || !date || !time || isSubmitting) ? 0.5 : 1
+            fontWeight: 700,
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
+            opacity: isSubmitting ? 0.5 : 1,
+            boxShadow: '0 4px 20px rgba(255,107,53,0.4)'
           }}
         >
           {isSubmitting ? 'Creating...' : 'Create Group'}
         </button>
+        {(!groupName || !date || !time) && (
+          <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginTop: '8px' }}>
+            Fill in name, date & time to continue
+          </div>
+        )}
       </div>
     </div>
   );
