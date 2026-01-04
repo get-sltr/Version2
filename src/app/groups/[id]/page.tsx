@@ -330,9 +330,24 @@ export default function GroupDetailPage() {
             <a href={`/messages/group/${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
               💬 Chat
             </a>
-            <a href={`/groups/${group.id}/edit`} style={{ flex: 1, background: '#1c1c1e', border: '1px solid #FF6B35', borderRadius: '12px', padding: '18px', color: '#FF6B35', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              ✏️ Edit
-            </a>
+            <button
+              onClick={async () => {
+                try {
+                  const { error } = await supabase
+                    .from('groups')
+                    .update({ is_active: true })
+                    .eq('id', group.id)
+                    .eq('host_id', currentUserId);
+                  if (error) throw error;
+                  alert('Group posted to your profile!');
+                } catch (err: any) {
+                  alert(err.message || 'Failed to post group');
+                }
+              }}
+              style={{ flex: 1, background: '#1c1c1e', border: '1px solid #FF6B35', borderRadius: '12px', padding: '18px', color: '#FF6B35', fontSize: '16px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              📢 Post
+            </button>
           </div>
         ) : isMember ? (
           <div style={{ display: 'flex', gap: '12px' }}>
