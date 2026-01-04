@@ -199,7 +199,7 @@ export default function GroupDetailPage() {
         gap: '15px',
         zIndex: 100
       }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#FF6B35', fontSize: '24px', cursor: 'pointer', padding: 0 }}>
+        <button onClick={() => router.push('/groups')} style={{ background: 'none', border: 'none', color: '#FF6B35', fontSize: '24px', cursor: 'pointer', padding: 0 }}>
           ‹
         </button>
         <h1 style={{ fontSize: '18px', fontWeight: 600, flex: 1 }}>Group Details</h1>

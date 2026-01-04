@@ -173,7 +173,7 @@ export default function GroupMessagesPage() {
         background: colors.background,
         zIndex: 10
       }}>
-        <Link href={`/groups/${groupId}`} style={{ color: colors.text, textDecoration: 'none', fontSize: '20px' }}>
+        <Link href="/messages" style={{ color: colors.text, textDecoration: 'none', fontSize: '20px' }}>
           ←
         </Link>
         <div style={{ flex: 1 }}>
