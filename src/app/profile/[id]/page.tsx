@@ -74,6 +74,7 @@ export default function ProfileViewPage() {
   const [hasTapped, setHasTapped] = useState(false);
   const [showTapMenu, setShowTapMenu] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [hostedGroups, setHostedGroups] = useState<any[]>([]);
 
   // Validate and extract profile ID
   const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
@@ -126,6 +127,18 @@ export default function ProfileViewPage() {
           setError('Failed to load profile');
         } else if (data) {
           setProfile(data);
+
+          // Fetch hosted groups that are active (posted)
+          const { data: groupsData } = await supabase
+            .from('groups')
+            .select('id, name, type, start_time, location, attendees, max_attendees')
+            .eq('host_id', profileId)
+            .eq('is_active', true)
+            .order('start_time', { ascending: true });
+
+          if (groupsData) {
+            setHostedGroups(groupsData);
+          }
         } else {
           setError('Profile not found');
         }
@@ -511,7 +524,7 @@ export default function ProfileViewPage() {
 
         {/* Additional Photos Section */}
         {hasPhotos && (
-          <div style={{ padding: '20px 0' }}>
+          <div style={{ padding: '20px 0', borderBottom: hostedGroups.length > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
             <SectionHeader title="Photos" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
               {profile.photo_urls.filter((url: string) => url).map((url: string, index: number) => (
@@ -519,6 +532,64 @@ export default function ProfileViewPage() {
                   <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Hosted Groups Section */}
+        {hostedGroups.length > 0 && (
+          <div style={{ padding: '20px 0' }}>
+            <SectionHeader title="Hosting" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {hostedGroups.map((group) => {
+                const eventDate = group.start_time ? new Date(group.start_time) : null;
+                const dateStr = eventDate ? eventDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '';
+                const timeStr = eventDate ? eventDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+
+                return (
+                  <a
+                    key={group.id}
+                    href={`/groups/${group.id}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px',
+                      padding: '14px',
+                      background: 'rgba(255,107,53,0.08)',
+                      border: '1px solid rgba(255,107,53,0.2)',
+                      borderRadius: '12px',
+                      textDecoration: 'none',
+                      color: '#fff'
+                    }}
+                  >
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '12px',
+                      background: 'rgba(255,107,53,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
+                      flexShrink: 0
+                    }}>
+                      👥
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px', color: '#fff' }}>
+                        {group.name}
+                      </div>
+                      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
+                        {group.type} • {dateStr} {timeStr && `at ${timeStr}`}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#FF6B35', marginTop: '4px' }}>
+                        {group.attendees}/{group.max_attendees} attending
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '20px', color: 'rgba(255,255,255,0.4)' }}>›</div>
+                  </a>
+                );
+              })}
             </div>
           </div>
         )}
