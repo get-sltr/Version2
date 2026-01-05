@@ -75,7 +75,7 @@ export default function ProfileViewPage() {
   const [showTapMenu, setShowTapMenu] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [hostedGroups, setHostedGroups] = useState<any[]>([]);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [photoIndex, setPhotoIndex] = useState<number | null>(null);
 
   // Validate and extract profile ID
   const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
@@ -531,7 +531,7 @@ export default function ProfileViewPage() {
               {profile.photo_urls.filter((url: string) => url).map((url: string, index: number) => (
                 <div
                   key={index}
-                  onClick={() => setSelectedPhoto(url)}
+                  onClick={() => setPhotoIndex(index)}
                   style={{
                     aspectRatio: '1',
                     background: '#1a1a1a',
@@ -665,55 +665,156 @@ export default function ProfileViewPage() {
         </div>
       )}
 
-      {/* Photo Lightbox */}
-      {selectedPhoto && (
-        <div
-          onClick={() => setSelectedPhoto(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.95)',
-            zIndex: 300,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
-        >
-          <button
-            onClick={() => setSelectedPhoto(null)}
+      {/* Photo Gallery Lightbox */}
+      {photoIndex !== null && profile.photo_urls && (() => {
+        const photos = profile.photo_urls.filter((url: string) => url);
+        const currentPhoto = photos[photoIndex];
+        const hasPrev = photoIndex > 0;
+        const hasNext = photoIndex < photos.length - 1;
+
+        return (
+          <div
+            onClick={() => setPhotoIndex(null)}
             style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '44px',
-              height: '44px',
-              color: '#fff',
-              fontSize: '24px',
-              cursor: 'pointer',
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.95)',
+              zIndex: 300,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              padding: '20px'
             }}
           >
-            ✕
-          </button>
-          <img
-            src={selectedPhoto}
-            alt=""
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '90vh',
-              objectFit: 'contain',
-              borderRadius: '8px'
-            }}
-          />
-        </div>
-      )}
+            {/* Close button */}
+            <button
+              onClick={() => setPhotoIndex(null)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '44px',
+                height: '44px',
+                color: '#fff',
+                fontSize: '24px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Photo counter */}
+            <div style={{
+              position: 'absolute',
+              top: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '14px'
+            }}>
+              {photoIndex + 1} / {photos.length}
+            </div>
+
+            {/* Previous arrow */}
+            {hasPrev && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setPhotoIndex(photoIndex - 1); }}
+                style={{
+                  position: 'absolute',
+                  left: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '48px',
+                  height: '48px',
+                  color: '#fff',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ‹
+              </button>
+            )}
+
+            {/* Next arrow */}
+            {hasNext && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setPhotoIndex(photoIndex + 1); }}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '48px',
+                  height: '48px',
+                  color: '#fff',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ›
+              </button>
+            )}
+
+            {/* Photo */}
+            <img
+              src={currentPhoto}
+              alt=""
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '80vh',
+                objectFit: 'contain',
+                borderRadius: '8px'
+              }}
+            />
+
+            {/* Dots */}
+            {photos.length > 1 && (
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                marginTop: '20px'
+              }}>
+                {photos.map((_: string, i: number) => (
+                  <button
+                    key={i}
+                    onClick={(e) => { e.stopPropagation(); setPhotoIndex(i); }}
+                    style={{
+                      width: i === photoIndex ? '24px' : '8px',
+                      height: '8px',
+                      borderRadius: '4px',
+                      background: i === photoIndex ? '#FF6B35' : 'rgba(255,255,255,0.3)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Fixed Action Buttons at Bottom */}
       <div style={{
