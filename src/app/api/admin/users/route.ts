@@ -34,6 +34,16 @@ export async function GET(request: NextRequest) {
     const order = searchParams.get('order') || 'desc';
 
     const offset = (page - 1) * limit;
+
+    // Check if service role key is configured
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not configured');
+      return NextResponse.json(
+        { error: 'Admin service not configured - missing service role key' },
+        { status: 500 }
+      );
+    }
+
     const admin = getSupabaseAdmin();
 
     // Build query
@@ -86,10 +96,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Admin users error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch users' },
+      { error: error?.message || 'Failed to fetch users' },
       { status: 500 }
     );
   }
