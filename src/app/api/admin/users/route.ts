@@ -46,10 +46,10 @@ export async function GET(request: NextRequest) {
 
     const admin = getSupabaseAdmin();
 
-    // Build query
+    // Build query - only select columns that exist in the database
     let query = admin
       .from('profiles')
-      .select('id, email, display_name, age, photo_url, is_online, is_premium, is_verified, created_at, last_seen, premium_until, city, country', { count: 'exact' });
+      .select('id, email, display_name, age, photo_url, is_online, is_premium, created_at, last_seen, city, country', { count: 'exact' });
 
     // Apply search filter
     if (search) {
@@ -69,9 +69,9 @@ export async function GET(request: NextRequest) {
         fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes() - 15);
         query = query.gte('last_seen', fifteenMinutesAgo.toISOString());
         break;
-      case 'verified':
-        query = query.eq('is_verified', true);
-        break;
+      // case 'verified': - column doesn't exist yet
+      //   query = query.eq('is_verified', true);
+      //   break;
     }
 
     // Apply sorting
