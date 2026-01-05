@@ -81,6 +81,8 @@ export default function CreateAlbumPage() {
     setUploading(true);
 
     try {
+      console.log('Creating album:', { albumName, albumDescription, isPrivate: albumType === 'private' });
+
       // Create album in database
       const album = await createAlbum(
         albumName,
@@ -88,9 +90,13 @@ export default function CreateAlbumPage() {
         albumType === 'private'
       );
 
+      console.log('Album created:', album);
+
       // Upload all photos
-      for (const photo of media) {
+      for (let i = 0; i < media.length; i++) {
+        const photo = media[i];
         if (photo.file) {
+          console.log(`Uploading photo ${i + 1}/${media.length}`);
           await uploadAlbumPhoto(photo.file, album.id, {
             caption: photo.caption || undefined,
             isPrivate: albumType === 'private'
@@ -98,10 +104,11 @@ export default function CreateAlbumPage() {
         }
       }
 
+      console.log('All photos uploaded');
       router.push('/profile/edit');
     } catch (error: any) {
       console.error('Album creation error:', error);
-      alert(error.message || 'Failed to create album');
+      alert(error.message || 'Failed to create album. Check console for details.');
     } finally {
       setUploading(false);
     }
@@ -165,6 +172,7 @@ export default function CreateAlbumPage() {
           </label>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
+              type="button"
               onClick={() => setAlbumType('public')}
               style={{
                 flex: 1,
@@ -173,12 +181,14 @@ export default function CreateAlbumPage() {
                 borderRadius: '12px',
                 padding: '16px',
                 color: '#fff',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent'
               }}
             >
               🌍 Public
             </button>
             <button
+              type="button"
               onClick={() => setAlbumType('private')}
               style={{
                 flex: 1,
@@ -187,7 +197,8 @@ export default function CreateAlbumPage() {
                 borderRadius: '12px',
                 padding: '16px',
                 color: '#fff',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent'
               }}
             >
               🔒 Private
@@ -345,21 +356,23 @@ export default function CreateAlbumPage() {
         zIndex: 99
       }}>
         <button
+          type="button"
           onClick={handleSave}
+          disabled={uploading}
           style={{
             width: '100%',
-            background: '#FF6B35',
+            background: uploading ? '#666' : '#FF6B35',
             border: 'none',
             borderRadius: '12px',
             padding: '16px',
             color: '#fff',
             fontSize: '16px',
             fontWeight: 600,
-            cursor: 'pointer',
+            cursor: uploading ? 'not-allowed' : 'pointer',
             boxSizing: 'border-box'
           }}
         >
-          Create Album
+          {uploading ? 'Creating...' : 'Create Album'}
         </button>
       </div>
     </div>
