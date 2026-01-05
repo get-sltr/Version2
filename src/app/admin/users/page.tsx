@@ -14,7 +14,6 @@ interface User {
   is_premium: boolean;
   created_at: string;
   last_seen: string | null;
-  location_name: string | null;
 }
 
 interface Pagination {
@@ -224,7 +223,6 @@ export default function AdminUsersPage() {
                   <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: '#888', fontWeight: 600 }}>Status</th>
                   <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: '#888', fontWeight: 600 }}>Joined</th>
                   <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: '#888', fontWeight: 600 }}>Last Seen</th>
-                  <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '12px', color: '#888', fontWeight: 600 }}>Location</th>
                   <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: '12px', color: '#888', fontWeight: 600 }}>Actions</th>
                 </tr>
               </thead>
@@ -301,9 +299,6 @@ export default function AdminUsersPage() {
                     </td>
                     <td style={{ padding: '12px 16px', fontSize: '13px', color: '#888' }}>
                       {formatTime(user.last_seen)}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: '13px', color: '#888' }}>
-                      {user.location_name || '—'}
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                       <button
