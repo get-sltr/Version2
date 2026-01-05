@@ -75,6 +75,7 @@ export default function ProfileViewPage() {
   const [showTapMenu, setShowTapMenu] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [hostedGroups, setHostedGroups] = useState<any[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   // Validate and extract profile ID
   const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
@@ -528,7 +529,17 @@ export default function ProfileViewPage() {
             <SectionHeader title="Photos" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
               {profile.photo_urls.filter((url: string) => url).map((url: string, index: number) => (
-                <div key={index} style={{ aspectRatio: '1', background: '#1a1a1a', borderRadius: '4px', overflow: 'hidden' }}>
+                <div
+                  key={index}
+                  onClick={() => setSelectedPhoto(url)}
+                  style={{
+                    aspectRatio: '1',
+                    background: '#1a1a1a',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    cursor: 'pointer'
+                  }}
+                >
                   <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
               ))}
@@ -651,6 +662,56 @@ export default function ProfileViewPage() {
           >
             Cancel
           </button>
+        </div>
+      )}
+
+      {/* Photo Lightbox */}
+      {selectedPhoto && (
+        <div
+          onClick={() => setSelectedPhoto(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.95)',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <button
+            onClick={() => setSelectedPhoto(null)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'rgba(255,255,255,0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '44px',
+              height: '44px',
+              color: '#fff',
+              fontSize: '24px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            ✕
+          </button>
+          <img
+            src={selectedPhoto}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '90vh',
+              objectFit: 'contain',
+              borderRadius: '8px'
+            }}
+          />
         </div>
       )}
 
