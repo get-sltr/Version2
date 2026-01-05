@@ -12,12 +12,9 @@ interface User {
   photo_url: string | null;
   is_online: boolean;
   is_premium: boolean;
-  is_verified: boolean;
   created_at: string;
   last_seen: string | null;
-  premium_until: string | null;
-  city: string | null;
-  country: string | null;
+  location_name: string | null;
 }
 
 interface Pagination {
@@ -286,19 +283,7 @@ export default function AdminUsersPage() {
                             Premium
                           </span>
                         )}
-                        {user.is_verified && (
-                          <span style={{
-                            background: 'rgba(33, 150, 243, 0.2)',
-                            color: '#2196F3',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            fontWeight: 600,
-                          }}>
-                            Verified
-                          </span>
-                        )}
-                        {!user.is_premium && !user.is_verified && (
+                        {!user.is_premium && (
                           <span style={{
                             background: 'rgba(136, 136, 136, 0.2)',
                             color: '#888',
@@ -318,7 +303,7 @@ export default function AdminUsersPage() {
                       {formatTime(user.last_seen)}
                     </td>
                     <td style={{ padding: '12px 16px', fontSize: '13px', color: '#888' }}>
-                      {user.city || user.country || '—'}
+                      {user.location_name || '—'}
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                       <button
@@ -446,40 +431,6 @@ export default function AdminUsersPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {canEditUsers && (
                 <>
-                  {!selectedUser.is_verified ? (
-                    <button
-                      onClick={() => performAction(selectedUser.id, 'verify')}
-                      disabled={actionLoading}
-                      style={{
-                        background: '#1a1a1a',
-                        border: '1px solid #333',
-                        borderRadius: '8px',
-                        padding: '12px 16px',
-                        color: '#2196F3',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                    >
-                      ✓ Verify User
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => performAction(selectedUser.id, 'unverify')}
-                      disabled={actionLoading}
-                      style={{
-                        background: '#1a1a1a',
-                        border: '1px solid #333',
-                        borderRadius: '8px',
-                        padding: '12px 16px',
-                        color: '#888',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                    >
-                      Remove Verification
-                    </button>
-                  )}
-
                   {!selectedUser.is_premium ? (
                     <button
                       onClick={() => performAction(selectedUser.id, 'grant_premium', { months: 1 })}

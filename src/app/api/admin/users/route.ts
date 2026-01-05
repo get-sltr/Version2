@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     // Build query - only select columns that exist in the database
     let query = admin
       .from('profiles')
-      .select('id, email, display_name, age, photo_url, is_online, is_premium, created_at, last_seen, city, country', { count: 'exact' });
+      .select('id, email, display_name, age, photo_url, is_online, is_premium, created_at, last_seen, location_name', { count: 'exact' });
 
     // Apply search filter
     if (search) {
