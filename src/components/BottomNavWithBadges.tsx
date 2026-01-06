@@ -43,13 +43,17 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: 4,
-    padding: '8px 10px',
+    padding: '8px 10px 12px 10px',
     cursor: 'pointer',
     position: 'relative' as const,
     textDecoration: 'none',
     borderRadius: 14,
     minWidth: 56,
     height: 60, // Fixed height for alignment
+  },
+  navItemActive: {
+    borderBottom: '3px solid #ff6b35',
+    boxShadow: '0 4px 12px rgba(255,107,53,0.5), inset 0 -8px 16px rgba(255,107,53,0.15)',
   },
   iconWrapper: {
     height: ICON_SIZE,
@@ -159,19 +163,17 @@ interface NavItemProps {
 
 function NavItem({ href, label, icon, isActive, badge }: NavItemProps) {
   return (
-    <Link href={href} style={styles.navItem}>
+    <Link
+      href={href}
+      style={{
+        ...styles.navItem,
+        ...(isActive ? styles.navItemActive : {}),
+      }}
+    >
       <div style={styles.iconWrapper}>
         {icon}
       </div>
       <span style={styles.label}>{label}</span>
-      {/* Orange underline - only visible when selected */}
-      {isActive && (
-        <span style={{
-          ...styles.accent,
-          width: 28, // Slightly longer underline
-          boxShadow: '0 0 8px rgba(255,107,53,0.8)',
-        }} />
-      )}
       {badge && badge > 0 && (
         <span style={styles.badge}>{badge > 99 ? '99+' : badge}</span>
       )}
@@ -189,22 +191,16 @@ function SltrPlus({ onClick, isActive }: { onClick: () => void; isActive: boolea
       onClick={onClick}
       style={{
         ...styles.navItem,
+        ...(isActive ? styles.navItemActive : {}),
         background: 'none',
         border: 'none',
+        borderBottom: isActive ? '3px solid #ff6b35' : 'none',
       }}
     >
       <div style={styles.iconWrapper}>
         <span style={styles.sltrText}>SLTR+</span>
       </div>
       <span style={{ ...styles.label, opacity: 0 }}>SLTR+</span>
-      {/* Always show underline for SLTR+ or only when active */}
-      {isActive && (
-        <span style={{
-          ...styles.accent,
-          width: 32,
-          boxShadow: '0 0 8px rgba(255,107,53,0.8)',
-        }} />
-      )}
     </button>
   );
 }
