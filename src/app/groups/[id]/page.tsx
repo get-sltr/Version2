@@ -326,27 +326,52 @@ export default function GroupDetailPage() {
       {/* Fixed Action Button */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(0deg, rgba(0,0,0,0.95) 70%, transparent)', backdropFilter: 'blur(20px)' }}>
         {isHost ? (
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <a href={`/messages/group/${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '18px', color: '#fff', fontSize: '16px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-              💬 Chat
-            </a>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <a href={`/messages/group/${group.id}`} style={{ flex: 1, background: '#FF6B35', border: 'none', borderRadius: '12px', padding: '16px', color: '#fff', fontSize: '15px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                💬 Chat
+              </a>
+              <button
+                onClick={async () => {
+                  try {
+                    const { error } = await supabase
+                      .from('groups')
+                      .update({ is_active: true })
+                      .eq('id', group.id)
+                      .eq('host_id', currentUserId);
+                    if (error) throw error;
+                    alert('Group posted to your profile!');
+                  } catch (err: any) {
+                    alert(err.message || 'Failed to post group');
+                  }
+                }}
+                style={{ flex: 1, background: '#1c1c1e', border: '1px solid #FF6B35', borderRadius: '12px', padding: '16px', color: '#FF6B35', fontSize: '15px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              >
+                📢 Post
+              </button>
+            </div>
             <button
               onClick={async () => {
+                if (!confirm('Are you sure you want to delete this group? This cannot be undone.')) return;
+                setActionLoading(true);
                 try {
                   const { error } = await supabase
                     .from('groups')
-                    .update({ is_active: true })
+                    .delete()
                     .eq('id', group.id)
                     .eq('host_id', currentUserId);
                   if (error) throw error;
-                  alert('Group posted to your profile!');
+                  router.push('/groups/mine');
                 } catch (err: any) {
-                  alert(err.message || 'Failed to post group');
+                  alert(err.message || 'Failed to delete group');
+                } finally {
+                  setActionLoading(false);
                 }
               }}
-              style={{ flex: 1, background: '#1c1c1e', border: '1px solid #FF6B35', borderRadius: '12px', padding: '18px', color: '#FF6B35', fontSize: '16px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              disabled={actionLoading}
+              style={{ width: '100%', background: 'rgba(255,59,48,0.1)', border: '1px solid #FF3B30', borderRadius: '12px', padding: '14px', color: '#FF3B30', fontSize: '14px', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer', opacity: actionLoading ? 0.5 : 1 }}
             >
-              📢 Post
+              {actionLoading ? 'Deleting...' : '🗑️ Delete Group'}
             </button>
           </div>
         ) : isMember ? (
