@@ -247,67 +247,49 @@ export default function PremiumPage() {
           ))}
         </div>
 
-        {/* Unlimited Features */}
+        {/* All Premium Features */}
         <div style={{ marginBottom: '32px' }}>
           <h3 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '20px' }}>
-            Unlimited Features
+            Everything You Get
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             {[
               { icon: '🖼️', text: 'Unlimited profiles' },
-              { icon: '🌍', text: 'Unlimited Messaging in Explore' },
-              { icon: '🔭', text: 'Viewed me' },
+              { icon: '🌍', text: 'Unlimited Messaging' },
+              { icon: '🔭', text: 'See who viewed you' },
               { icon: '👻', text: 'Incognito mode' },
               { icon: '✨', text: 'For You Matches' },
-              { icon: '⏰', text: 'Unlimited expiring photos' },
+              { icon: '⏰', text: 'Expiring photos' },
               { icon: '💦', text: 'Right Now - 100 profiles' },
               { icon: '↩️', text: 'Unsend messages' },
               { icon: '🌐', text: 'Message translate' },
-              { icon: '⋯', text: 'Typing status' }
-            ].map((feature, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  fontSize: '15px'
-                }}
-              >
-                <span style={{ fontSize: '20px' }}>{feature.icon}</span>
-                <span>{feature.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* XTRA Features */}
-        <div style={{ marginBottom: '32px' }}>
-          <h3 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '20px' }}>
-            Includes All XTRA Features
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {[
-              { icon: '🖼️', text: 'Create multiple albums' },
-              { icon: '👀', text: 'View all shared albums' },
+              { icon: '⋯', text: 'Typing status' },
+              { icon: '📸', text: 'Create multiple albums' },
+              { icon: '👀', text: 'View shared albums' },
               { icon: '⏳', text: 'Expiring albums' },
               { icon: '🚫', text: 'No 3rd party ads*' },
               { icon: '✓', text: 'Read receipts' },
               { icon: '💬', text: 'Saved phrases' },
-              { icon: '💬', text: 'Mark recently messaged' },
-              { icon: '🎥', text: 'The Pulse - Premium Video Rooms' }
+              { icon: '🎥', text: 'Premium Video Rooms' },
+              { icon: '⭐', text: 'Pro Badge on Profile' },
+              { icon: '🙈', text: 'Hide Message Photos' },
+              { icon: '📌', text: 'Pin Conversations' },
+              { icon: '🎯', text: 'Priority Support' },
+              { icon: '📍', text: 'Add Places' },
+              { icon: '🌎', text: 'Travel Mode' },
+              { icon: '🔓', text: 'Unblock Users' }
             ].map((feature, i) => (
               <div
                 key={i}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '12px',
-                  fontSize: '15px'
+                  gap: '10px',
+                  fontSize: '14px'
                 }}
               >
-                <span style={{ fontSize: '20px' }}>{feature.icon}</span>
-                <span>{feature.text}</span>
+                <span style={{ fontSize: '18px' }}>{feature.icon}</span>
+                <span style={{ color: '#ddd' }}>{feature.text}</span>
               </div>
             ))}
           </div>
@@ -548,38 +530,6 @@ export default function PremiumPage() {
               </div>
               <span style={{ fontSize: '17px', fontWeight: 700 }}>${plans['1month'].price}/mo</span>
             </div>
-          </div>
-        </div>
-
-        {/* Additional Premium Features */}
-        <div style={{
-          background: '#1c1c1e',
-          borderRadius: '16px',
-          padding: '24px',
-          marginBottom: '24px'
-        }}>
-          <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px' }}>
-            Here's everything else you'll get...
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
-            {[
-              { icon: '⭐', text: 'Pro Badge on Profile' },
-              { icon: '✓', text: 'Read Receipts' },
-              { icon: '🙈', text: 'Hide Message Photos' },
-              { icon: '⏱️', text: 'Expiring Photos' },
-              { icon: '📌', text: 'Pin Conversations' },
-              { icon: '🎯', text: 'Priority Support (24hr response)' },
-              { icon: '👻', text: 'Incognito Mode' },
-              { icon: '🚫', text: 'No Ads' },
-              { icon: '📍', text: 'Add Places' },
-              { icon: '🌎', text: 'Travel Mode' },
-              { icon: '🔓', text: 'Unblock Individual Users' }
-            ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                <span style={{ color: '#ddd' }}>{item.text}</span>
-              </div>
-            ))}
           </div>
         </div>
 
