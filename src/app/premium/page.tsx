@@ -120,7 +120,11 @@ export default function PremiumPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#000',
+      background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.85) 25%, rgba(0,0,0,0.95) 45%, #000 55%), url(/images/7.jpg)',
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center top, center top',
+      backgroundRepeat: 'no-repeat, no-repeat',
+      backgroundAttachment: 'scroll, scroll',
       color: '#fff',
       fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif",
       paddingBottom: '100px'
@@ -162,24 +166,6 @@ export default function PremiumPage() {
         margin: '0 auto',
         padding: '24px 20px'
       }}>
-        {/* Hero Image */}
-        <div style={{
-          width: '100%',
-          borderRadius: '20px',
-          overflow: 'hidden',
-          marginBottom: '24px'
-        }}>
-          <img
-            src="/images/7.jpg"
-            alt="Premium"
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block'
-            }}
-          />
-        </div>
-
         {/* Plan Type Badge */}
         <div style={{
           background: '#fff',
