@@ -10,6 +10,7 @@ interface PremiumStatus {
   premiumUntil: Date | null;
   isLoading: boolean;
   error: string | null;
+  messagesRemaining: number;
   // Refresh function
   refresh: () => Promise<void>;
 }
@@ -19,6 +20,7 @@ export function usePremium(): PremiumStatus {
   const [premiumUntil, setPremiumUntil] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [messagesRemaining, setMessagesRemaining] = useState(Infinity);
 
   const checkPremiumStatus = useCallback(async () => {
     try {
@@ -73,6 +75,7 @@ export function usePremium(): PremiumStatus {
     premiumUntil,
     isLoading,
     error,
+    messagesRemaining,
     refresh: checkPremiumStatus
   };
 }
