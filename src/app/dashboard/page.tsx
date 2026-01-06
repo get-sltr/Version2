@@ -642,7 +642,7 @@ export default function Dashboard() {
             position: 'relative',
             overflow: 'hidden',
             background: '#0a0a0a',
-            color: '#fff',
+            color: '#ff6b35',
             border: '1px solid #333',
             borderRadius: '6px',
             padding: '8px 16px',
@@ -659,7 +659,9 @@ export default function Dashboard() {
           }}>
             <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
             <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <IconStar size={14} />
+              <svg style={{ width: '14px', height: '14px', fill: '#ff6b35' }} viewBox="0 0 12 24">
+                <path d="M6 0L7.35 7.56L12 8.18L6 12.96V24L0 17.77V8.18L6 0Z"/>
+              </svg>
               Faves
             </span>
           </a>
@@ -683,7 +685,7 @@ export default function Dashboard() {
                     position: 'relative',
                     overflow: 'hidden',
                     background: '#0a0a0a',
-                    color: '#fff',
+                    color: '#ff6b35',
                     border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
                     borderRadius: '6px',
                     padding: '8px 16px',
@@ -712,10 +714,10 @@ export default function Dashboard() {
                   <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center' }}>
                     DTFN
                     <span style={{ display: 'inline-flex', alignItems: 'flex-end', marginLeft: '2px', gap: 0 }}>
-                      <svg style={{ width: '12px', height: '12px', fill: '#fff', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                      <svg style={{ width: '12px', height: '12px', fill: '#ff6b35', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
                         <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
                       </svg>
-                      <svg style={{ width: '8px', height: '8px', marginLeft: '-1px', fill: '#fff', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                      <svg style={{ width: '8px', height: '8px', marginLeft: '-1px', fill: '#ff6b35', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
                         <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
                       </svg>
                     </span>
@@ -734,7 +736,7 @@ export default function Dashboard() {
                     position: 'relative',
                     overflow: 'hidden',
                     background: '#0a0a0a',
-                    color: '#fff',
+                    color: '#ff6b35',
                     border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
                     borderRadius: '6px',
                     padding: '8px 16px',
@@ -777,7 +779,7 @@ export default function Dashboard() {
                     position: 'relative',
                     overflow: 'hidden',
                     background: '#0a0a0a',
-                    color: '#fff',
+                    color: '#ff6b35',
                     border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
                     borderRadius: '6px',
                     padding: '8px 16px',
@@ -804,7 +806,7 @@ export default function Dashboard() {
                     boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
                     transition: 'all 0.3s',
                   }} />
-                  <svg style={{ width: '14px', height: '14px', fill: '#fff', position: 'relative', zIndex: 10, filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                  <svg style={{ width: '14px', height: '14px', fill: '#ff6b35', position: 'relative', zIndex: 10, filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                   </svg>
                   <span style={{ position: 'relative', zIndex: 10 }}>New</span>
@@ -822,7 +824,7 @@ export default function Dashboard() {
                     position: 'relative',
                     overflow: 'hidden',
                     background: '#0a0a0a',
-                    color: '#fff',
+                    color: '#ff6b35',
                     border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
                     borderRadius: '6px',
                     padding: '8px 16px',
@@ -849,7 +851,7 @@ export default function Dashboard() {
                     boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
                     transition: 'all 0.3s',
                   }} />
-                  <svg style={{ width: '14px', height: '14px', fill: '#fff', position: 'relative', zIndex: 10, filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                  <svg style={{ width: '14px', height: '14px', fill: '#ff6b35', position: 'relative', zIndex: 10, filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
                     <path d="M4 4H7L9 2H15L17 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4ZM12 17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17ZM12 9C13.65 9 15 10.35 15 12C15 13.65 13.65 15 12 15C10.35 15 9 13.65 9 12C9 10.35 10.35 9 12 9Z"/>
                   </svg>
                   <span style={{ position: 'relative', zIndex: 10 }}>Photos</span>
@@ -866,7 +868,7 @@ export default function Dashboard() {
                   position: 'relative',
                   overflow: 'hidden',
                   background: '#0a0a0a',
-                  color: '#fff',
+                  color: '#ff6b35',
                   border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
                   borderRadius: '6px',
                   padding: '8px 16px',
