@@ -7,6 +7,7 @@ import { IconFlame, IconWave, IconWink, IconEye, IconStar, IconChat, IconClose, 
 import ProBadge from '@/components/ProBadge';
 import OrbitBadge from '@/components/OrbitBadge';
 import { DTFNBadge } from '@/components/dtfn';
+import { recordProfileView } from '@/lib/api/views';
 import posthog from 'posthog-js';
 
 // Tap types available - now using components
@@ -129,6 +130,13 @@ export default function ProfileViewPage() {
         } else if (data) {
           setProfile(data);
 
+          // Record profile view (only if viewing someone else's profile)
+          if (user && profileId !== user.id) {
+            recordProfileView(profileId).catch(err => {
+              console.error('Failed to record profile view:', err);
+            });
+          }
+
           // Fetch hosted groups that are active (posted)
           const { data: groupsData } = await supabase
             .from('groups')
@@ -171,13 +179,20 @@ export default function ProfileViewPage() {
         setHasTapped(false);
       } else {
         // Add tap
-        await supabase
+        const { error: tapError } = await supabase
           .from('taps')
           .insert({
             sender_id: currentUserId,
             recipient_id: profileId,
             tap_type: tapType
           });
+
+        if (tapError) {
+          console.error('Tap insert error:', tapError);
+          alert(`Failed to send tap: ${tapError.message}`);
+          return;
+        }
+
         setHasTapped(true);
 
         // Capture tap_sent event in PostHog
@@ -186,8 +201,9 @@ export default function ProfileViewPage() {
           recipient_id: profileId,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Tap error:', error);
+      alert(`Tap failed: ${error.message || 'Unknown error'}`);
     }
     setActionLoading(false);
   };
