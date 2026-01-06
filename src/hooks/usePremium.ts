@@ -77,6 +77,12 @@ export function usePremium(): PremiumStatus {
   };
 }
 
+// Utility to check if user can send a message
+// For now, always returns true (no daily limits enforced)
+export async function useMessage(): Promise<boolean> {
+  return true;
+}
+
 // Check if a specific feature is available
 export function canAccessFeature(isPremium: boolean, feature:
   'video_call' |
