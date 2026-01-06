@@ -194,7 +194,7 @@ export default function PremiumPage() {
               desc: 'Unlocked grid with unlimited profiles'
             },
             {
-              icon: '👁️',
+              icon: '🔭',
               title: 'Know Who\'s Interested',
               desc: 'See who\'s checking you out'
             },
@@ -256,7 +256,7 @@ export default function PremiumPage() {
             {[
               { icon: '🖼️', text: 'Unlimited profiles' },
               { icon: '🌍', text: 'Unlimited Messaging in Explore' },
-              { icon: '👁️', text: 'Viewed me' },
+              { icon: '🔭', text: 'Viewed me' },
               { icon: '👻', text: 'Incognito mode' },
               { icon: '✨', text: 'For You Matches' },
               { icon: '⏰', text: 'Unlimited expiring photos' },
