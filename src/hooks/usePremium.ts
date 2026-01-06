@@ -10,24 +10,15 @@ interface PremiumStatus {
   premiumUntil: Date | null;
   isLoading: boolean;
   error: string | null;
-  // Free tier limits
-  messagesRemaining: number;
-  filtersRemaining: number;
   // Refresh function
   refresh: () => Promise<void>;
 }
-
-// Free tier limits
-const FREE_MESSAGE_LIMIT = 5;
-const FREE_FILTER_LIMIT = 1;
 
 export function usePremium(): PremiumStatus {
   const [isPremium, setIsPremium] = useState(false);
   const [premiumUntil, setPremiumUntil] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [messagesRemaining, setMessagesRemaining] = useState(FREE_MESSAGE_LIMIT);
-  const [filtersRemaining, setFiltersRemaining] = useState(FREE_FILTER_LIMIT);
 
   const checkPremiumStatus = useCallback(async () => {
     try {
@@ -44,7 +35,7 @@ export function usePremium(): PremiumStatus {
       // Get profile with premium status
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('is_premium, premium_expires_at, messages_sent_today, filters_used_today, last_activity_date, role')
+        .select('is_premium, premium_until')
         .eq('id', user.id)
         .single();
 
@@ -57,44 +48,13 @@ export function usePremium(): PremiumStatus {
       }
 
       // Check if premium is still valid
-      // Founders always have premium access
       const now = new Date();
-      const isFounder = profile.role === 'founder';
-      const premiumExpiry = profile.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-      const isCurrentlyPremium = isFounder || (profile.is_premium && premiumExpiry && premiumExpiry > now);
+      const premiumExpiry = profile.premium_until ? new Date(profile.premium_until) : null;
+      const isCurrentlyPremium = profile.is_premium && (!premiumExpiry || premiumExpiry > now);
 
       setIsPremium(isCurrentlyPremium);
       setPremiumUntil(premiumExpiry);
 
-      // Calculate remaining limits for free users
-      if (!isCurrentlyPremium) {
-        // Reset daily limits if it's a new day
-        const lastActivity = profile.last_activity_date ? new Date(profile.last_activity_date) : null;
-        const isNewDay = !lastActivity || lastActivity.toDateString() !== now.toDateString();
-
-        if (isNewDay) {
-          // Reset counters for new day
-          setMessagesRemaining(FREE_MESSAGE_LIMIT);
-          setFiltersRemaining(FREE_FILTER_LIMIT);
-
-          // Update the database
-          await supabase
-            .from('profiles')
-            .update({
-              messages_sent_today: 0,
-              filters_used_today: 0,
-              last_activity_date: now.toISOString()
-            })
-            .eq('id', user.id);
-        } else {
-          setMessagesRemaining(Math.max(0, FREE_MESSAGE_LIMIT - (profile.messages_sent_today || 0)));
-          setFiltersRemaining(Math.max(0, FREE_FILTER_LIMIT - (profile.filters_used_today || 0)));
-        }
-      } else {
-        // Premium users have unlimited
-        setMessagesRemaining(Infinity);
-        setFiltersRemaining(Infinity);
-      }
     } catch (err) {
       console.error('Premium check error:', err);
       setError('Failed to verify subscription');
@@ -113,49 +73,8 @@ export function usePremium(): PremiumStatus {
     premiumUntil,
     isLoading,
     error,
-    messagesRemaining,
-    filtersRemaining,
     refresh: checkPremiumStatus
   };
-}
-
-// Utility to decrement message count for free users
-export async function useMessage(): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_premium, premium_expires_at, messages_sent_today, role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile) return false;
-
-  // Founders always have premium access
-  if (profile.role === 'founder') {
-    return true;
-  }
-
-  // Premium users always allowed
-  const premiumExpiry = profile.premium_expires_at ? new Date(profile.premium_expires_at) : null;
-  if (profile.is_premium && premiumExpiry && premiumExpiry > new Date()) {
-    return true;
-  }
-
-  // Check free tier limit
-  const messagesSent = profile.messages_sent_today || 0;
-  if (messagesSent >= FREE_MESSAGE_LIMIT) {
-    return false;
-  }
-
-  // Increment counter
-  await supabase
-    .from('profiles')
-    .update({ messages_sent_today: messagesSent + 1 })
-    .eq('id', user.id);
-
-  return true;
 }
 
 // Check if a specific feature is available

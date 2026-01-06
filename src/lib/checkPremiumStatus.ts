@@ -33,7 +33,7 @@ export async function checkAndSyncPremiumStatus(userId: string): Promise<{
     // Get current profile
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('is_premium, premium_plan, premium_expires_at, stripe_subscription_id')
+      .select('is_premium, premium_until')
       .eq('id', userId)
       .single();
 
@@ -42,7 +42,7 @@ export async function checkAndSyncPremiumStatus(userId: string): Promise<{
     }
 
     const now = new Date();
-    const expiresAt = profile.premium_expires_at ? new Date(profile.premium_expires_at) : null;
+    const expiresAt = profile.premium_until ? new Date(profile.premium_until) : null;
 
     // Check if premium has expired
     if (profile.is_premium && expiresAt && expiresAt < now) {
@@ -56,13 +56,13 @@ export async function checkAndSyncPremiumStatus(userId: string): Promise<{
         .eq('id', userId);
 
       console.log(`Premium expired for user ${userId}`);
-      return { isPremium: false, plan: profile.premium_plan, expiresAt };
+      return { isPremium: false, plan: null, expiresAt };
     }
 
     // Premium is still valid or user was never premium
     return {
       isPremium: profile.is_premium || false,
-      plan: profile.premium_plan,
+      plan: null,
       expiresAt,
     };
   } catch (err) {
