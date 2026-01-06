@@ -48,6 +48,8 @@ export default function Dashboard() {
   const [showTribesDropdown, setShowTribesDropdown] = useState(false);
   const [selectedTribes, setSelectedTribes] = useState<string[]>([]);
   const [hostingUserIds, setHostingUserIds] = useState<Set<string>>(new Set());
+  const [locationSearch, setLocationSearch] = useState('');
+  const [searchedLocation, setSearchedLocation] = useState<{ lat: number; lng: number; name: string } | null>(null);
 
   const filters = [
     { id: 'online', label: 'Online' },
@@ -345,6 +347,91 @@ export default function Dashboard() {
     });
   };
 
+  const handleLocationSearch = async () => {
+    if (!locationSearch.trim()) {
+      // Clear location filter
+      setSearchedLocation(null);
+      fetchProfiles();
+      return;
+    }
+
+    try {
+      const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(locationSearch)}.json?access_token=${mapboxToken}&types=place,locality,region,country&limit=1`
+      );
+      const data = await response.json();
+
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const [lng, lat] = feature.center;
+        setSearchedLocation({
+          lat,
+          lng,
+          name: feature.place_name
+        });
+        // Fetch profiles near this location
+        fetchProfilesAtLocation(lat, lng);
+      } else {
+        alert('Location not found. Try a different city name.');
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      alert('Failed to search location');
+    }
+  };
+
+  const fetchProfilesAtLocation = async (lat: number, lng: number) => {
+    setLoading(true);
+    try {
+      // Get profiles with location data
+      const { data: profilesData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+
+      if (error) throw error;
+
+      if (profilesData) {
+        // Calculate distance and filter profiles within ~50 miles
+        const maxDistanceKm = 80; // ~50 miles
+        const nearbyProfiles = profilesData
+          .map(profile => {
+            const distance = getDistanceKm(lat, lng, profile.latitude, profile.longitude);
+            return { ...profile, distanceKm: distance };
+          })
+          .filter(profile => profile.distanceKm <= maxDistanceKm)
+          .sort((a, b) => a.distanceKm - b.distanceKm);
+
+        setProfiles(nearbyProfiles);
+      }
+    } catch (error) {
+      console.error('Error fetching profiles at location:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Haversine formula to calculate distance between two points
+  const getDistanceKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const clearLocationSearch = () => {
+    setLocationSearch('');
+    setSearchedLocation(null);
+    fetchProfiles();
+  };
+
   const handleFilterClick = (filter: any) => {
     if (filter.id === 'position') {
       setShowPositionDropdown(!showPositionDropdown);
@@ -435,31 +522,121 @@ export default function Dashboard() {
           <a href="/settings" style={{ width: '44px', height: '44px', borderRadius: '50%', background: colors.surface, backgroundImage: currentUser?.photo_url ? `url(${currentUser.photo_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0, border: `2px solid ${colors.surface}`, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: colors.text }}>
             {!currentUser?.photo_url && <IconUser size={20} />}
           </a>
-          <a href="/search" style={{ flex: 1, background: colors.surface, borderRadius: '10px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <span style={{ opacity: 0.5 }}><IconSearch size={16} /></span>
-            <span style={{ opacity: 0.5, fontSize: '15px', color: colors.text }}>Explore more profiles</span>
-          </a>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search city..."
+              value={locationSearch}
+              onChange={(e) => setLocationSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
+              style={{
+                width: '100%',
+                background: searchedLocation ? 'rgba(255,107,53,0.1)' : colors.surface,
+                borderRadius: '10px',
+                padding: '12px 70px 12px 16px',
+                border: searchedLocation ? '1px solid #ff6b35' : 'none',
+                color: colors.text,
+                fontSize: '14px',
+                outline: 'none'
+              }}
+            />
+            {searchedLocation && (
+              <button
+                onClick={clearLocationSearch}
+                style={{
+                  position: 'absolute',
+                  right: '36px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255,107,53,0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  color: '#ff6b35',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px'
+                }}
+              >
+                ✕
+              </button>
+            )}
+            <button
+              onClick={handleLocationSearch}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: searchedLocation ? '#ff6b35' : colors.textSecondary,
+                cursor: 'pointer',
+                padding: '4px'
+              }}
+            >
+              <IconSearch size={16} />
+            </button>
+          </div>
           <a href="/map" style={{
-            width: '44px',
-            height: '44px',
-            borderRadius: '8px',
             background: '#0a0a0a',
             border: '1px solid #ff6b35',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            borderRadius: '6px',
+            padding: '8px 16px',
+            color: '#ff6b35',
+            fontSize: '13px',
+            fontWeight: 'bold',
+            letterSpacing: '0.5px',
             textDecoration: 'none',
             flexShrink: 0,
-            color: '#ff6b35',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             position: 'relative',
             overflow: 'hidden',
             boxShadow: '0 4px 20px rgba(255,107,53,0.25)',
             transition: 'all 0.3s ease-out'
           }}>
             <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#ff6b35', boxShadow: '0 0 10px rgba(255,107,53,0.8)' }} />
-            <IconMap size={20} />
+            <span style={{ position: 'relative', zIndex: 10 }}>MAP</span>
           </a>
         </div>
+        {searchedLocation && (
+          <div style={{
+            background: 'rgba(255,107,53,0.1)',
+            border: '1px solid rgba(255,107,53,0.3)',
+            borderRadius: '8px',
+            padding: '8px 12px',
+            marginBottom: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: '14px' }}>📍</span>
+              <span style={{ fontSize: '13px', color: '#ff6b35' }}>
+                Viewing profiles near <strong>{searchedLocation.name}</strong>
+              </span>
+            </div>
+            <button
+              onClick={clearLocationSearch}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#ff6b35',
+                cursor: 'pointer',
+                fontSize: '12px',
+                padding: '4px 8px'
+              }}
+            >
+              Clear
+            </button>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginLeft: '-15px', marginRight: '-15px', paddingLeft: '15px', paddingRight: '15px' }}>
           <a href="/settings" style={{
             background: '#0a0a0a',
