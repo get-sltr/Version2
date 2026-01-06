@@ -162,6 +162,24 @@ export default function PremiumPage() {
         margin: '0 auto',
         padding: '24px 20px'
       }}>
+        {/* Hero Image */}
+        <div style={{
+          width: '100%',
+          borderRadius: '20px',
+          overflow: 'hidden',
+          marginBottom: '24px'
+        }}>
+          <img
+            src="/images/7.jpg"
+            alt="Premium"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block'
+            }}
+          />
+        </div>
+
         {/* Plan Type Badge */}
         <div style={{
           background: '#fff',
