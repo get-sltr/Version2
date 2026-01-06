@@ -128,8 +128,16 @@ export async function POST(request: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
 
-        // Get userId from invoice metadata or subscription metadata
-        const userId = (invoice.subscription_details as any)?.metadata?.userId;
+        // Get userId from subscription metadata
+        let userId: string | undefined;
+
+        if (invoice.subscription) {
+          const subscriptionId = typeof invoice.subscription === 'string'
+            ? invoice.subscription
+            : invoice.subscription.id;
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          userId = subscription.metadata?.userId;
+        }
 
         if (userId) {
           console.log(`Payment failed for user ${userId}`);
