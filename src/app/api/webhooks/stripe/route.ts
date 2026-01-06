@@ -126,16 +126,16 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object;
 
-        // Get userId from subscription metadata
+        // Get subscription ID from invoice (using any to handle API version differences)
+        const subscriptionId = (invoice as any).subscription || (invoice as any).parent?.subscription_details?.subscription;
+
         let userId: string | undefined;
 
-        if (invoice.subscription) {
-          const subscriptionId = typeof invoice.subscription === 'string'
-            ? invoice.subscription
-            : invoice.subscription.id;
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        if (subscriptionId) {
+          const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId.id;
+          const subscription = await stripe.subscriptions.retrieve(subId);
           userId = subscription.metadata?.userId;
         }
 
