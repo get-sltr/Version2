@@ -1064,7 +1064,7 @@ export default function Dashboard() {
                 <p style={{ margin: '4px 0 0', fontSize: '13px', color: colors.textSecondary }}>Unlimited profiles, no ads, see who viewed you</p>
               </div>
             </div>
-            <a href="https://checkout.stripe.com/c/pay/cs_live_b1unIQSp5E4DRHvjoF7AJB0oONGs5dF94XM2a2BrTxan5FcHeyFvnTQRBL#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSd2cGd2ZndsdXFsamtQa2x0cGBrYHZ2QGtkZ2lgYSc%2FY2RpdmApJ2R1bE5gfCc%2FJ3VuWmlsc2BaMDRXfFNgSDZEcDAxUj1mdD1CNnxUSHNpT10yMVRvTHVGT0RrdjN2Qj1zNF1nRlB1Un9ccEhfdWNxfU9IcmZ%2FUGx2a1RoUD08dWtASEZybnJPZ11zVnxtYWc1NWxyMF1KVVFBJyknY3dqaFZgd3Ngdyc%2FcXdwYCknZ2RmbmJ3anBrYUZqaWp3Jz8nJmE8MDU1NScpJ2lkfGpwcVF8dWAnPydocGlxbFpscWBoJyknYGtkZ2lgVWlkZmBtamlhYHd2Jz9xd3BgeCUl" target="_blank" rel="noopener noreferrer" style={{ background: colors.accent, color: '#fff', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>Upgrade</a>
+            <a href="/premium" style={{ background: colors.accent, color: '#fff', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>Upgrade</a>
           </div>
         </div>
       )}
