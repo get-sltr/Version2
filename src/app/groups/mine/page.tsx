@@ -71,19 +71,21 @@ export default function MyGroupsPage() {
           alignItems: 'center',
           gap: '15px'
         }}>
-          <button
-            onClick={() => router.back()}
+          <a
+            href="/dashboard"
             style={{
               background: 'none',
               border: 'none',
               color: '#FF6B35',
-              fontSize: '24px',
+              fontSize: '14px',
+              fontWeight: 600,
               cursor: 'pointer',
-              padding: 0
+              padding: '8px 0',
+              textDecoration: 'none'
             }}
           >
-            ‹
-          </button>
+            ✕ Exit
+          </a>
           <h1 style={{ fontSize: '18px', fontWeight: 600, flex: 1 }}>My Groups</h1>
           <a
             href="/groups/create"
