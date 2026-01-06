@@ -35,8 +35,16 @@ export default function CreateGroupPage() {
   };
 
   const handleCreate = async () => {
-    if (!groupName || !date || !time) {
-      alert('Please fill in all required fields');
+    if (!groupName.trim()) {
+      alert('Please enter a group name');
+      return;
+    }
+    if (!date) {
+      alert('Please select a date');
+      return;
+    }
+    if (!time) {
+      alert('Please select a time');
       return;
     }
 
@@ -45,10 +53,20 @@ export default function CreateGroupPage() {
     try {
       const { min: minAge, max: maxAge } = parseAgeRange(ageRange);
 
-      console.log('Creating group with data:', { groupName, groupType, date, time });
+      console.log('Creating group with data:', {
+        name: groupName.trim(),
+        type: groupType,
+        date,
+        time,
+        maxAttendees,
+        description,
+        minAge,
+        maxAge,
+        tags: selectedTags
+      });
 
       const newGroup = await createGroup({
-        name: groupName,
+        name: groupName.trim(),
         type: groupType,
         event_date: date,
         event_time: time,
@@ -61,16 +79,17 @@ export default function CreateGroupPage() {
         requires_approval: true
       });
 
-      console.log('Group created:', newGroup);
+      console.log('Group created successfully:', newGroup);
 
       if (!newGroup || !newGroup.id) {
         throw new Error('Group was created but no ID was returned');
       }
 
+      // Navigate to the new group
       router.push(`/groups/${newGroup.id}`);
     } catch (error: any) {
       console.error('Failed to create group:', error);
-      alert(error.message || 'Failed to create group. Please try again.');
+      alert(`Failed to create group: ${error.message || 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }
