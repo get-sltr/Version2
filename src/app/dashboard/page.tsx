@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
 import { IconSearch, IconMap, IconMenu, IconStar, IconUser, IconCheck, IconEye, IconCrown, IconClose } from '@/components/Icons';
-import BottomNav from '@/components/BottomNav';
+import BottomNavWithBadges from '@/components/BottomNavWithBadges';
 import ProBadge from '@/components/ProBadge';
 import OrbitBadge from '@/components/OrbitBadge';
 import { DTFNButton, DTFNBadge } from '@/components/dtfn';
@@ -381,15 +381,15 @@ export default function Dashboard() {
     }
   };
 
-  const fetchProfilesAtLocation = async (lat: number, lng: number) => {
+  const fetchProfilesAtLocation = async (searchLat: number, searchLng: number) => {
     setLoading(true);
     try {
       // Get profiles with location data
       const { data: profilesData, error } = await supabase
         .from('profiles')
         .select('*')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+        .not('lat', 'is', null)
+        .not('lng', 'is', null);
 
       if (error) throw error;
 
@@ -398,7 +398,7 @@ export default function Dashboard() {
         const maxDistanceKm = 80; // ~50 miles
         const nearbyProfiles = profilesData
           .map(profile => {
-            const distance = getDistanceKm(lat, lng, profile.latitude, profile.longitude);
+            const distance = getDistanceKm(searchLat, searchLng, profile.lat, profile.lng);
             return { ...profile, distanceKm: distance };
           })
           .filter(profile => profile.distanceKm <= maxDistanceKm)
@@ -1329,7 +1329,7 @@ export default function Dashboard() {
         <DTFNButton />
       </div>
 
-      <BottomNav active="explore" />
+      <BottomNavWithBadges />
     </div>
   );
 }

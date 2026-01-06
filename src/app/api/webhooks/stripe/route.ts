@@ -70,10 +70,7 @@ export async function POST(request: NextRequest) {
             .from('profiles')
             .update({
               is_premium: true,
-              premium_plan: plan,
-              premium_expires_at: expiresAt.toISOString(),
-              stripe_customer_id: session.customer as string,
-              stripe_subscription_id: session.subscription as string || null,
+              premium_until: expiresAt.toISOString(),
             })
             .eq('id', userId);
 
@@ -84,18 +81,11 @@ export async function POST(request: NextRequest) {
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        const customerId = typeof subscription.customer === 'string'
-          ? subscription.customer
-          : subscription.customer.id;
 
-        // Find user by stripe customer ID
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('stripe_customer_id', customerId)
-          .single();
+        // Get userId from subscription metadata (set during checkout)
+        const userId = subscription.metadata?.userId;
 
-        if (profile) {
+        if (userId) {
           const isActive = subscription.status === 'active';
           // Get the end date from the subscription items
           const periodEnd = subscription.items?.data?.[0]?.current_period_end;
@@ -104,57 +94,45 @@ export async function POST(request: NextRequest) {
             .from('profiles')
             .update({
               is_premium: isActive,
-              premium_expires_at: isActive && periodEnd
+              premium_until: isActive && periodEnd
                 ? new Date(periodEnd * 1000).toISOString()
                 : null,
             })
-            .eq('id', profile.id);
+            .eq('id', userId);
+
+          console.log(`Subscription updated for user ${userId}, active: ${isActive}`);
         }
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-        const customerId = typeof subscription.customer === 'string'
-          ? subscription.customer
-          : subscription.customer.id;
 
-        // Find user by stripe customer ID and remove premium
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('stripe_customer_id', customerId)
-          .single();
+        // Get userId from subscription metadata (set during checkout)
+        const userId = subscription.metadata?.userId;
 
-        if (profile) {
+        if (userId) {
           await supabase
             .from('profiles')
             .update({
               is_premium: false,
-              premium_plan: null,
-              premium_expires_at: null,
-              stripe_subscription_id: null,
+              premium_until: null,
             })
-            .eq('id', profile.id);
+            .eq('id', userId);
 
-          console.log(`Premium cancelled for user ${profile.id}`);
+          console.log(`Premium cancelled for user ${userId}`);
         }
         break;
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        const customerId = invoice.customer as string;
 
-        // Find user and mark payment as failed
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('stripe_customer_id', customerId)
-          .single();
+        // Get userId from invoice metadata or subscription metadata
+        const userId = (invoice.subscription_details as any)?.metadata?.userId;
 
-        if (profile) {
-          console.log(`Payment failed for user ${profile.id}`);
+        if (userId) {
+          console.log(`Payment failed for user ${userId}`);
           // Optionally send notification or email to user
         }
         break;

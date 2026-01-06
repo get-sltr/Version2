@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { IconClose, IconMenu, IconChat } from '@/components/Icons';
-import BottomNav from '@/components/BottomNav';
+import BottomNavWithBadges from '@/components/BottomNavWithBadges';
 import ProBadge from '@/components/ProBadge';
 
 type ProfilePreview = {
@@ -483,7 +483,7 @@ export default function MessagesPage() {
           </div>
     
         {/* Bottom Navigation */}
-      <BottomNav active="messages" />
+      <BottomNavWithBadges />
     </div>
   );
 }

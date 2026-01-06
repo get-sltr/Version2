@@ -24,12 +24,12 @@ export default function SavedPhrasesPage() {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('is_premium, role')
+          .select('is_premium')
           .eq('id', user.id)
           .single();
 
-        // Premium if is_premium is true OR role is 'founder'
-        const hasPremium = profile?.is_premium === true || profile?.role === 'founder';
+        // Premium if is_premium is true
+        const hasPremium = profile?.is_premium === true;
         setIsPremium(hasPremium);
       }
 

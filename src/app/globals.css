@@ -83,29 +83,27 @@ video {
 
 /* =============================================================================
    Mapbox Marker Click Fix
-   Markers are rendered in a separate overlay div above the canvas.
-   We need to ensure the overlay container allows pointer events through
-   while markers themselves remain clickable.
+   Markers are visual only - clicks are handled via canvas hit detection.
+   All overlay elements should allow pointer events to pass through to canvas.
    ============================================================================= */
 
-/* The overlay container should not block canvas interactions */
+/* All overlay containers should not block canvas interactions */
 .mapboxgl-overlay-container,
 .mapboxgl-control-container {
   pointer-events: none;
 }
 
-/* But markers need to be clickable */
+/* Markers are visual only - clicks pass through to canvas for hit detection */
 .mapboxgl-marker {
-  pointer-events: auto;
-  cursor: pointer;
+  pointer-events: none;
 }
 
-/* Ensure all marker contents are clickable */
+/* Marker contents also pass through */
 .mapboxgl-marker * {
-  pointer-events: auto;
+  pointer-events: none;
 }
 
-/* Controls should also be clickable */
+/* Only controls should be clickable */
 .mapboxgl-ctrl,
 .mapboxgl-ctrl-group {
   pointer-events: auto;

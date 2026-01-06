@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGroups } from '@/lib/api/groups';
 import type { GroupWithHost } from '@/types/database';
+import BottomNavWithBadges from '@/components/BottomNavWithBadges';
 
 export default function GroupsPage() {
   const router = useRouter();
@@ -294,6 +295,8 @@ export default function GroupsPage() {
           </div>
         )}
       </div>
+
+      <BottomNavWithBadges />
     </div>
   );
 }

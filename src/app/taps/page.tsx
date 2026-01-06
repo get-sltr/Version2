@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getReceivedTaps, getSentTaps, markTapViewed, sendTap } from '@/lib/api/taps';
 import { IconFlame, IconWave, IconWink, IconEye, IconClose, IconMenu, IconLocation } from '@/components/Icons';
-import BottomNav from '@/components/BottomNav';
+import BottomNavWithBadges from '@/components/BottomNavWithBadges';
 import type { TapWithUser, TapType } from '@/types/database';
 import posthog from 'posthog-js';
 
@@ -412,7 +412,7 @@ export default function TapsPage() {
       </div>
 
       {/* Bottom Navigation */}
-      <BottomNav active="taps" />
+      <BottomNavWithBadges />
     </div>
   );
 }

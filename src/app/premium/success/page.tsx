@@ -31,7 +31,7 @@ function SuccessContent() {
       if (user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('is_premium, premium_plan')
+          .select('is_premium')
           .eq('id', user.id)
           .single();
 
