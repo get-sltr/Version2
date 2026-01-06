@@ -638,42 +638,30 @@ export default function Dashboard() {
           </div>
         )}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginLeft: '-15px', marginRight: '-15px', paddingLeft: '15px', paddingRight: '15px' }}>
-          <a href="/settings" style={{
-            background: '#0a0a0a',
-            border: '1px solid #333',
-            borderRadius: '6px',
-            padding: '8px 12px',
-            color: '#888',
-            fontSize: '14px',
-            flexShrink: 0,
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            transition: 'all 0.3s ease-out'
-          }}>
-            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
-            <IconMenu size={16} />
-          </a>
           <a href="/favorites" style={{
-            background: '#0a0a0a',
-            border: '1px solid #333',
-            borderRadius: '6px',
-            padding: '8px 12px',
-            color: '#888',
-            fontSize: '14px',
-            flexShrink: 0,
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
             position: 'relative',
             overflow: 'hidden',
-            cursor: 'pointer',
+            background: '#0a0a0a',
+            color: '#888',
+            border: '1px solid #333',
+            borderRadius: '6px',
+            padding: '8px 16px',
+            fontSize: '13px',
+            fontWeight: 'bold',
+            letterSpacing: '0.5px',
+            flexShrink: 0,
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
             transition: 'all 0.3s ease-out'
           }}>
             <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
-            <IconStar size={16} />
+            <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <IconStar size={14} />
+              Faves
+            </span>
           </a>
           {filters.map(filter => {
             const isFilterActive = (filter.id === 'position' && selectedPositions.length > 0) ||
