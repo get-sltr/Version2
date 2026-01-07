@@ -50,13 +50,21 @@ export async function getProfileViews(): Promise<ProfileViewWithViewer[]> {
  */
 export async function recordProfileView(viewedId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) {
+    console.warn('[recordProfileView] No authenticated user');
+    return;
+  }
 
   // Don't record views of own profile
-  if (viewedId === user.id) return;
+  if (viewedId === user.id) {
+    console.log('[recordProfileView] Skipping - viewing own profile');
+    return;
+  }
+
+  console.log('[recordProfileView] Recording view:', { viewer: user.id, viewed: viewedId });
 
   // Upsert to avoid duplicates and update timestamp
-  await supabase
+  const { error } = await supabase
     .from('profile_views')
     .upsert({
       viewer_id: user.id,
@@ -66,6 +74,13 @@ export async function recordProfileView(viewedId: string): Promise<void> {
       onConflict: 'viewer_id,viewed_id',
       ignoreDuplicates: false
     });
+
+  if (error) {
+    console.error('[recordProfileView] Error inserting view:', error);
+    throw error;
+  }
+
+  console.log('[recordProfileView] View recorded successfully');
 }
 
 /**
