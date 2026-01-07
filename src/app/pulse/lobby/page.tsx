@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { usePremium } from '@/hooks/usePremium';
 import { PremiumPromo } from '@/components/PremiumPromo';
@@ -307,34 +306,8 @@ export default function PulseLobbyPage() {
       minHeight: '100vh',
       background: colors.background,
       color: colors.text,
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-      position: 'relative',
-      overflow: 'hidden'
+      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif"
     }}>
-      {/* Background Image */}
-      <Image
-        src="/images/9.png"
-        alt="Background"
-        fill
-        style={{
-          objectFit: 'cover',
-          objectPosition: 'center',
-          zIndex: 0
-        }}
-        priority
-      />
-
-      {/* Dark Overlay for readability */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.8) 100%)',
-        zIndex: 1
-      }} />
-
       {/* Header */}
       <header style={{
         position: 'sticky',
@@ -417,7 +390,7 @@ export default function PulseLobbyPage() {
       </header>
 
       {/* Main */}
-      <main style={{ padding: '48px 24px', maxWidth: '1000px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+      <main style={{ padding: '48px 24px', maxWidth: '1000px', margin: '0 auto' }}>
         {/* Welcome */}
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2 style={{
