@@ -189,6 +189,13 @@ export default function Dashboard() {
       return;
     }
 
+    // Fetch current user's location directly (don't rely on state which may not be set yet)
+    const { data: currentUserProfile } = await supabase
+      .from('profiles')
+      .select('lat, lng')
+      .eq('id', user.id)
+      .single();
+
     // EARLY STAGE: Show all profiles, less restrictive filtering
     let query = supabase
       .from('profiles')
@@ -240,17 +247,17 @@ export default function Dashboard() {
     if (selectedTribes.length > 0) {
       // For JSONB array contains, we need to use a different approach
       // This will filter profiles that have any of the selected tribes
-      const tribeConditions = selectedTribes.map(tribe => 
+      const tribeConditions = selectedTribes.map(tribe =>
         `tribes @> '["${tribe}"]'`
       ).join(' OR ');
       // Note: This requires a raw SQL approach, but Supabase client doesn't support it directly
       // We'll filter in JavaScript instead for now
     }
 
-    // Get user's location for distance-based sorting
-    const userLat = currentUser?.lat;
-    const userLng = currentUser?.lng;
-    const hasLocation = userLat && userLng && 
+    // Get user's location for distance-based sorting (from fresh DB fetch, not state)
+    const userLat = currentUserProfile?.lat;
+    const userLng = currentUserProfile?.lng;
+    const hasLocation = userLat && userLng &&
                        typeof userLat === 'number' && typeof userLng === 'number' &&
                        !isNaN(userLat) && !isNaN(userLng);
 
