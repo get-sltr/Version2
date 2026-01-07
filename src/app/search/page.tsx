@@ -2,12 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { usePremium } from '@/hooks/usePremium';
 
 export default function SearchPage() {
   const router = useRouter();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  
+  const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
+
   // Filters
   const [ageMin, setAgeMin] = useState(18);
   const [ageMax, setAgeMax] = useState(80);
@@ -16,6 +19,32 @@ export default function SearchPage() {
   const [tribes, setTribes] = useState<string[]>([]);
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [withPhotos, setWithPhotos] = useState(false);
+
+  // Track which filter category is active (for free users - only 1 allowed)
+  const getActiveFilterType = (): string | null => {
+    if (ageMin !== 18 || ageMax !== 80) return 'age';
+    if (distance !== 30) return 'distance';
+    if (position.length > 0) return 'position';
+    if (tribes.length > 0) return 'tribes';
+    if (onlineOnly) return 'online';
+    if (withPhotos) return 'photos';
+    return null;
+  };
+
+  const activeFilterType = getActiveFilterType();
+  const canUseFilter = (filterType: string) => {
+    if (premiumLoading || isPremium) return true;
+    if (!activeFilterType) return true;
+    return activeFilterType === filterType;
+  };
+
+  const handleFilterAttempt = (filterType: string, action: () => void) => {
+    if (canUseFilter(filterType)) {
+      action();
+    } else {
+      setShowPremiumPrompt(true);
+    }
+  };
 
   const positions = ['Top', 'Bottom', 'Versatile', 'Top Vers', 'Btm Vers', 'Side'];
   const tribeOptions = ['Bear', 'Twink', 'Jock', 'Otter', 'Daddy', 'Leather', 'Poz', 'Discreet', 'Clean Cut'];
@@ -200,10 +229,26 @@ export default function SearchPage() {
           maxHeight: '60vh',
           overflowY: 'auto'
         }}>
+          {/* Free user warning */}
+          {!premiumLoading && !isPremium && (
+            <div style={{
+              background: 'rgba(255,107,53,0.1)',
+              border: '1px solid rgba(255,107,53,0.3)',
+              borderRadius: '12px',
+              padding: '12px 16px',
+              marginBottom: '20px',
+              fontSize: '13px',
+              color: '#FF6B35'
+            }}>
+              🔒 Free users can use 1 filter type. <span onClick={() => router.push('/premium')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Upgrade</span> for unlimited filters.
+            </div>
+          )}
+
           {/* Age Range */}
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '24px', opacity: canUseFilter('age') ? 1 : 0.4 }}>
             <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
               Age Range: {ageMin} - {ageMax}
+              {!canUseFilter('age') && <span style={{ color: '#FF6B35', marginLeft: '8px' }}>🔒</span>}
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <input
@@ -211,45 +256,50 @@ export default function SearchPage() {
                 min="18"
                 max="80"
                 value={ageMin}
-                onChange={(e) => setAgeMin(Math.min(parseInt(e.target.value), ageMax - 1))}
+                onChange={(e) => handleFilterAttempt('age', () => setAgeMin(Math.min(parseInt(e.target.value), ageMax - 1)))}
                 style={{ flex: 1 }}
+                disabled={!canUseFilter('age')}
               />
               <input
                 type="range"
                 min="18"
                 max="80"
                 value={ageMax}
-                onChange={(e) => setAgeMax(Math.max(parseInt(e.target.value), ageMin + 1))}
+                onChange={(e) => handleFilterAttempt('age', () => setAgeMax(Math.max(parseInt(e.target.value), ageMin + 1)))}
                 style={{ flex: 1 }}
+                disabled={!canUseFilter('age')}
               />
             </div>
           </div>
 
           {/* Distance */}
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '24px', opacity: canUseFilter('distance') ? 1 : 0.4 }}>
             <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
               Maximum Distance: {distance} mi
+              {!canUseFilter('distance') && <span style={{ color: '#FF6B35', marginLeft: '8px' }}>🔒</span>}
             </div>
             <input
               type="range"
               min="1"
               max="100"
               value={distance}
-              onChange={(e) => setDistance(parseInt(e.target.value))}
+              onChange={(e) => handleFilterAttempt('distance', () => setDistance(parseInt(e.target.value)))}
               style={{ width: '100%' }}
+              disabled={!canUseFilter('distance')}
             />
           </div>
 
           {/* Position */}
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '24px', opacity: canUseFilter('position') ? 1 : 0.4 }}>
             <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
               Position
+              {!canUseFilter('position') && <span style={{ color: '#FF6B35', marginLeft: '8px' }}>🔒</span>}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {positions.map(pos => (
                 <button
                   key={pos}
-                  onClick={() => togglePosition(pos)}
+                  onClick={() => handleFilterAttempt('position', () => togglePosition(pos))}
                   style={{
                     background: position.includes(pos) ? 'rgba(255,107,53,0.2)' : '#2c2c2e',
                     border: position.includes(pos) ? '1px solid rgba(255,107,53,0.5)' : '1px solid #444',
@@ -257,7 +307,7 @@ export default function SearchPage() {
                     padding: '8px 16px',
                     color: position.includes(pos) ? '#FF6B35' : '#fff',
                     fontSize: '14px',
-                    cursor: 'pointer'
+                    cursor: canUseFilter('position') ? 'pointer' : 'not-allowed'
                   }}
                 >
                   {pos}
@@ -267,15 +317,16 @@ export default function SearchPage() {
           </div>
 
           {/* Tribes */}
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '24px', opacity: canUseFilter('tribes') ? 1 : 0.4 }}>
             <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#aaa' }}>
               Tribes
+              {!canUseFilter('tribes') && <span style={{ color: '#FF6B35', marginLeft: '8px' }}>🔒</span>}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {tribeOptions.map(tribe => (
                 <button
                   key={tribe}
-                  onClick={() => toggleTribe(tribe)}
+                  onClick={() => handleFilterAttempt('tribes', () => toggleTribe(tribe))}
                   style={{
                     background: tribes.includes(tribe) ? 'rgba(255,107,53,0.2)' : '#2c2c2e',
                     border: tribes.includes(tribe) ? '1px solid rgba(255,107,53,0.5)' : '1px solid #444',
@@ -283,7 +334,7 @@ export default function SearchPage() {
                     padding: '8px 16px',
                     color: tribes.includes(tribe) ? '#FF6B35' : '#fff',
                     fontSize: '14px',
-                    cursor: 'pointer'
+                    cursor: canUseFilter('tribes') ? 'pointer' : 'not-allowed'
                   }}
                 >
                   {tribe}
@@ -299,11 +350,15 @@ export default function SearchPage() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 0',
-              cursor: 'pointer'
+              cursor: canUseFilter('online') ? 'pointer' : 'not-allowed',
+              opacity: canUseFilter('online') ? 1 : 0.4
             }}>
-              <span style={{ fontSize: '15px' }}>Online Only</span>
+              <span style={{ fontSize: '15px' }}>
+                Online Only
+                {!canUseFilter('online') && <span style={{ color: '#FF6B35', marginLeft: '8px' }}>🔒</span>}
+              </span>
               <div
-                onClick={() => setOnlineOnly(!onlineOnly)}
+                onClick={() => handleFilterAttempt('online', () => setOnlineOnly(!onlineOnly))}
                 style={{
                   width: '44px',
                   height: '24px',
@@ -331,11 +386,15 @@ export default function SearchPage() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '12px 0',
-              cursor: 'pointer'
+              cursor: canUseFilter('photos') ? 'pointer' : 'not-allowed',
+              opacity: canUseFilter('photos') ? 1 : 0.4
             }}>
-              <span style={{ fontSize: '15px' }}>With Photos Only</span>
+              <span style={{ fontSize: '15px' }}>
+                With Photos Only
+                {!canUseFilter('photos') && <span style={{ color: '#FF6B35', marginLeft: '8px' }}>🔒</span>}
+              </span>
               <div
-                onClick={() => setWithPhotos(!withPhotos)}
+                onClick={() => handleFilterAttempt('photos', () => setWithPhotos(!withPhotos))}
                 style={{
                   width: '44px',
                   height: '24px',
@@ -497,6 +556,93 @@ export default function SearchPage() {
           </div>
         )}
       </div>
+
+      {/* Premium Prompt Modal */}
+      {showPremiumPrompt && (
+        <div
+          onClick={() => setShowPremiumPrompt(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#1c1c1e',
+              borderRadius: '20px',
+              padding: '32px 24px',
+              maxWidth: '340px',
+              width: '100%',
+              textAlign: 'center',
+              border: '1px solid rgba(255,107,53,0.3)'
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+            <h3 style={{
+              fontSize: '22px',
+              fontWeight: 700,
+              marginBottom: '12px',
+              color: '#fff'
+            }}>
+              Multiple Filters
+            </h3>
+            <p style={{
+              fontSize: '15px',
+              color: '#aaa',
+              marginBottom: '24px',
+              lineHeight: 1.5
+            }}>
+              Free users can only use one filter type at a time. Upgrade to Premium for unlimited filters.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setShowPremiumPrompt(false);
+                  router.push('/premium');
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  color: '#fff',
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 20px rgba(255,107,53,0.4)'
+                }}
+              >
+                Upgrade to Premium
+              </button>
+              <button
+                onClick={() => setShowPremiumPrompt(false)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #444',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  color: '#aaa',
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { usePremium } from '@/hooks/usePremium';
 import { getCruisingUpdates, postCruisingUpdate, deleteCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import type { CruisingUpdateWithUser } from '@/lib/api/cruisingUpdates';
 
 export default function CruisingUpdatesPage() {
   const router = useRouter();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [sortBy, setSortBy] = useState<'time' | 'distance'>('time');
   const [updateText, setUpdateText] = useState('');
   const [isHosting, setIsHosting] = useState(false);
@@ -18,6 +20,7 @@ export default function CruisingUpdatesPage() {
   const [posting, setPosting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
 
   // Get user location
   useEffect(() => {
@@ -71,6 +74,12 @@ export default function CruisingUpdatesPage() {
   // Post update
   const handlePostUpdate = async () => {
     if (!updateText.trim() || posting) return;
+
+    // Check premium status before posting
+    if (!premiumLoading && !isPremium) {
+      setShowPremiumPrompt(true);
+      return;
+    }
 
     setPosting(true);
     try {
@@ -419,7 +428,12 @@ export default function CruisingUpdatesPage() {
             value={updateText}
             onChange={(e) => setUpdateText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !posting && handlePostUpdate()}
-            placeholder="Post an update..."
+            onFocus={() => {
+              if (!premiumLoading && !isPremium) {
+                setShowPremiumPrompt(true);
+              }
+            }}
+            placeholder={!premiumLoading && !isPremium ? "Upgrade to post updates..." : "Post an update..."}
             maxLength={200}
             style={{
               flex: 1,
@@ -429,7 +443,8 @@ export default function CruisingUpdatesPage() {
               padding: '14px 20px',
               color: '#fff',
               fontSize: '15px',
-              outline: 'none'
+              outline: 'none',
+              opacity: !premiumLoading && !isPremium ? 0.6 : 1
             }}
           />
           <button
@@ -454,6 +469,74 @@ export default function CruisingUpdatesPage() {
           </button>
         </div>
       </div>
+
+      {/* Premium Prompt Modal */}
+      {showPremiumPrompt && (
+        <div
+          onClick={() => setShowPremiumPrompt(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 1000
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#1c1c1e',
+              borderRadius: '24px',
+              padding: '32px 24px',
+              maxWidth: '340px',
+              width: '100%',
+              textAlign: 'center'
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
+            <h3 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '12px' }}>
+              Post Cruising Updates
+            </h3>
+            <p style={{ fontSize: '15px', color: '#888', marginBottom: '24px', lineHeight: 1.5 }}>
+              Upgrade to SLTR Pro to post updates and let others know where you are
+            </p>
+            <button
+              onClick={() => router.push('/premium')}
+              style={{
+                width: '100%',
+                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                border: 'none',
+                borderRadius: '14px',
+                padding: '16px',
+                color: '#fff',
+                fontSize: '16px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                marginBottom: '12px'
+              }}
+            >
+              Upgrade to Pro
+            </button>
+            <button
+              onClick={() => setShowPremiumPrompt(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#666',
+                fontSize: '14px',
+                cursor: 'pointer',
+                padding: '8px'
+              }}
+            >
+              Maybe Later
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

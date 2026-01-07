@@ -86,3 +86,36 @@ export async function listPhotosInAlbum(albumId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function listUserAlbums(userId: string, includePrivate = false) {
+  let query = supabase
+    .from('profile_albums')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (!includePrivate) {
+    query = query.eq('is_private', false);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
+}
+
+export async function getAlbumById(albumId: string) {
+  const { data, error } = await supabase
+    .from('profile_albums')
+    .select('*')
+    .eq('id', albumId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAlbumWithPhotos(albumId: string) {
+  const album = await getAlbumById(albumId);
+  const photos = await listPhotosInAlbum(albumId);
+  return { album, photos };
+}

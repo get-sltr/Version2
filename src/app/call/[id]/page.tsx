@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
+import { usePremium } from '@/hooks/usePremium';
+import { PremiumPromo } from '@/components/PremiumPromo';
 
 type CallerProfile = {
   id: string;
@@ -14,6 +16,7 @@ export default function VideoCallPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const otherUserId = params.id as string;
   const roomUrl = searchParams.get('room');
 
@@ -26,6 +29,11 @@ export default function VideoCallPage() {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Premium gate - block non-premium users
+  if (!premiumLoading && !isPremium) {
+    return <PremiumPromo feature="Video Calls" fullPage />;
+  }
 
   // Load caller profile
   useEffect(() => {

@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabase';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { usePremium, useMessage } from '@/hooks/usePremium';
 import { PremiumPromo } from '@/components/PremiumPromo';
+import { listMyAlbums, listPhotosInAlbum, getAlbumWithPhotos } from '@/lib/api/albumMedia';
 import posthog from 'posthog-js';
 
 type MessageRecord = {
@@ -20,6 +21,7 @@ type MessageRecord = {
   created_at: string;
   image_url?: string | null;
   shared_profile_id?: string | null;
+  shared_album_id?: string | null;
   is_expiring?: boolean;
   expiring_duration?: number; // seconds
 };
@@ -34,6 +36,14 @@ type ShareableProfile = {
   id: string;
   display_name: string | null;
   photo_url: string | null;
+};
+
+type ShareableAlbum = {
+  id: string;
+  name: string;
+  description: string | null;
+  cover_photo_url: string | null;
+  photo_count?: number;
 };
 
 const MAX_MESSAGE_LENGTH = 2000;
@@ -96,6 +106,12 @@ export default function ConversationPage() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [sharedProfilesCache, setSharedProfilesCache] = useState<Record<string, ShareableProfile>>({});
   const [startingVideoCall, setStartingVideoCall] = useState(false);
+
+  // Album sharing states
+  const [showAlbumShare, setShowAlbumShare] = useState(false);
+  const [shareableAlbums, setShareableAlbums] = useState<ShareableAlbum[]>([]);
+  const [loadingAlbums, setLoadingAlbums] = useState(false);
+  const [sharedAlbumsCache, setSharedAlbumsCache] = useState<Record<string, ShareableAlbum>>({});
 
   // Hide chat photos feature
   const [hideChatPhotos, setHideChatPhotos] = useState<{ enabled: boolean; blurLevel: 'light' | 'heavy' }>({ enabled: false, blurLevel: 'light' });
@@ -218,6 +234,24 @@ export default function ConversationPage() {
         }
       }
 
+      // Load shared albums data
+      const sharedAlbumIds = thread
+        .filter(m => m.type === 'album_share' && m.shared_album_id)
+        .map(m => m.shared_album_id as string);
+
+      if (sharedAlbumIds.length > 0) {
+        const { data: albums } = await supabase
+          .from('profile_albums')
+          .select('id, name, description, cover_photo_url')
+          .in('id', sharedAlbumIds);
+
+        if (albums) {
+          const cache: Record<string, ShareableAlbum> = {};
+          albums.forEach(a => { cache[a.id] = a; });
+          setSharedAlbumsCache(prev => ({ ...prev, ...cache }));
+        }
+      }
+
       if (mounted) {
         setMessages(thread);
         setLoading(false);
@@ -280,7 +314,7 @@ export default function ConversationPage() {
     };
   }, [otherUserId]);
 
-  const sendMessage = async (type: string = 'text', content?: string, imageUrl?: string, sharedProfileId?: string) => {
+  const sendMessage = async (type: string = 'text', content?: string, imageUrl?: string, sharedProfileId?: string, sharedAlbumId?: string) => {
     const messageContent = content ?? input.trim();
 
     if (type === 'text' && !messageContent) {
@@ -316,6 +350,7 @@ export default function ConversationPage() {
       created_at: new Date().toISOString(),
       image_url: imageUrl || null,
       shared_profile_id: sharedProfileId || null,
+      shared_album_id: sharedAlbumId || null,
       is_expiring: isExpiringImage,
       expiring_duration: isExpiringImage ? expiringDuration : undefined,
     };
@@ -335,6 +370,7 @@ export default function ConversationPage() {
       };
       if (imageUrl) insertData.image_url = imageUrl;
       if (sharedProfileId) insertData.shared_profile_id = sharedProfileId;
+      if (sharedAlbumId) insertData.shared_album_id = sharedAlbumId;
 
       const { error: sendError } = await supabase.from('messages').insert(insertData);
 
@@ -347,6 +383,7 @@ export default function ConversationPage() {
           recipient_id: otherUserId,
           has_image: !!imageUrl,
           has_shared_profile: !!sharedProfileId,
+          has_shared_album: !!sharedAlbumId,
           is_expiring: isExpiringImage,
         });
       }
@@ -479,6 +516,42 @@ export default function ConversationPage() {
     }
     await sendMessage('profile_share', `Shared a profile`, undefined, profileId);
     setShowProfileShare(false);
+  };
+
+  const loadShareableAlbums = async () => {
+    if (!currentUserId) return;
+    setLoadingAlbums(true);
+
+    try {
+      const albums = await listMyAlbums();
+      // Get photo count for each album
+      const albumsWithCount = await Promise.all(
+        (albums || []).map(async (album: any) => {
+          const photos = await listPhotosInAlbum(album.id);
+          return {
+            id: album.id,
+            name: album.name,
+            description: album.description,
+            cover_photo_url: album.cover_photo_url || (photos?.[0]?.public_url || null),
+            photo_count: photos?.length || 0,
+          };
+        })
+      );
+      setShareableAlbums(albumsWithCount);
+    } catch (err) {
+      console.error('Failed to load albums:', err);
+    } finally {
+      setLoadingAlbums(false);
+    }
+  };
+
+  const shareAlbum = async (albumId: string) => {
+    const album = shareableAlbums.find(a => a.id === albumId);
+    if (album) {
+      setSharedAlbumsCache(prev => ({ ...prev, [albumId]: album }));
+    }
+    await sendMessage('album_share', `Shared an album: ${album?.name || 'Album'}`, undefined, undefined, albumId);
+    setShowAlbumShare(false);
   };
 
   const handleDeleteMessage = async (messageId: string) => {
@@ -864,6 +937,61 @@ export default function ConversationPage() {
       );
     }
 
+    // Album share message
+    if (m.type === 'album_share' && m.shared_album_id) {
+      const sharedAlbum = sharedAlbumsCache[m.shared_album_id];
+      return (
+        <div
+          key={m.id}
+          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '10px' }}
+        >
+          <div
+            style={{
+              maxWidth: '70%',
+              background: mine ? colors.accent : colors.surface,
+              borderRadius: '12px',
+              border: `1px solid ${colors.border}`,
+              overflow: 'hidden',
+              cursor: 'pointer',
+            }}
+            onClick={() => {
+              // Open album viewer - for now we navigate to the sender's profile
+              // In future, this could open a dedicated album viewer
+              router.push(`/profile/${m.sender_id}`);
+            }}
+          >
+            <div style={{
+              width: '100%',
+              height: '120px',
+              background: sharedAlbum?.cover_photo_url ? `url(${sharedAlbum.cover_photo_url}) center/cover` : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              {!sharedAlbum?.cover_photo_url && <span style={{ fontSize: '32px' }}>🖼️</span>}
+            </div>
+            <div style={{ padding: '10px 12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px' }}>📷</span>
+                <div>
+                  <div style={{ fontWeight: 600, color: mine ? '#fff' : colors.text }}>
+                    {sharedAlbum?.name || 'Album'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary }}>
+                    Tap to view album
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style={{ fontSize: '10px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary, padding: '0 12px 8px', textAlign: mine ? 'right' : 'left' }}>
+              {formatTime(m.created_at)}
+              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // Video call message
     if (m.type === 'video_call') {
       return (
@@ -1162,6 +1290,89 @@ export default function ConversationPage() {
         </div>
       )}
 
+      {/* Album share modal */}
+      {showAlbumShare && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+        }}
+        onClick={() => setShowAlbumShare(false)}
+        >
+          <div
+            style={{
+              background: colors.background,
+              borderRadius: '16px 16px 0 0',
+              width: '100%',
+              maxHeight: '70vh',
+              overflow: 'hidden',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ padding: '16px', borderBottom: `1px solid ${colors.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, fontSize: '18px' }}>Share an Album</span>
+              <button onClick={() => setShowAlbumShare(false)} style={{ background: 'none', border: 'none', color: colors.text, fontSize: '20px', cursor: 'pointer' }}>×</button>
+            </div>
+            <div style={{ padding: '16px', maxHeight: '50vh', overflowY: 'auto' }}>
+              {loadingAlbums ? (
+                <div style={{ textAlign: 'center', padding: '20px', color: colors.textSecondary }}>Loading albums...</div>
+              ) : shareableAlbums.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '20px', color: colors.textSecondary }}>
+                  <p>No albums to share</p>
+                  <p style={{ fontSize: '13px', marginTop: '8px' }}>
+                    Create albums in your profile to share them here
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                  {shareableAlbums.map(album => (
+                    <button
+                      key={album.id}
+                      onClick={() => shareAlbum(album.id)}
+                      style={{
+                        background: colors.surface,
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: '12px',
+                        padding: '0',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div style={{
+                        width: '100%',
+                        height: '100px',
+                        background: album.cover_photo_url ? `url(${album.cover_photo_url}) center/cover` : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                        {!album.cover_photo_url && <span style={{ fontSize: '28px' }}>📷</span>}
+                      </div>
+                      <div style={{ padding: '10px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {album.name}
+                        </div>
+                        <div style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '4px' }}>
+                          {album.photo_count || 0} photos
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Report modal */}
       {showReportModal && (
         <div style={{
@@ -1265,6 +1476,13 @@ export default function ConversationPage() {
             title="Share profile"
           >
             👤
+          </button>
+          <button
+            onClick={() => { setShowAlbumShare(true); loadShareableAlbums(); }}
+            style={{ background: 'none', border: 'none', color: colors.textSecondary, fontSize: '20px', cursor: 'pointer' }}
+            title="Share album"
+          >
+            🖼️
           </button>
         </div>
 

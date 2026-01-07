@@ -1,31 +1,17 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useCallback } from 'react';
-import { MatrixRain } from '../components/landing/MatrixRain';
+import { useState } from 'react';
 import { CapsuleButton } from '../components/landing/CapsuleButton';
 import { LightBulbFlicker } from '../components/landing/LightBulbFlicker';
 import { RevealContainer } from '../components/landing/RevealText';
 
 export default function LandingPage() {
-  const [showRain, setShowRain] = useState(true);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const [lightsActive, setLightsActive] = useState(false);
-  const [sltrLetters, setSltrLetters] = useState<string[]>([]);
-
-  const handleRevealComplete = useCallback(() => {
-    setShowRain(false);
-    setSltrLetters(['s', 'l', 't', 'r']);
-
-    setTimeout(() => {
-      setLightsActive(true);
-      setTimeout(() => {
-        setIsRevealed(true);
-      }, 400);
-    }, 300);
-  }, []);
+  const [isRevealed] = useState(true);
+  const [lightsActive, setLightsActive] = useState(true);
+  const sltrLetters = ['s', 'l', 't', 'r'];
 
   const handleButtonClick = () => {
     setLightsActive(false);
@@ -72,14 +58,6 @@ export default function LandingPage() {
 
       {/* Light Bulb Flicker Effect */}
       <LightBulbFlicker isActive={lightsActive} intensity={0.9} />
-
-      {/* Matrix Rain Effect */}
-      <AnimatePresence>
-        {showRain && (
-          <MatrixRain onRevealComplete={handleRevealComplete} targetText="sltr" />
-        )}
-      </AnimatePresence>
-
 
       {/* Hero Section */}
       <section

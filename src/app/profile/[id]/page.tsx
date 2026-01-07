@@ -8,7 +8,25 @@ import ProBadge from '@/components/ProBadge';
 import OrbitBadge from '@/components/OrbitBadge';
 import { DTFNBadge } from '@/components/dtfn';
 import { recordProfileView } from '@/lib/api/views';
+import { listUserAlbums, listPhotosInAlbum } from '@/lib/api/albumMedia';
 import posthog from 'posthog-js';
+
+type Album = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  is_private: boolean;
+  cover_photo_url: string | null;
+  created_at: string;
+};
+
+type AlbumPhoto = {
+  id: string;
+  album_id: string;
+  public_url: string;
+  caption: string | null;
+};
 
 // Tap types available - now using components
 const TAP_TYPES = [
@@ -77,6 +95,11 @@ export default function ProfileViewPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [hostedGroups, setHostedGroups] = useState<any[]>([]);
   const [photoIndex, setPhotoIndex] = useState<number | null>(null);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [albumPhotos, setAlbumPhotos] = useState<AlbumPhoto[]>([]);
+  const [loadingAlbumPhotos, setLoadingAlbumPhotos] = useState(false);
+  const [albumPhotoIndex, setAlbumPhotoIndex] = useState<number | null>(null);
 
   // Validate and extract profile ID
   const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
@@ -147,6 +170,14 @@ export default function ProfileViewPage() {
 
           if (groupsData) {
             setHostedGroups(groupsData);
+          }
+
+          // Fetch user's public albums
+          try {
+            const albumsData = await listUserAlbums(profileId, false);
+            setAlbums(albumsData || []);
+          } catch (err) {
+            console.error('Failed to load albums:', err);
           }
         } else {
           setError('Profile not found');
@@ -241,6 +272,20 @@ export default function ProfileViewPage() {
       console.error('Favorite error:', error);
     }
     setActionLoading(false);
+  };
+
+  // Handle opening an album
+  const handleOpenAlbum = async (album: Album) => {
+    setSelectedAlbum(album);
+    setLoadingAlbumPhotos(true);
+    try {
+      const photos = await listPhotosInAlbum(album.id);
+      setAlbumPhotos(photos || []);
+    } catch (err) {
+      console.error('Failed to load album photos:', err);
+    } finally {
+      setLoadingAlbumPhotos(false);
+    }
   };
 
   if (loading) {
@@ -563,6 +608,68 @@ export default function ProfileViewPage() {
           </div>
         )}
 
+        {/* Albums Section */}
+        {albums.length > 0 && (
+          <div style={{ padding: '20px 0', borderBottom: hostedGroups.length > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
+            <SectionHeader title="Albums" />
+            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+              {albums.map((album) => (
+                <button
+                  key={album.id}
+                  onClick={() => handleOpenAlbum(album)}
+                  style={{
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
+                    padding: '0',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    width: '120px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    background: album.cover_photo_url ? `url(${album.cover_photo_url}) center/cover` : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    {!album.cover_photo_url && (
+                      <span style={{ fontSize: '32px' }}>📷</span>
+                    )}
+                  </div>
+                  <div style={{ padding: '10px', textAlign: 'left' }}>
+                    <div style={{
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: '#fff',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {album.name}
+                    </div>
+                    {album.description && (
+                      <div style={{
+                        fontSize: '11px',
+                        color: 'rgba(255,255,255,0.5)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        marginTop: '2px',
+                      }}>
+                        {album.description}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Hosted Groups Section */}
         {hostedGroups.length > 0 && (
           <div style={{ padding: '20px 0' }}>
@@ -826,6 +933,229 @@ export default function ProfileViewPage() {
                     }}
                   />
                 ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Album Viewer Modal */}
+      {selectedAlbum && (
+        <div
+          onClick={() => { setSelectedAlbum(null); setAlbumPhotos([]); setAlbumPhotoIndex(null); }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.95)',
+            zIndex: 300,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Album Header */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              padding: '16px',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{selectedAlbum.name}</h3>
+              {selectedAlbum.description && (
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
+                  {selectedAlbum.description}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => { setSelectedAlbum(null); setAlbumPhotos([]); setAlbumPhotoIndex(null); }}
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                color: '#fff',
+                fontSize: '20px',
+                cursor: 'pointer',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Album Photos Grid */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '16px',
+            }}
+          >
+            {loadingAlbumPhotos ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.6)' }}>
+                Loading photos...
+              </div>
+            ) : albumPhotos.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.6)' }}>
+                No photos in this album
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                {albumPhotos.map((photo, index) => (
+                  <div
+                    key={photo.id}
+                    onClick={() => setAlbumPhotoIndex(index)}
+                    style={{
+                      aspectRatio: '1',
+                      background: '#1a1a1a',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <img
+                      src={photo.public_url}
+                      alt={photo.caption || ''}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Album Photo Lightbox */}
+      {albumPhotoIndex !== null && albumPhotos.length > 0 && (() => {
+        const currentPhoto = albumPhotos[albumPhotoIndex];
+        const hasPrev = albumPhotoIndex > 0;
+        const hasNext = albumPhotoIndex < albumPhotos.length - 1;
+
+        return (
+          <div
+            onClick={() => setAlbumPhotoIndex(null)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.98)',
+              zIndex: 400,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px',
+            }}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setAlbumPhotoIndex(null)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255,255,255,0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '44px',
+                height: '44px',
+                color: '#fff',
+                fontSize: '24px',
+                cursor: 'pointer',
+                zIndex: 10,
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Photo counter */}
+            <div style={{
+              position: 'absolute',
+              top: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'rgba(255,255,255,0.7)',
+              fontSize: '14px',
+            }}>
+              {albumPhotoIndex + 1} / {albumPhotos.length}
+            </div>
+
+            {/* Previous arrow */}
+            {hasPrev && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setAlbumPhotoIndex(albumPhotoIndex - 1); }}
+                style={{
+                  position: 'absolute',
+                  left: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '48px',
+                  height: '48px',
+                  color: '#fff',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                }}
+              >
+                ‹
+              </button>
+            )}
+
+            {/* Next arrow */}
+            {hasNext && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setAlbumPhotoIndex(albumPhotoIndex + 1); }}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '48px',
+                  height: '48px',
+                  color: '#fff',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                }}
+              >
+                ›
+              </button>
+            )}
+
+            {/* Photo */}
+            <img
+              src={currentPhoto.public_url}
+              alt={currentPhoto.caption || ''}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '75vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+              }}
+            />
+
+            {/* Caption */}
+            {currentPhoto.caption && (
+              <div style={{
+                marginTop: '16px',
+                padding: '12px 20px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '8px',
+                maxWidth: '80%',
+                textAlign: 'center',
+              }}>
+                <p style={{ margin: 0, fontSize: '14px', color: '#fff' }}>{currentPhoto.caption}</p>
               </div>
             )}
           </div>

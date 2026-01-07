@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
+import { usePremium } from '@/hooks/usePremium';
 import { getProfileViews, markViewSeen, markAllViewsSeen, type ProfileViewWithViewer } from '@/lib/api/views';
 import { IconClose, IconMenu, IconLocation } from '@/components/Icons';
 import BottomNavWithBadges from '@/components/BottomNavWithBadges';
@@ -38,6 +40,8 @@ function FlameIcon({ size = 20, color = '#ff6b35' }: { size?: number; color?: st
 
 export default function ViewsPage() {
   const { colors } = useTheme();
+  const router = useRouter();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [views, setViews] = useState<ProfileViewWithViewer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -188,146 +192,194 @@ export default function ViewsPage() {
           </div>
         )}
 
-        {!loading && !error && views.length > 0 && views.map(view => (
-          <div
-            key={view.id}
-            onClick={() => !view.seen_at && handleMarkSeen(view.id)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px',
-              padding: '15px 20px',
-              borderBottom: `1px solid ${colors.border}`,
-              position: 'relative',
-              background: !view.seen_at
-                ? 'rgba(255,107,53,0.05)'
-                : 'transparent'
-            }}
-          >
-            {/* Unseen indicator */}
-            {!view.seen_at && (
-              <div style={{
-                position: 'absolute',
-                left: '8px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: colors.accent
-              }} />
-            )}
+        {!loading && !error && views.length > 0 && views.map((view, index) => {
+          // Free users can only see the first profile clearly
+          const isBlurred = !isPremium && !premiumLoading && index > 0;
 
-            {/* Profile Image */}
-            <Link
-              href={`/profile/${view.viewer.id}`}
-              style={{ position: 'relative', flexShrink: 0, textDecoration: 'none' }}
+          return (
+            <div
+              key={view.id}
+              onClick={() => {
+                if (isBlurred) return; // Don't allow interaction with blurred items
+                if (!view.seen_at) handleMarkSeen(view.id);
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                padding: '15px 20px',
+                borderBottom: `1px solid ${colors.border}`,
+                position: 'relative',
+                background: !view.seen_at
+                  ? 'rgba(255,107,53,0.05)'
+                  : 'transparent',
+                filter: isBlurred ? 'blur(8px)' : 'none',
+                pointerEvents: isBlurred ? 'none' : 'auto',
+                userSelect: isBlurred ? 'none' : 'auto'
+              }}
             >
-              <div
-                style={{
-                  width: '70px',
-                  height: '70px',
+              {/* Unseen indicator */}
+              {!view.seen_at && (
+                <div style={{
+                  position: 'absolute',
+                  left: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '6px',
+                  height: '6px',
                   borderRadius: '50%',
-                  background: '#333',
-                  backgroundImage: view.viewer.photo_url ? `url(${view.viewer.photo_url})` : 'none',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              />
-              {view.viewer.is_online && (
+                  background: colors.accent
+                }} />
+              )}
+
+              {/* Profile Image */}
+              <Link
+                href={`/profile/${view.viewer.id}`}
+                style={{ position: 'relative', flexShrink: 0, textDecoration: 'none' }}
+              >
                 <div
                   style={{
-                    position: 'absolute',
-                    bottom: '2px',
-                    right: '2px',
-                    width: '16px',
-                    height: '16px',
+                    width: '70px',
+                    height: '70px',
                     borderRadius: '50%',
-                    background: colors.accent,
-                    border: `3px solid ${colors.background}`
+                    background: '#333',
+                    backgroundImage: view.viewer.photo_url ? `url(${view.viewer.photo_url})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
                   }}
                 />
-              )}
-            </Link>
+                {view.viewer.is_online && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '2px',
+                      right: '2px',
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      background: colors.accent,
+                      border: `3px solid ${colors.background}`
+                    }}
+                  />
+                )}
+              </Link>
 
-            {/* User Info */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <Link
-                  href={`/profile/${view.viewer.id}`}
-                  style={{ fontSize: '17px', fontWeight: 600, textDecoration: 'none', color: colors.text }}
-                >
-                  {view.viewer.display_name || 'User'}
-                  {view.viewer.age && <span style={{ fontWeight: 400, color: colors.textSecondary }}>, {view.viewer.age}</span>}
-                </Link>
-                <div style={{ fontSize: '13px', color: colors.textSecondary }}>
-                  {formatRelativeTime(view.created_at)}
+              {/* User Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <Link
+                    href={`/profile/${view.viewer.id}`}
+                    style={{ fontSize: '17px', fontWeight: 600, textDecoration: 'none', color: colors.text }}
+                  >
+                    {view.viewer.display_name || 'User'}
+                    {view.viewer.age && <span style={{ fontWeight: 400, color: colors.textSecondary }}>, {view.viewer.age}</span>}
+                  </Link>
+                  <div style={{ fontSize: '13px', color: colors.textSecondary }}>
+                    {formatRelativeTime(view.created_at)}
+                  </div>
                 </div>
-              </div>
 
-              {/* Position badge */}
-              {view.viewer.position && (
-                <div style={{
-                  display: 'inline-block',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  padding: '3px 8px',
-                  borderRadius: '4px',
-                  background: 'rgba(255,107,53,0.15)',
-                  color: colors.accent,
-                  marginBottom: '10px'
-                }}>
-                  {view.viewer.position.replace('-', ' ')}
+                {/* Position badge */}
+                {view.viewer.position && (
+                  <div style={{
+                    display: 'inline-block',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    background: 'rgba(255,107,53,0.15)',
+                    color: colors.accent,
+                    marginBottom: '10px'
+                  }}>
+                    {view.viewer.position.replace('-', ' ')}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Link
+                    href={`/profile/${view.viewer.id}`}
+                    style={{
+                      flex: 1,
+                      background: colors.accent,
+                      border: `2px solid ${colors.background}`,
+                      borderRadius: '4px',
+                      padding: '10px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      textAlign: 'center',
+                      textDecoration: 'none',
+                      display: 'block',
+                      boxShadow: '0 2px 12px rgba(255,107,53,0.3)'
+                    }}
+                  >
+                    View Profile
+                  </Link>
+                  <Link
+                    href={`/messages/${view.viewer.id}`}
+                    style={{
+                      flex: 1,
+                      background: 'rgba(128, 128, 128, 0.15)',
+                      border: `2px solid ${colors.background}`,
+                      borderRadius: '4px',
+                      padding: '10px',
+                      color: colors.text,
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      textAlign: 'center',
+                      textDecoration: 'none',
+                      display: 'block',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    }}
+                  >
+                    Message
+                  </Link>
                 </div>
-              )}
-
-              {/* Actions */}
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <Link
-                  href={`/profile/${view.viewer.id}`}
-                  style={{
-                    flex: 1,
-                    background: colors.accent,
-                    border: `2px solid ${colors.background}`,
-                    borderRadius: '4px',
-                    padding: '10px',
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                    display: 'block',
-                    boxShadow: '0 2px 12px rgba(255,107,53,0.3)'
-                  }}
-                >
-                  View Profile
-                </Link>
-                <Link
-                  href={`/messages/${view.viewer.id}`}
-                  style={{
-                    flex: 1,
-                    background: 'rgba(128, 128, 128, 0.15)',
-                    border: `2px solid ${colors.background}`,
-                    borderRadius: '4px',
-                    padding: '10px',
-                    color: colors.text,
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                    display: 'block',
-                    backdropFilter: 'blur(10px)',
-                    WebkitBackdropFilter: 'blur(10px)',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                  }}
-                >
-                  Message
-                </Link>
               </div>
             </div>
+          );
+        })}
+
+        {/* Premium Upsell for blurred views */}
+        {!loading && !error && !isPremium && !premiumLoading && views.length > 1 && (
+          <div style={{
+            position: 'relative',
+            margin: '20px',
+            padding: '24px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.05) 100%)',
+            border: '1px solid rgba(255,107,53,0.3)',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>👀</div>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', color: colors.text }}>
+              {views.length - 1} more {views.length - 1 === 1 ? 'person' : 'people'} viewed you
+            </h3>
+            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px' }}>
+              Upgrade to see everyone who's checking out your profile
+            </p>
+            <button
+              onClick={() => router.push('/premium')}
+              style={{
+                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '14px 28px',
+                color: '#fff',
+                fontSize: '16px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 4px 20px rgba(255,107,53,0.4)'
+              }}
+            >
+              Unlock All Views
+            </button>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Bottom Navigation */}
