@@ -1,5 +1,5 @@
 // =============================================================================
-// Map Page - Main orchestration component
+// Map Page - Main orchestration component with glass UI
 // =============================================================================
 
 'use client';
@@ -12,16 +12,17 @@ import { useMapProfiles } from '@/hooks/useMapProfiles';
 import { useMapGroups } from '@/hooks/useMapGroups';
 import { useMapVenues } from '@/hooks/useMapVenues';
 import MapboxMap from '@/components/Mapbox/MapboxMap';
+import { BottomNav } from '@/components/BottomNav';
 import {
   MapHeader,
   MapToggleTabs,
   PulseBanner,
   ProfileDrawer,
   GroupDrawer,
-  MapControls,
+  MapFilterDrawer,
+  type MapFilters,
 } from '@/components/map/index';
 import type { MapViewMode, MapProfile, MapGroup, Coordinates } from '@/types/map';
-import styles from '@/components/map/Map.module.css';
 
 export default function MapViewPage() {
   const { colors } = useTheme();
@@ -30,6 +31,7 @@ export default function MapViewPage() {
   const [viewMode, setViewMode] = useState<MapViewMode>('users');
   const [mapCenter, setMapCenter] = useState<Coordinates | null>(null);
   const [centerOn, setCenterOn] = useState<Coordinates | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Drawer state
   const [selectedProfile, setSelectedProfile] = useState<MapProfile | null>(null);
@@ -38,7 +40,7 @@ export default function MapViewPage() {
   // Handle map center from different sources
   const handleCenterUpdate = useCallback((coords: Coordinates) => {
     setMapCenter(coords);
-    setCenterOn(coords); // Also fly to this location
+    setCenterOn(coords);
   }, []);
 
   // Track user location
@@ -60,7 +62,7 @@ export default function MapViewPage() {
   const { venues } = useMapVenues({
     mapCenter,
     enabled: true,
-    radius: 8000, // 8km radius
+    radius: 8000,
   });
 
   // Handlers
@@ -85,25 +87,53 @@ export default function MapViewPage() {
     refetchProfiles();
   }, [refetchProfiles]);
 
+  const handleOpenFilters = useCallback(() => {
+    setFiltersOpen(true);
+  }, []);
+
+  const handleApplyFilters = useCallback((filters: MapFilters) => {
+    // TODO: Apply filters to profile query
+    console.log('Applying filters:', filters);
+    setFiltersOpen(false);
+  }, []);
+
   return (
     <div
       style={{
         height: '100vh',
-        background: colors.background,
+        background: '#0a0a0f',
         color: colors.text,
-        fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif",
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         display: 'flex',
         flexDirection: 'column',
+        paddingBottom: '70px', // Space for bottom nav
       }}
     >
-      {/* Header */}
-      <header style={{ background: colors.background, borderBottom: `1px solid ${colors.border}` }}>
-        <MapHeader userImage={currentUser?.image ?? null} />
+      {/* Header Section - Glass style */}
+      <header style={{
+        background: 'rgba(10,10,15,0.95)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        position: 'relative',
+        zIndex: 50,
+      }}>
+        <MapHeader
+          userImage={currentUser?.image ?? null}
+          onRefresh={handleRefresh}
+          onOpenFilters={handleOpenFilters}
+        />
         <MapToggleTabs
           viewMode={viewMode}
           onChangeMode={setViewMode}
           userCount={profiles.length}
           groupCount={groups.length}
+          profiles={profiles}
+          groups={groups}
+          currentUserLat={mapCenter?.lat}
+          currentUserLng={mapCenter?.lng}
+          onSelectProfile={handleSelectProfile}
+          onSelectGroup={handleSelectGroup}
         />
         <PulseBanner />
       </header>
@@ -142,13 +172,20 @@ export default function MapViewPage() {
         )}
       </div>
 
-      {/* Cruising FAB */}
-      <a href="/cruising" className={styles.cruisingFab}>
-        💬
-      </a>
+      {/* Filter Drawer */}
+      <MapFilterDrawer
+        isOpen={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        onApply={handleApplyFilters}
+      />
 
-      {/* Controls */}
-      <MapControls viewMode={viewMode} onRefresh={handleRefresh} />
+      {/* Bottom Navigation - Connection to other features */}
+      <BottomNav />
+
+      {/* Orbitron Font */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+      `}</style>
     </div>
   );
 }
