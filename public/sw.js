@@ -1,3 +1,6 @@
+// Import OneSignal Service Worker
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+
 // SLTR Service Worker
 const CACHE_NAME = 'sltr-v1';
 const STATIC_ASSETS = [
@@ -48,6 +51,9 @@ self.addEventListener('fetch', (event) => {
   // Skip Mapbox requests
   if (event.request.url.includes('mapbox.com')) return;
 
+  // Skip OneSignal requests
+  if (event.request.url.includes('onesignal.com')) return;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -81,29 +87,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push notification handler
-self.addEventListener('push', (event) => {
-  if (!event.data) return;
-
-  const data = event.data.json();
-  const options = {
-    body: data.body || 'New notification',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
-    vibrate: [100, 50, 100],
-    data: {
-      url: data.url || '/',
-      dateOfArrival: Date.now()
-    },
-    actions: data.actions || []
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'SLTR', options)
-  );
-});
-
-// Notification click handler
+// Notification click handler (for non-OneSignal notifications)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 

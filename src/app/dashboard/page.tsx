@@ -255,10 +255,10 @@ export default function Dashboard() {
     }
 
     // Get user's location for distance-based sorting (from fresh DB fetch, not state)
-    const userLat = currentUserProfile?.lat;
-    const userLng = currentUserProfile?.lng;
-    const hasLocation = userLat && userLng &&
-                       typeof userLat === 'number' && typeof userLng === 'number' &&
+    // Parse as numbers in case they're stored as strings
+    const userLat = currentUserProfile?.lat ? parseFloat(String(currentUserProfile.lat)) : null;
+    const userLng = currentUserProfile?.lng ? parseFloat(String(currentUserProfile.lng)) : null;
+    const hasLocation = userLat !== null && userLng !== null &&
                        !isNaN(userLat) && !isNaN(userLng);
 
     // Order by last_seen (most recent first)

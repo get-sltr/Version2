@@ -32,6 +32,7 @@ export function OneSignalProvider() {
         await OneSignal.init({
           appId,
           allowLocalhostAsSecureOrigin: true,
+          serviceWorkerPath: '/sw.js',
         });
 
         setInitialized(true);

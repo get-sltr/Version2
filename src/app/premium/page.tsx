@@ -140,25 +140,41 @@ export default function PremiumPage() {
         zIndex: 100,
         display: 'flex',
         alignItems: 'center',
-        gap: '16px'
+        justifyContent: 'space-between'
       }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button
+            onClick={() => router.back()}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#FF6B35',
+              fontSize: '32px',
+              cursor: 'pointer',
+              padding: 0,
+              lineHeight: 1
+            }}
+          >
+            ←
+          </button>
+          <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>
+            Choose A Plan
+          </h1>
+        </div>
         <button
-          onClick={() => router.back()}
+          onClick={() => router.push('/dashboard')}
           style={{
             background: 'none',
             border: 'none',
-            color: '#FF6B35',
-            fontSize: '32px',
+            color: '#888',
+            fontSize: '28px',
             cursor: 'pointer',
-            padding: 0,
+            padding: '4px 8px',
             lineHeight: 1
           }}
         >
-          ←
+          ✕
         </button>
-        <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0 }}>
-          Choose A Plan
-        </h1>
       </div>
 
       <div style={{
