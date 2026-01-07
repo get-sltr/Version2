@@ -1,12 +1,12 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
-  const next = requestUrl.searchParams.get('next');
-  const type = requestUrl.searchParams.get('type');
+export async function GET(request: NextRequest) {
+  const { searchParams, origin } = request.nextUrl;
+  const code = searchParams.get('code');
+  const next = searchParams.get('next') ?? '/dashboard';
 
   if (code) {
     const cookieStore = await cookies();
@@ -20,9 +20,15 @@ export async function GET(request: Request) {
             return cookieStore.getAll();
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {
+              // The `setAll` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
           },
         },
       }
@@ -30,36 +36,46 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (error) {
-      console.error('Auth callback error:', error);
-      return NextResponse.redirect(new URL('/login?error=auth_failed', request.url));
-    }
-
-    // Handle password recovery flow
-    if (type === 'recovery') {
-      return NextResponse.redirect(new URL('/reset-password', request.url));
-    }
-
-    // If a specific redirect was requested, use that
-    if (next) {
-      return NextResponse.redirect(new URL(next, request.url));
-    }
-
-    // Check if user has completed their profile (new users need onboarding)
-    if (data.user) {
+    if (!error && data.user) {
+      // Check if this is a new OAuth user (no profile yet)
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, position')
+        .select('id, display_name')
         .eq('id', data.user.id)
         .single();
 
-      // If profile is incomplete, redirect to onboarding
-      if (!profile?.display_name || !profile?.position) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+      // If no profile exists, create one with OAuth user data
+      if (!profile) {
+        const metadata = data.user.user_metadata;
+        const displayName = metadata?.full_name || metadata?.name || null;
+        const photoUrl = metadata?.avatar_url || metadata?.picture || null;
+
+        await supabase.from('profiles').insert({
+          id: data.user.id,
+          display_name: displayName,
+          photo_url: photoUrl,
+          created_at: new Date().toISOString(),
+          last_seen: new Date().toISOString(),
+        });
+
+        // Redirect new OAuth users to onboarding
+        return NextResponse.redirect(`${origin}/onboarding`);
+      }
+
+      // Existing user - redirect to dashboard or specified next URL
+      const forwardedHost = request.headers.get('x-forwarded-host');
+      const isLocalEnv = process.env.NODE_ENV === 'development';
+
+      if (isLocalEnv) {
+        return NextResponse.redirect(`${origin}${next}`);
+      } else if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+      } else {
+        return NextResponse.redirect(`${origin}${next}`);
       }
     }
   }
 
-  // Default redirect to dashboard for returning users
-  return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Auth error - redirect to login with error
+  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);
 }
