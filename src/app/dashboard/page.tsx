@@ -189,18 +189,18 @@ export default function Dashboard() {
       return;
     }
 
+    // EARLY STAGE: Show all profiles, less restrictive filtering
     let query = supabase
       .from('profiles')
       .select('*')
-      .not('photo_url', 'is', null)  // Only show profiles WITH photos
-      .eq('is_incognito', false);  // Exclude incognito users
+      .neq('is_incognito', true);  // Only exclude explicitly incognito users (allows null)
 
     // Apply filters based on activeFilter
     if (activeFilter === 'online') {
-      // Consider "online" if last_seen within last 24 hours (show active users)
-      const oneDayAgo = new Date();
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-      query = query.gte('last_seen', oneDayAgo.toISOString());
+      // Consider "online" if last_seen within last 7 days (more lenient for early stage)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      query = query.gte('last_seen', sevenDaysAgo.toISOString());
     } else if (activeFilter === 'fresh') {
       // Show profiles created in the last 7 days
       const sevenDaysAgo = new Date();
@@ -333,8 +333,9 @@ export default function Dashboard() {
     if (profile.photo_url) {
       return profile.photo_url;
     }
-    // Alternate between 5.jpg and 6.jpg as fallback
-    return index % 2 === 0 ? '/images/5.jpg' : '/images/6.jpg';
+    // Use a default avatar placeholder for users without photos
+    // This shows they're real users, just haven't uploaded yet
+    return `https://api.dicebear.com/7.x/initials/svg?seed=${profile.display_name || profile.id}&backgroundColor=ff6b35&textColor=ffffff`;
   };
 
   const togglePosition = (positionId: string) => {
