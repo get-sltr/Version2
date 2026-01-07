@@ -126,9 +126,20 @@ export async function checkUpstashRateLimit(
 }> {
   const limiter = rateLimiters[type];
 
-  // If Upstash is not configured, allow all requests (development mode)
+  // If Upstash is not configured
   if (!limiter) {
-    console.warn(`Upstash rate limiting not configured. Allowing request for ${type}.`);
+    // In production, fail secure (reject requests)
+    if (process.env.NODE_ENV === 'production') {
+      console.error(`Upstash rate limiting not configured in production. Rejecting request for ${type}.`);
+      return {
+        success: false,
+        limit: 0,
+        remaining: 0,
+        reset: Date.now() + 60000,
+      };
+    }
+    // In development, allow requests but log warning
+    console.warn(`Upstash rate limiting not configured. Allowing request for ${type} (dev mode).`);
     return {
       success: true,
       limit: 999,

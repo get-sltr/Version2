@@ -285,13 +285,15 @@ export default function Dashboard() {
         });
       }
 
-      // Sort by distance if user has location, otherwise by last_seen
+      // Calculate distance and filter by radius if user has location
+      const MAX_DISTANCE_MILES = 50; // Only show users within 50 miles
+
       if (hasLocation) {
         filtered = filtered
           .map(profile => {
             const profileLat = typeof profile.lat === 'number' ? profile.lat : parseFloat(profile.lat);
             const profileLng = typeof profile.lng === 'number' ? profile.lng : parseFloat(profile.lng);
-            
+
             if (!profileLat || !profileLng || isNaN(profileLat) || isNaN(profileLng)) {
               return { ...profile, distance: Infinity };
             }
@@ -300,7 +302,7 @@ export default function Dashboard() {
             const R = 3958.8; // Earth radius in miles
             const dLat = (profileLat - userLat) * Math.PI / 180;
             const dLon = (profileLng - userLng) * Math.PI / 180;
-            const a = 
+            const a =
               Math.sin(dLat / 2) * Math.sin(dLat / 2) +
               Math.cos(userLat * Math.PI / 180) * Math.cos(profileLat * Math.PI / 180) *
               Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -309,8 +311,11 @@ export default function Dashboard() {
 
             return { ...profile, distance };
           })
+          // Filter out profiles beyond max distance (keep profiles without location for now)
+          .filter(profile => profile.distance <= MAX_DISTANCE_MILES || profile.distance === Infinity)
           .sort((a, b) => {
             // Sort by distance first, then by last_seen
+            // Profiles without location (Infinity) go to the end
             if (a.distance !== b.distance) {
               return a.distance - b.distance;
             }

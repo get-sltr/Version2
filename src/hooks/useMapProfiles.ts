@@ -11,7 +11,7 @@ const DEFAULT_FILTERS: MapFilterSettings = {
   positionFilters: [],
   minAge: 18,
   maxAge: 80,
-  maxDistance: 30,
+  maxDistance: 50, // 50 miles default radius
 };
 
 interface UseMapProfilesOptions {
@@ -28,6 +28,7 @@ interface UseMapProfilesReturn {
 
 /**
  * Read filter settings from localStorage
+ * Uses same keys as MapFilterDrawer for consistency
  */
 function getFilterSettings(): MapFilterSettings {
   if (typeof window === 'undefined') {
@@ -35,7 +36,7 @@ function getFilterSettings(): MapFilterSettings {
   }
 
   let positionFilters: string[] = [];
-  const rawPositions = localStorage.getItem('showMePositions') ?? '';
+  const rawPositions = localStorage.getItem('mapFilterPositions') ?? '';
 
   if (rawPositions) {
     try {
@@ -47,9 +48,9 @@ function getFilterSettings(): MapFilterSettings {
 
   return {
     positionFilters,
-    minAge: parseInt(localStorage.getItem('minAge') ?? '18', 10),
-    maxAge: parseInt(localStorage.getItem('maxAge') ?? '80', 10),
-    maxDistance: parseInt(localStorage.getItem('maxDistance') ?? '30', 10),
+    minAge: parseInt(localStorage.getItem('mapFilterAgeMin') ?? '18', 10),
+    maxAge: parseInt(localStorage.getItem('mapFilterAgeMax') ?? '80', 10),
+    maxDistance: parseInt(localStorage.getItem('maxDistance') ?? '50', 10), // Default 50 miles
   };
 }
 
@@ -96,12 +97,11 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
         .from('profiles')
         .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito, is_online')
         .gte('last_seen', sevenDaysAgo.toISOString())
-        .eq('is_incognito', false)
-        .not('photo_url', 'is', null)
+        .neq('is_incognito', true)  // Allow null (same as dashboard)
         .not('lat', 'is', null)
         .not('lng', 'is', null)
-        // DO NOT EXCLUDE CURRENT USER
-        .limit(500);  // Increased limit for better coverage
+        // Photo not required - will use placeholder if missing
+        .limit(500);
 
       if (fetchError) {
         console.warn('Failed to load profiles for map:', fetchError);
@@ -197,13 +197,15 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
     const normalizedPositionFilters = filters.positionFilters.map((p) => p.toLowerCase());
 
     return rawProfiles
-      .map((profile): MapProfile | null => {
+      .map((profile, index): MapProfile | null => {
         // Parse coordinates
         const lat = parseCoordinate(profile.lat);
         const lng = parseCoordinate(profile.lng);
 
         if (lat === null || lng === null) return null;
-        if (!profile.photo_url) return null;
+
+        // Use placeholder image if no photo (alternating between 5.jpg and 6.jpg)
+        const image = profile.photo_url || (index % 2 === 0 ? '/images/5.jpg' : '/images/6.jpg');
 
         // Calculate distance if we have map center
         let distanceFeet: number | null = null;
@@ -224,7 +226,7 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
           position: profile.position || '',
           lat,
           lng,
-          image: profile.photo_url,
+          image,
           distance: distanceFeet,
           online: isOnline,
         };

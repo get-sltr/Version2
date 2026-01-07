@@ -174,12 +174,6 @@ function buildCheckoutSessionParams(
 /* -------------------------------------------------------------------------- */
 
 export async function POST(request: NextRequest) {
-  console.log('ENV CHECK:', {
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NODE_ENV: process.env.NODE_ENV,
-    allKeys: Object.keys(process.env).filter(k => k.includes('APP_URL') || k.includes('STRIPE'))
-  });
-
   /* ------------------------------ Rate Limit ------------------------------ */
   const clientId = getClientIdentifier(request)
   const rateLimit = await checkUpstashRateLimit(clientId, 'api')

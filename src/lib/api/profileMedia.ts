@@ -1,13 +1,35 @@
 import { supabase } from '../supabase';
 
+// Allowed image MIME types and their extensions
+const ALLOWED_MIME_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+};
+
+// Maximum file size: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 export async function uploadAvatar(file: File): Promise<string> {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     console.error('Auth error:', authError);
     throw new Error('Not authenticated');
   }
-  
-  const ext = file.name.split('.').pop() || 'jpg';
+
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error('File size exceeds 10MB limit');
+  }
+
+  // Validate MIME type
+  const ext = ALLOWED_MIME_TYPES[file.type];
+  if (!ext) {
+    throw new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+  }
+
   const path = `${user.id}/avatar-${Date.now()}.${ext}`;
 
   const { error: uploadError } = await supabase
