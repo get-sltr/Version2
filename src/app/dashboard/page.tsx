@@ -333,9 +333,8 @@ export default function Dashboard() {
     if (profile.photo_url) {
       return profile.photo_url;
     }
-    // Cycle through placeholder images 1-7
-    const placeholderNum = (index % 7) + 1;
-    return `/images/${placeholderNum}.jpg`;
+    // Alternate between placeholder images 5 and 6
+    return index % 2 === 0 ? '/images/5.jpg' : '/images/6.jpg';
   };
 
   const togglePosition = (positionId: string) => {
