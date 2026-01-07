@@ -329,13 +329,13 @@ export default function Dashboard() {
   }, [fetchProfiles, currentUser]);
 
   const getProfileImage = (profile: any, index: number) => {
-    // Use photo_url from profile or fallback to placeholder
+    // Use photo_url from profile or fallback to placeholder images
     if (profile.photo_url) {
       return profile.photo_url;
     }
-    // Use a default avatar placeholder for users without photos
-    // This shows they're real users, just haven't uploaded yet
-    return `https://api.dicebear.com/7.x/initials/svg?seed=${profile.display_name || profile.id}&backgroundColor=ff6b35&textColor=ffffff`;
+    // Cycle through placeholder images 1-7
+    const placeholderNum = (index % 7) + 1;
+    return `/images/${placeholderNum}.jpg`;
   };
 
   const togglePosition = (positionId: string) => {
