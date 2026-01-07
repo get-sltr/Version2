@@ -425,7 +425,7 @@ export default function MapboxMap({
         {/* Group Markers - visual only, clicks handled by map */}
         {viewMode === 'groups' &&
           groups
-            .filter(g => typeof g.lat === 'number' && typeof g.lng === 'number')
+            .filter(g => typeof g.lat === 'number' && typeof g.lng === 'number' && g.lat !== 0 && g.lng !== 0)
             .map(group => (
               <Marker
                 key={group.id}

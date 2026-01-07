@@ -68,11 +68,11 @@ export function useMapGroups(): UseMapGroupsReturn {
 
     try {
       const data = await getGroups(50);
+      console.log('[useMapGroups] Raw groups from API:', data.length, data);
 
-      // Filter out groups without valid coordinates and transform
-      const mapGroups = data
-        .filter(group => group.lat != null && group.lng != null)
-        .map(transformToMapGroup);
+      // Transform all groups - include those without coords too (they just won't show on map)
+      const mapGroups = data.map(transformToMapGroup);
+      console.log('[useMapGroups] Transformed groups:', mapGroups.length);
 
       setGroups(mapGroups);
     } catch (err) {

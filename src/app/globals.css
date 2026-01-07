@@ -109,6 +109,17 @@ video {
   pointer-events: auto;
 }
 
+/* Hide Mapbox attribution and logo */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib,
+.mapboxgl-ctrl-attrib-inner,
+.mapboxgl-ctrl-bottom-left,
+.mapboxgl-ctrl-bottom-right {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 /* =============================================================================
    Fluid Typography
    ============================================================================= */
