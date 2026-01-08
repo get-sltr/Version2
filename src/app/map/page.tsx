@@ -11,6 +11,7 @@ import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
 import { useMapGroups } from '@/hooks/useMapGroups';
 import { useMapVenues } from '@/hooks/useMapVenues';
+import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import MapboxMap from '@/components/Mapbox/MapboxMap';
 import {
   MapHeader,
@@ -96,10 +97,15 @@ export default function MapViewPage() {
     console.log('Open filters');
   }, []);
 
-  const handleCruisingPost = useCallback((text: string) => {
-    // TODO: Post cruising update
-    console.log('Cruising post:', text);
-  }, []);
+  const handleCruisingPost = useCallback(async (text: string) => {
+    try {
+      await postCruisingUpdate(text, false, mapCenter?.lat, mapCenter?.lng);
+      setCruisingOpen(false);
+    } catch (err: any) {
+      console.error('Failed to post cruising update:', err);
+      alert(err.message || 'Failed to post update');
+    }
+  }, [mapCenter]);
 
   const handleTabChange = useCallback((tab: NavTab) => {
     setActiveTab(tab);
