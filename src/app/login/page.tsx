@@ -481,15 +481,31 @@ export default function LoginPage() {
           style={{
             padding: '24px',
             textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
           }}
         >
           <p
             style={{
-              fontSize: '12px',
+              fontSize: '11px',
               color: 'rgba(255, 255, 255, 0.2)',
+              letterSpacing: '0.1em',
+              margin: 0,
             }}
           >
-            © 2025 SLTR Digital LLC
+            © 2025 SLTR DIGITAL LLC
+          </p>
+          <p
+            style={{
+              fontSize: '9px',
+              color: 'rgba(200, 220, 255, 0.35)',
+              letterSpacing: '0.15em',
+              margin: 0,
+            }}
+          >
+            INTELLIGENT | INNOVATIVE | INTUITIVE
           </p>
         </footer>
       </div>

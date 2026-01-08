@@ -163,9 +163,15 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className={`landing-footer ${phase === 'reveal' ? 'visible' : ''}`}>
-        <Link href="/privacy">Privacy</Link>
-        <Link href="/terms">Terms</Link>
-        <Link href="/about">About</Link>
+        <div className="footer-links">
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/about">About</Link>
+        </div>
+        <div className="footer-brand">
+          <span className="company-name">SLTR DIGITAL LLC</span>
+          <span className="company-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
+        </div>
       </footer>
 
       <style jsx global>{`
@@ -790,12 +796,13 @@ export default function LandingPage() {
            =========================================== */
         .landing-footer {
           position: fixed;
-          bottom: 24px;
+          bottom: 20px;
           left: 0;
           right: 0;
           display: flex;
-          justify-content: center;
-          gap: 24px;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
           opacity: 0;
           transition: opacity 0.8s ease 1.2s;
           z-index: 60;
@@ -803,16 +810,42 @@ export default function LandingPage() {
 
         .landing-footer.visible { opacity: 1; }
 
-        .landing-footer a {
+        .footer-links {
+          display: flex;
+          gap: 24px;
+        }
+
+        .footer-links a {
           font-size: 11px;
           color: rgba(255, 255, 255, 0.35);
           text-decoration: none;
           transition: all 0.3s ease;
         }
 
-        .landing-footer a:hover {
+        .footer-links a:hover {
           color: #FF6B35;
           text-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+        }
+
+        .footer-brand {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .company-name {
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.2em;
+          color: rgba(255, 255, 255, 0.25);
+        }
+
+        .company-tagline {
+          font-size: 9px;
+          font-weight: 500;
+          letter-spacing: 0.15em;
+          color: rgba(200, 220, 255, 0.4);
         }
 
         /* ===========================================
