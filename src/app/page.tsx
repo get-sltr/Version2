@@ -1,79 +1,85 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const [phase, setPhase] = useState<'stars' | 'flash' | 'logo'>('stars');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Stars fly and stack: 3s
-    // Flash: 3.2s
-    // Logo reveal: 3.8s
-    const flashTimer = setTimeout(() => setPhase('flash'), 3200);
-    const logoTimer = setTimeout(() => setPhase('logo'), 3800);
+    // Show content after brief delay for smooth entrance
+    const contentTimer = setTimeout(() => setShowContent(true), 300);
 
-    return () => {
-      clearTimeout(flashTimer);
-      clearTimeout(logoTimer);
-    };
+    // Handle video load state
+    const video = videoRef.current;
+    if (video) {
+      const handleCanPlay = () => setIsLoaded(true);
+      video.addEventListener('canplay', handleCanPlay);
+
+      // Fallback: show content even if video takes too long
+      const fallbackTimer = setTimeout(() => setIsLoaded(true), 2000);
+
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay);
+        clearTimeout(fallbackTimer);
+        clearTimeout(contentTimer);
+      };
+    }
+
+    return () => clearTimeout(contentTimer);
   }, []);
 
-  // Skip animation on tap
-  const handleSkip = () => {
-    if (phase !== 'logo') {
-      setPhase('logo');
-    }
-  };
-
   return (
-    <div className="landing-container" onClick={handleSkip}>
-      {/* Ambient background */}
-      <div className="ambient" />
-
-      {/* Flying Stars - Paramount Formation */}
-      <div className={`stars-stage ${phase !== 'stars' ? 'hidden' : ''}`}>
-        {/* Star 1 - White - leads the formation */}
-        <div className="star star-1">
-          <StarSVG color1="#ffffff" color2="#e8e8e8" />
-        </div>
-        {/* Star 2 - Orange - follows */}
-        <div className="star star-2">
-          <StarSVG color1="#FF8C42" color2="#FF6B35" />
-        </div>
-        {/* Star 3 - Black - follows */}
-        <div className="star star-3">
-          <StarSVG color1="#3a3a3a" color2="#1a1a1a" />
-        </div>
-        {/* Star 4 - Gold - trails */}
-        <div className="star star-4">
-          <StarSVG color1="#FFE55C" color2="#FFD700" />
-        </div>
+    <div className="landing-container">
+      {/* Video Background */}
+      <div className="video-wrapper">
+        <video
+          ref={videoRef}
+          className={`bg-video ${isLoaded ? 'loaded' : ''}`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="/images/landing-poster.jpg"
+        >
+          <source src="/Videos/landingvid.mp4" type="video/mp4" />
+        </video>
+        {/* Gradient Overlay */}
+        <div className="video-overlay" />
       </div>
 
-      {/* White Flash */}
-      <div className={`flash-overlay ${phase === 'flash' ? 'active' : ''}`} />
-
-      {/* Logo Reveal */}
-      <div className={`logo-stage ${phase === 'logo' ? 'visible' : ''}`}>
+      {/* Main Content */}
+      <main className={`content ${showContent ? 'visible' : ''}`}>
+        {/* Logo Star */}
         <div className="logo-star">
-          <StarSVG color1="#ffffff" color2="#c8dcff" />
+          <StarSVG />
           <div className="star-glow" />
         </div>
-        <h1 className="logo-text">SLTR</h1>
+
+        {/* Brand */}
+        <h1 className="brand">SLTR</h1>
         <p className="tagline">RULES DON&apos;T APPLY</p>
 
-        <div className="cta-buttons">
-          <Link href="/signup" className="cta-primary">Get Started</Link>
-          <Link href="/login" className="cta-secondary">Sign In</Link>
+        {/* CTA Buttons */}
+        <div className="cta-group">
+          <Link href="/signup" className="btn btn-primary">
+            Get Started
+          </Link>
+          <Link href="/login" className="btn btn-secondary">
+            Sign In
+          </Link>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className={`landing-footer ${phase === 'logo' ? 'visible' : ''}`}>
+      <footer className={`footer ${showContent ? 'visible' : ''}`}>
         <Link href="/privacy">Privacy</Link>
+        <span className="dot">·</span>
         <Link href="/terms">Terms</Link>
-        <Link href="/guidelines">Guidelines</Link>
+        <span className="dot">·</span>
+        <Link href="/about">About</Link>
       </footer>
 
       <style jsx global>{`
@@ -85,211 +91,90 @@ export default function LandingPage() {
           box-sizing: border-box;
         }
 
+        html, body {
+          height: 100%;
+          overflow: hidden;
+        }
+
         .landing-container {
           position: fixed;
           inset: 0;
-          background: #050508;
-          overflow: hidden;
+          background: #000;
           font-family: 'Orbitron', sans-serif;
-          cursor: pointer;
+          overflow: hidden;
         }
 
-        /* Ambient glow */
-        .ambient {
+        /* ============================================
+           VIDEO BACKGROUND
+           ============================================ */
+        .video-wrapper {
           position: absolute;
           inset: 0;
-          background: radial-gradient(ellipse at 50% 40%, rgba(200, 220, 255, 0.03) 0%, transparent 60%);
+          overflow: hidden;
+        }
+
+        .bg-video {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          min-width: 100%;
+          min-height: 100%;
+          width: auto;
+          height: auto;
+          transform: translate(-50%, -50%);
+          object-fit: cover;
+          opacity: 0;
+          transition: opacity 1.5s ease;
+        }
+
+        .bg-video.loaded {
+          opacity: 1;
+        }
+
+        .video-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.4) 0%,
+            rgba(0, 0, 0, 0.2) 30%,
+            rgba(0, 0, 0, 0.3) 70%,
+            rgba(0, 0, 0, 0.7) 100%
+          );
           pointer-events: none;
         }
 
         /* ============================================
-           STARS FLYING IN FORMATION
+           MAIN CONTENT
            ============================================ */
-        .stars-stage {
-          position: absolute;
-          inset: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .stars-stage.hidden {
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .star {
-          position: absolute;
-          width: 50px;
-          height: 75px;
-          opacity: 0;
-          filter: drop-shadow(0 0 20px currentColor);
-        }
-
-        .star svg {
-          width: 100%;
+        .content {
+          position: relative;
+          z-index: 10;
           height: 100%;
-        }
-
-        /* Formation flight - arc from left to center */
-        .star-1 {
-          color: rgba(255, 255, 255, 0.8);
-          animation: fly-star1 3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-        }
-
-        .star-2 {
-          color: rgba(255, 107, 53, 0.8);
-          animation: fly-star2 3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-          animation-delay: 0.12s;
-        }
-
-        .star-3 {
-          color: rgba(100, 100, 100, 0.6);
-          animation: fly-star3 3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-          animation-delay: 0.24s;
-        }
-
-        .star-4 {
-          color: rgba(255, 215, 0, 0.8);
-          animation: fly-star4 3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-          animation-delay: 0.36s;
-        }
-
-        /* Star 1 - highest arc */
-        @keyframes fly-star1 {
-          0% {
-            opacity: 0;
-            transform: translate(-15vw, 50vh) scale(0.4);
-          }
-          8% { opacity: 1; }
-          30% {
-            transform: translate(10vw, 15vh) scale(0.6);
-          }
-          60% {
-            transform: translate(35vw, 5vh) scale(0.8);
-          }
-          85% {
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1);
-          }
-          100% {
-            opacity: 1;
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1.1);
-          }
-        }
-
-        /* Star 2 - mid-high arc */
-        @keyframes fly-star2 {
-          0% {
-            opacity: 0;
-            transform: translate(-15vw, 55vh) scale(0.4);
-          }
-          8% { opacity: 1; }
-          30% {
-            transform: translate(8vw, 22vh) scale(0.6);
-          }
-          60% {
-            transform: translate(32vw, 12vh) scale(0.8);
-          }
-          85% {
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1);
-          }
-          100% {
-            opacity: 1;
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1.1);
-          }
-        }
-
-        /* Star 3 - mid-low arc */
-        @keyframes fly-star3 {
-          0% {
-            opacity: 0;
-            transform: translate(-15vw, 60vh) scale(0.4);
-          }
-          8% { opacity: 1; }
-          30% {
-            transform: translate(5vw, 30vh) scale(0.6);
-          }
-          60% {
-            transform: translate(28vw, 22vh) scale(0.8);
-          }
-          85% {
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1);
-          }
-          100% {
-            opacity: 1;
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1.1);
-          }
-        }
-
-        /* Star 4 - lowest arc */
-        @keyframes fly-star4 {
-          0% {
-            opacity: 0;
-            transform: translate(-15vw, 65vh) scale(0.4);
-          }
-          8% { opacity: 1; }
-          30% {
-            transform: translate(2vw, 40vh) scale(0.6);
-          }
-          60% {
-            transform: translate(24vw, 32vh) scale(0.8);
-          }
-          85% {
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1);
-          }
-          100% {
-            opacity: 1;
-            transform: translate(calc(50vw - 25px), calc(50vh - 40px)) scale(1.1);
-          }
-        }
-
-        /* ============================================
-           WHITE FLASH
-           ============================================ */
-        .flash-overlay {
-          position: fixed;
-          inset: 0;
-          background: white;
-          opacity: 0;
-          pointer-events: none;
-          z-index: 100;
-        }
-
-        .flash-overlay.active {
-          animation: flash-burst 0.6s ease-out forwards;
-        }
-
-        @keyframes flash-burst {
-          0% { opacity: 0; }
-          20% { opacity: 1; }
-          100% { opacity: 0; }
-        }
-
-        /* ============================================
-           LOGO REVEAL
-           ============================================ */
-        .logo-stage {
-          position: absolute;
-          inset: 0;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          padding: 24px;
           opacity: 0;
-          transform: scale(0.9);
+          transform: translateY(20px);
           transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-          z-index: 50;
         }
 
-        .logo-stage.visible {
+        .content.visible {
           opacity: 1;
-          transform: scale(1);
+          transform: translateY(0);
         }
 
+        /* ============================================
+           LOGO STAR
+           ============================================ */
         .logo-star {
           position: relative;
-          width: 120px;
-          height: 180px;
-          margin-bottom: 30px;
-          animation: star-pulse 2s ease-in-out infinite;
+          width: 100px;
+          height: 150px;
+          margin-bottom: 24px;
+          animation: float 4s ease-in-out infinite;
         }
 
         .logo-star svg {
@@ -303,152 +188,199 @@ export default function LandingPage() {
           top: 30%;
           left: 50%;
           transform: translate(-50%, -50%);
-          width: 60px;
-          height: 60px;
-          background: radial-gradient(circle, rgba(255, 107, 53, 0.4) 0%, transparent 70%);
-          filter: blur(15px);
+          width: 50px;
+          height: 50px;
+          background: radial-gradient(circle, rgba(255, 107, 53, 0.5) 0%, transparent 70%);
+          filter: blur(12px);
           animation: glow-pulse 2s ease-in-out infinite;
         }
 
-        @keyframes star-pulse {
-          0%, 100% {
-            filter: drop-shadow(0 0 30px rgba(200, 220, 255, 0.5));
-          }
-          50% {
-            filter: drop-shadow(0 0 50px rgba(200, 220, 255, 0.8))
-                   drop-shadow(0 0 80px rgba(200, 220, 255, 0.4));
-          }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
         }
 
         @keyframes glow-pulse {
-          0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
           50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
         }
 
-        .logo-text {
-          font-size: clamp(48px, 15vw, 100px);
+        /* ============================================
+           BRAND TEXT
+           ============================================ */
+        .brand {
+          font-size: clamp(56px, 18vw, 120px);
           font-weight: 900;
-          letter-spacing: 0.3em;
+          letter-spacing: 0.25em;
           color: #fff;
           text-shadow:
-            0 0 30px rgba(200, 220, 255, 0.5),
-            0 0 60px rgba(200, 220, 255, 0.3);
-          margin-bottom: 15px;
-          animation: text-glow 2s ease-in-out infinite;
+            0 0 40px rgba(200, 220, 255, 0.4),
+            0 4px 20px rgba(0, 0, 0, 0.5);
+          margin-bottom: 8px;
+          animation: text-breathe 3s ease-in-out infinite;
         }
 
-        @keyframes text-glow {
-          0%, 100% { text-shadow: 0 0 30px rgba(200, 220, 255, 0.4); }
-          50% { text-shadow: 0 0 50px rgba(200, 220, 255, 0.7), 0 0 80px rgba(200, 220, 255, 0.4); }
+        @keyframes text-breathe {
+          0%, 100% {
+            text-shadow: 0 0 40px rgba(200, 220, 255, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5);
+          }
+          50% {
+            text-shadow: 0 0 60px rgba(200, 220, 255, 0.5), 0 0 100px rgba(200, 220, 255, 0.2), 0 4px 20px rgba(0, 0, 0, 0.5);
+          }
         }
 
         .tagline {
-          font-size: 12px;
-          letter-spacing: 0.4em;
+          font-size: clamp(10px, 3vw, 14px);
+          letter-spacing: 0.5em;
           color: #FF6B35;
-          margin-bottom: 50px;
           text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+          margin-bottom: 48px;
         }
 
-        /* CTA Buttons */
-        .cta-buttons {
+        /* ============================================
+           CTA BUTTONS
+           ============================================ */
+        .cta-group {
           display: flex;
           gap: 16px;
         }
 
-        .cta-primary, .cta-secondary {
+        .btn {
           display: flex;
           align-items: center;
           justify-content: center;
-          height: 52px;
-          padding: 0 32px;
-          border-radius: 14px;
+          height: 54px;
+          padding: 0 36px;
+          border-radius: 16px;
           font-family: 'Orbitron', sans-serif;
           font-size: 12px;
           font-weight: 600;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.15em;
           text-transform: uppercase;
           text-decoration: none;
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
         }
 
-        .cta-primary {
-          background: rgba(255, 107, 53, 0.2);
-          border: 1px solid rgba(255, 107, 53, 0.5);
+        .btn-primary {
+          background: rgba(255, 107, 53, 0.25);
+          border: 1.5px solid rgba(255, 107, 53, 0.6);
           color: #FF6B35;
+          box-shadow: 0 4px 24px rgba(255, 107, 53, 0.15);
         }
 
-        .cta-primary:hover {
-          background: rgba(255, 107, 53, 0.3);
+        .btn-primary:hover {
+          background: rgba(255, 107, 53, 0.4);
           border-color: #FF6B35;
           color: #fff;
-          transform: translateY(-2px);
-          box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(255, 107, 53, 0.35);
         }
 
-        .cta-secondary {
-          background: rgba(40, 40, 50, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: rgba(255, 255, 255, 0.6);
+        .btn-primary:active {
+          transform: translateY(-1px);
         }
 
-        .cta-secondary:hover {
-          background: rgba(255, 107, 53, 0.1);
-          border-color: rgba(255, 107, 53, 0.3);
-          color: #FF6B35;
-          transform: translateY(-2px);
+        .btn-secondary {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1.5px solid rgba(255, 255, 255, 0.2);
+          color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Footer */
-        .landing-footer {
+        .btn-secondary:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.4);
+          color: #fff;
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:active {
+          transform: translateY(-1px);
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        .footer {
           position: fixed;
-          bottom: 24px;
+          bottom: 0;
           left: 0;
           right: 0;
           display: flex;
+          align-items: center;
           justify-content: center;
-          gap: 24px;
+          gap: 12px;
+          padding: 24px;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
           opacity: 0;
-          transition: opacity 0.8s ease 0.5s;
-          z-index: 60;
+          transition: opacity 0.8s ease 0.3s;
+          z-index: 20;
         }
 
-        .landing-footer.visible {
+        .footer.visible {
           opacity: 1;
         }
 
-        .landing-footer a {
+        .footer a {
           font-size: 11px;
-          color: rgba(255, 255, 255, 0.3);
+          letter-spacing: 0.1em;
+          color: rgba(255, 255, 255, 0.4);
           text-decoration: none;
           transition: color 0.3s ease;
         }
 
-        .landing-footer a:hover {
+        .footer a:hover {
           color: #FF6B35;
         }
 
-        /* Mobile */
+        .footer .dot {
+          color: rgba(255, 255, 255, 0.2);
+          font-size: 10px;
+        }
+
+        /* ============================================
+           MOBILE RESPONSIVE
+           ============================================ */
         @media (max-width: 600px) {
-          .star {
-            width: 35px;
-            height: 52px;
-          }
-
           .logo-star {
-            width: 80px;
-            height: 120px;
+            width: 70px;
+            height: 105px;
+            margin-bottom: 20px;
           }
 
-          .cta-buttons {
+          .tagline {
+            margin-bottom: 36px;
+          }
+
+          .cta-group {
             flex-direction: column;
             width: 100%;
-            padding: 0 24px;
+            max-width: 280px;
           }
 
-          .cta-primary, .cta-secondary {
+          .btn {
             width: 100%;
+            height: 52px;
+          }
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+          .logo-star,
+          .star-glow,
+          .brand {
+            animation: none;
+          }
+
+          .bg-video {
+            transition: none;
+          }
+
+          .content,
+          .footer {
+            transition: none;
           }
         }
       `}</style>
@@ -457,20 +389,19 @@ export default function LandingPage() {
 }
 
 // Star SVG Component
-function StarSVG({ color1, color2 }: { color1: string; color2: string }) {
-  const id = `grad-${color1.replace('#', '')}`;
+function StarSVG() {
   return (
-    <svg viewBox="0 0 100 150">
+    <svg viewBox="0 0 100 150" aria-hidden="true">
       <defs>
-        <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={color1} />
-          <stop offset="50%" stopColor={color2} />
-          <stop offset="100%" stopColor={color1} />
+        <linearGradient id="star-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="50%" stopColor="#c8dcff" />
+          <stop offset="100%" stopColor="#ffffff" />
         </linearGradient>
       </defs>
       <polygon
         points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
-        fill={`url(#${id})`}
+        fill="url(#star-grad)"
       />
     </svg>
   );
