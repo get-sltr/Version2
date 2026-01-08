@@ -165,492 +165,561 @@ export default function SignupPage() {
     }
   };
 
-  // Liquid glass input style
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '14px 18px',
-    fontSize: '15px',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '12px',
-    boxSizing: 'border-box',
-    outline: 'none',
-    color: '#FFFFFF',
-    fontFamily: "'DM Sans', sans-serif",
-    transition: 'all 0.3s ease',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: '11px',
-    fontWeight: 500,
-    marginBottom: '8px',
-    color: 'rgba(200, 220, 255, 0.6)',
-    letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-  };
-
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.borderColor = 'rgba(200, 220, 255, 0.4)';
-    e.target.style.boxShadow = '0 0 20px rgba(200, 220, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.1)';
-    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
-  };
-
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)';
-    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-  };
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#000000',
-        color: '#FFFFFF',
-        fontFamily: "'DM Sans', sans-serif",
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Background Image */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 1,
-        }}
-      >
-        <Image
-          src="/icons/signup.png"
-          alt="Background"
-          fill
-          priority
-          style={{
-            objectFit: 'cover',
-            objectPosition: 'center',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.75) 100%)',
-          }}
-        />
-        {/* Ambient glow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '15%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(200, 220, 255, 0.03) 0%, transparent 60%)',
-            pointerEvents: 'none',
-          }}
-        />
-      </div>
+    <>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
-      {/* Content */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {/* Header with Animated Logo */}
-        <header
-          style={{
-            padding: '20px 32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <AnimatedLogo size="small" href="/" />
-          <Link
-            href="/login"
-            style={{
-              fontSize: '13px',
-              color: 'rgba(200, 220, 255, 0.7)',
-              textDecoration: 'none',
-              letterSpacing: '0.02em',
-            }}
-          >
-            Already have an account?{' '}
-            <span
-              style={{
-                color: 'rgba(200, 220, 255, 0.9)',
-                fontWeight: 600,
-                padding: '8px 16px',
-                marginLeft: '8px',
-                borderRadius: '50px',
-                border: '1px solid rgba(200, 220, 255, 0.2)',
-                background: 'rgba(255, 255, 255, 0.03)',
-              }}
+        .signup-container {
+          min-height: 100vh;
+          background: #0a0a0f;
+          color: #fff;
+          font-family: 'DM Sans', -apple-system, sans-serif;
+          position: relative;
+          overflow-x: hidden;
+        }
+
+        .signup-bg {
+          position: fixed;
+          inset: 0;
+          z-index: 1;
+        }
+
+        .signup-bg-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(10,10,15,0.85) 0%, rgba(10,10,15,0.6) 50%, rgba(10,10,15,0.85) 100%);
+        }
+
+        .signup-ambient {
+          position: absolute;
+          top: 10%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 800px;
+          height: 800px;
+          background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, rgba(200, 220, 255, 0.03) 40%, transparent 70%);
+          pointer-events: none;
+        }
+
+        .signup-content {
+          position: relative;
+          z-index: 10;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .signup-header {
+          padding: 20px 32px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .signup-header-link {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.5);
+          text-decoration: none;
+        }
+
+        .signup-header-btn {
+          color: #FF6B35;
+          font-weight: 600;
+          margin-left: 8px;
+          padding: 8px 16px;
+          border: 1px solid rgba(255, 107, 53, 0.3);
+          border-radius: 8px;
+          background: rgba(255, 107, 53, 0.05);
+          transition: all 0.3s ease;
+        }
+
+        .signup-header-btn:hover {
+          background: rgba(255, 107, 53, 0.15);
+          border-color: rgba(255, 107, 53, 0.5);
+          box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+        }
+
+        .signup-main {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px 24px 40px;
+        }
+
+        .signup-card {
+          width: 100%;
+          max-width: 440px;
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(40px);
+          -webkit-backdrop-filter: blur(40px);
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 32px 28px;
+          box-shadow:
+            0 25px 50px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .signup-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 26px;
+          font-weight: 600;
+          margin-bottom: 6px;
+          text-align: center;
+          background: linear-gradient(135deg, #ffffff 0%, #FF6B35 50%, #ffffff 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.3));
+        }
+
+        .signup-subtitle {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.4);
+          text-align: center;
+          margin-bottom: 28px;
+        }
+
+        .signup-error {
+          background: rgba(255, 80, 80, 0.1);
+          backdrop-filter: blur(10px);
+          color: #ff8888;
+          padding: 14px;
+          margin-bottom: 20px;
+          font-size: 14px;
+          border-left: 3px solid rgba(255, 80, 80, 0.5);
+          border-radius: 8px;
+        }
+
+        .signup-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 500;
+          margin-bottom: 8px;
+          color: rgba(255, 255, 255, 0.5);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .signup-label-required {
+          color: #FF6B35;
+        }
+
+        .signup-input {
+          width: 100%;
+          padding: 14px 18px;
+          font-size: 15px;
+          font-family: inherit;
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          color: #fff;
+          outline: none;
+          transition: all 0.3s ease;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .signup-input::placeholder {
+          color: rgba(255, 255, 255, 0.25);
+        }
+
+        .signup-input:focus {
+          border-color: rgba(255, 107, 53, 0.5);
+          background: rgba(255, 255, 255, 0.05);
+          box-shadow:
+            0 0 20px rgba(255, 107, 53, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .signup-hint {
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.3);
+          margin-top: 6px;
+        }
+
+        .signup-checkbox-wrap {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          cursor: pointer;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .signup-checkbox {
+          margin-top: 3px;
+          width: 18px;
+          height: 18px;
+          accent-color: #FF6B35;
+          flex-shrink: 0;
+        }
+
+        .signup-checkbox-text {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        .signup-checkbox-text a {
+          color: #FF6B35;
+          text-decoration: none;
+        }
+
+        .signup-checkbox-text a:hover {
+          text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
+
+        /* Glass Card Button - Create Account */
+        .signup-submit {
+          width: 100%;
+          padding: 18px;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          background: rgba(255, 107, 53, 0.1);
+          backdrop-filter: blur(20px);
+          color: #FF6B35;
+          border: 1px solid rgba(255, 107, 53, 0.4);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          box-shadow:
+            0 0 30px rgba(255, 107, 53, 0.2),
+            inset 0 1px 0 rgba(255, 200, 150, 0.1);
+        }
+
+        .signup-submit::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.2), transparent);
+          animation: submitShine 3s ease-in-out infinite;
+        }
+
+        .signup-submit:hover:not(:disabled) {
+          background: rgba(255, 107, 53, 0.2);
+          border-color: rgba(255, 107, 53, 0.6);
+          color: #fff;
+          box-shadow:
+            0 0 40px rgba(255, 107, 53, 0.4),
+            0 0 80px rgba(255, 107, 53, 0.2),
+            inset 0 1px 0 rgba(255, 200, 150, 0.2);
+          text-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+        }
+
+        .signup-submit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        @keyframes submitShine {
+          0% { left: -100%; }
+          50%, 100% { left: 150%; }
+        }
+
+        .signup-divider {
+          display: flex;
+          align-items: center;
+          margin: 24px 0;
+          gap: 16px;
+        }
+
+        .signup-divider-line {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 107, 53, 0.2), transparent);
+        }
+
+        .signup-divider-text {
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+
+        .signup-oauth {
+          display: flex;
+          gap: 10px;
+        }
+
+        .signup-oauth-btn {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px;
+          font-size: 13px;
+          font-weight: 500;
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(10px);
+          color: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .signup-oauth-btn:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.15);
+          color: #fff;
+        }
+
+        .signup-oauth-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .signup-footer-note {
+          text-align: center;
+          margin-top: 20px;
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.25);
+        }
+
+        .signup-footer {
+          padding: 24px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .signup-footer-company {
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.15em;
+          color: rgba(255, 255, 255, 0.2);
+        }
+
+        .signup-footer-tagline {
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.2em;
+          background: linear-gradient(90deg,
+            rgba(255, 107, 53, 0.6) 0%,
+            rgba(255, 200, 150, 1) 25%,
+            rgba(255, 107, 53, 0.6) 50%,
+            rgba(255, 200, 150, 1) 75%,
+            rgba(255, 107, 53, 0.6) 100%
+          );
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: taglineShimmer 3s ease-in-out infinite;
+          filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.4));
+        }
+
+        @keyframes taglineShimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        .field-group {
+          margin-bottom: 16px;
+        }
+      `}</style>
+
+      <div className="signup-container">
+        <div className="signup-bg">
+          <Image
+            src="/icons/signup.png"
+            alt="Background"
+            fill
+            priority
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+          />
+          <div className="signup-bg-overlay" />
+          <div className="signup-ambient" />
+        </div>
+
+        <div className="signup-content">
+          <header className="signup-header">
+            <AnimatedLogo size="small" href="/" />
+            <Link href="/login" className="signup-header-link">
+              Already have an account?
+              <span className="signup-header-btn">Log in</span>
+            </Link>
+          </header>
+
+          <main className="signup-main">
+            <motion.div
+              className="signup-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              Log in
-            </span>
-          </Link>
-        </header>
+              <h1 className="signup-title">Create Account</h1>
+              <p className="signup-subtitle">Join the community</p>
 
-        {/* Main Form */}
-        <main
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px 24px 40px',
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              width: '100%',
-              maxWidth: '440px',
-              background: 'rgba(255, 255, 255, 0.02)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              borderRadius: '24px',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              padding: '32px 28px',
-              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: '28px',
-                fontWeight: 600,
-                marginBottom: '8px',
-                textAlign: 'center',
-                background: 'linear-gradient(135deg, #ffffff 0%, #c8dcff 50%, #ffffff 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              Create Account
-            </h1>
-            <p
-              style={{
-                fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.4)',
-                textAlign: 'center',
-                marginBottom: '28px',
-              }}
-            >
-              Join the community
-            </p>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                role="alert"
-                id={errorId}
-                style={{
-                  background: 'rgba(255, 100, 100, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  color: '#ff9999',
-                  padding: '14px',
-                  marginBottom: '20px',
-                  fontSize: '14px',
-                  borderLeft: '3px solid rgba(255, 100, 100, 0.5)',
-                  borderRadius: '8px',
-                }}
-              >
-                {error}
-              </motion.div>
-            )}
-
-            <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
-              <div style={{ marginBottom: '16px' }}>
-                <label htmlFor={emailId} style={labelStyle}>
-                  Email address <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
-                </label>
-                <input
-                  id={emailId}
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  aria-required="true"
-                  style={inputStyle}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label htmlFor={passwordId} style={labelStyle}>
-                  Password <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
-                </label>
-                <input
-                  id={passwordId}
-                  type="password"
-                  placeholder="Min 8 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
-                  aria-required="true"
-                  aria-describedby={`${passwordId}-hint`}
-                  style={inputStyle}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
-                <p
-                  id={`${passwordId}-hint`}
-                  style={{
-                    fontSize: '10px',
-                    color: 'rgba(200, 220, 255, 0.35)',
-                    marginTop: '6px',
-                    marginBottom: 0,
-                  }}
+              {error && (
+                <motion.div
+                  className="signup-error"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  role="alert"
+                  id={errorId}
                 >
-                  Must be at least 8 characters with uppercase, lowercase, and number
-                </p>
-              </div>
+                  {error}
+                </motion.div>
+              )}
 
-              <div style={{ marginBottom: '16px' }}>
-                <label htmlFor={confirmPasswordId} style={labelStyle}>
-                  Confirm Password <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
-                </label>
-                <input
-                  id={confirmPasswordId}
-                  type="password"
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  autoComplete="new-password"
-                  aria-required="true"
-                  style={inputStyle}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
-              </div>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label htmlFor={dobId} style={labelStyle}>
-                  Date of Birth <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
-                </label>
-                <input
-                  id={dobId}
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  required
-                  aria-required="true"
-                  aria-describedby={`${dobId}-hint`}
-                  style={{
-                    ...inputStyle,
-                    colorScheme: 'dark',
-                  }}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
-                <p
-                  id={`${dobId}-hint`}
-                  style={{
-                    fontSize: '10px',
-                    color: 'rgba(200, 220, 255, 0.35)',
-                    marginTop: '6px',
-                    marginBottom: 0,
-                  }}
-                >
-                  You must be at least 18 years old to use SLTR
-                </p>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label
-                  htmlFor={termsId}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    lineHeight: 1.6,
-                  }}
-                >
+              <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
+                <div className="field-group">
+                  <label htmlFor={emailId} className="signup-label">
+                    Email address <span className="signup-label-required">*</span>
+                  </label>
                   <input
-                    id={termsId}
-                    type="checkbox"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
+                    id={emailId}
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
-                    aria-required="true"
-                    style={{
-                      marginTop: '3px',
-                      width: '18px',
-                      height: '18px',
-                      accentColor: 'rgba(200, 220, 255, 0.8)',
-                      flexShrink: 0,
-                    }}
+                    autoComplete="email"
+                    className="signup-input"
                   />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
-                    I am at least 18 years old and agree to the{' '}
-                    <Link href="/terms" style={{ color: 'rgba(200, 220, 255, 0.8)', textDecoration: 'none' }}>
-                      Terms of Service
-                    </Link>
-                    ,{' '}
-                    <Link href="/privacy" style={{ color: 'rgba(200, 220, 255, 0.8)', textDecoration: 'none' }}>
-                      Privacy Policy
-                    </Link>
-                    , and{' '}
-                    <Link href="/guidelines" style={{ color: 'rgba(200, 220, 255, 0.8)', textDecoration: 'none' }}>
-                      Community Guidelines
-                    </Link>
-                  </span>
-                </label>
+                </div>
+
+                <div className="field-group">
+                  <label htmlFor={passwordId} className="signup-label">
+                    Password <span className="signup-label-required">*</span>
+                  </label>
+                  <input
+                    id={passwordId}
+                    type="password"
+                    placeholder="Min 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="signup-input"
+                  />
+                  <p className="signup-hint">Must include uppercase, lowercase, and number</p>
+                </div>
+
+                <div className="field-group">
+                  <label htmlFor={confirmPasswordId} className="signup-label">
+                    Confirm Password <span className="signup-label-required">*</span>
+                  </label>
+                  <input
+                    id={confirmPasswordId}
+                    type="password"
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                    className="signup-input"
+                  />
+                </div>
+
+                <div className="field-group">
+                  <label htmlFor={dobId} className="signup-label">
+                    Date of Birth <span className="signup-label-required">*</span>
+                  </label>
+                  <input
+                    id={dobId}
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    required
+                    className="signup-input"
+                    style={{ colorScheme: 'dark' }}
+                  />
+                  <p className="signup-hint">You must be at least 18 years old</p>
+                </div>
+
+                <div className="field-group" style={{ marginBottom: '24px' }}>
+                  <label htmlFor={termsId} className="signup-checkbox-wrap">
+                    <input
+                      id={termsId}
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      required
+                      className="signup-checkbox"
+                    />
+                    <span className="signup-checkbox-text">
+                      I am at least 18 years old and agree to the{' '}
+                      <Link href="/terms">Terms of Service</Link>,{' '}
+                      <Link href="/privacy">Privacy Policy</Link>, and{' '}
+                      <Link href="/guidelines">Community Guidelines</Link>
+                    </span>
+                  </label>
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  className="signup-submit"
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {loading ? 'Creating Account...' : 'Create Account'}
+                </motion.button>
+              </form>
+
+              <div className="signup-divider">
+                <div className="signup-divider-line" />
+                <span className="signup-divider-text">or sign up with</span>
+                <div className="signup-divider-line" />
               </div>
 
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  background: 'linear-gradient(135deg, rgba(200, 220, 255, 0.9) 0%, rgba(255, 255, 255, 1) 50%, rgba(200, 220, 255, 0.9) 100%)',
-                  color: '#0a0a0f',
-                  border: 'none',
-                  borderRadius: '50px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
-                  outline: 'none',
-                  boxShadow: '0 0 30px rgba(200, 220, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.5)',
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                {loading ? 'Creating Account...' : 'Create Account'}
-              </motion.button>
-            </form>
-
-            {/* OAuth Divider */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                margin: '20px 0',
-                gap: '16px',
-              }}
-            >
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
-              <span style={{ fontSize: '10px', color: 'rgba(200, 220, 255, 0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                or sign up with
-              </span>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
-            </div>
-
-            {/* OAuth Buttons */}
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {[
-                { provider: 'google' as const, icon: <GoogleIcon />, label: 'Google' },
-                { provider: 'twitter' as const, icon: <TwitterIcon />, label: 'X' },
-                { provider: 'facebook' as const, icon: <FacebookIcon />, label: 'Facebook' },
-              ].map(({ provider, icon, label }) => (
-                <motion.button
-                  key={provider}
+              <div className="signup-oauth">
+                <button
                   type="button"
-                  onClick={() => handleOAuthSignup(provider)}
+                  onClick={() => handleOAuthSignup('google')}
                   disabled={loading || oauthLoading !== null}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '12px 14px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    color: '#FFFFFF',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '50px',
-                    cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                    opacity: oauthLoading !== null ? 0.6 : 1,
-                    outline: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
+                  className="signup-oauth-btn"
                 >
-                  {icon}
-                  {oauthLoading === provider ? '...' : label}
-                </motion.button>
-              ))}
-            </div>
+                  <GoogleIcon />
+                  {oauthLoading === 'google' ? '...' : 'Google'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOAuthSignup('twitter')}
+                  disabled={loading || oauthLoading !== null}
+                  className="signup-oauth-btn"
+                >
+                  <TwitterIcon />
+                  {oauthLoading === 'twitter' ? '...' : 'X'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOAuthSignup('facebook')}
+                  disabled={loading || oauthLoading !== null}
+                  className="signup-oauth-btn"
+                >
+                  <FacebookIcon />
+                  {oauthLoading === 'facebook' ? '...' : 'Facebook'}
+                </button>
+              </div>
 
-            <p
-              style={{
-                textAlign: 'center',
-                marginTop: '20px',
-                fontSize: '11px',
-                color: 'rgba(200, 220, 255, 0.3)',
-              }}
-            >
-              By signing up, you confirm you are at least 18 years old.
-            </p>
-          </motion.div>
-        </main>
+              <p className="signup-footer-note">
+                By signing up, you confirm you are at least 18 years old.
+              </p>
+            </motion.div>
+          </main>
 
-        {/* Footer */}
-        <footer
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-          }}
-        >
-          <p
-            style={{
-              fontSize: '11px',
-              color: 'rgba(255, 255, 255, 0.2)',
-              letterSpacing: '0.1em',
-              margin: 0,
-            }}
-          >
-            © 2025 SLTR DIGITAL LLC
-          </p>
-          <p
-            style={{
-              fontSize: '9px',
-              color: 'rgba(200, 220, 255, 0.35)',
-              letterSpacing: '0.15em',
-              margin: 0,
-            }}
-          >
-            INTELLIGENT | INNOVATIVE | INTUITIVE
-          </p>
-        </footer>
+          <footer className="signup-footer">
+            <span className="signup-footer-company">© 2025 SLTR DIGITAL LLC</span>
+            <span className="signup-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
+          </footer>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

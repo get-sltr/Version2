@@ -838,14 +838,32 @@ export default function LandingPage() {
           font-size: 10px;
           font-weight: 600;
           letter-spacing: 0.2em;
-          color: rgba(255, 255, 255, 0.25);
+          color: rgba(255, 255, 255, 0.3);
+          text-shadow: 0 0 10px rgba(200, 220, 255, 0.3);
         }
 
         .company-tagline {
           font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.15em;
-          color: rgba(200, 220, 255, 0.4);
+          font-weight: 600;
+          letter-spacing: 0.2em;
+          background: linear-gradient(90deg,
+            rgba(255, 107, 53, 0.6) 0%,
+            rgba(255, 200, 150, 1) 25%,
+            rgba(255, 107, 53, 0.6) 50%,
+            rgba(255, 200, 150, 1) 75%,
+            rgba(255, 107, 53, 0.6) 100%
+          );
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: tagline-shimmer 3s ease-in-out infinite;
+          filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.4));
+        }
+
+        @keyframes tagline-shimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
         }
 
         /* ===========================================

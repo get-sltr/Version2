@@ -99,416 +99,491 @@ export default function LoginPage() {
     }
   };
 
-  // Liquid glass input style
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '16px 20px',
-    fontSize: '15px',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '12px',
-    boxSizing: 'border-box',
-    outline: 'none',
-    color: '#FFFFFF',
-    transition: 'all 0.3s ease',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
-  };
-
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.borderColor = 'rgba(200, 220, 255, 0.4)';
-    e.target.style.boxShadow = '0 0 20px rgba(200, 220, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.1)';
-    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
-  };
-
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)';
-    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-  };
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#000000',
-        color: '#FFFFFF',
-        fontFamily: "'DM Sans', sans-serif",
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Background Image */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 1,
-        }}
-      >
-        <Image
-          src="/icons/signin.webp"
-          alt="Background"
-          fill
-          priority
-          style={{
-            objectFit: 'cover',
-            objectPosition: 'center',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 100%)',
-          }}
-        />
-        {/* Ambient glow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '20%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(200, 220, 255, 0.03) 0%, transparent 60%)',
-            pointerEvents: 'none',
-          }}
-        />
-      </div>
+    <>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
-      {/* Content */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {/* Header with Animated Logo */}
-        <header
-          style={{
-            padding: '20px 32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <AnimatedLogo size="small" href="/" />
-          <Link
-            href="/signup"
-            style={{
-              fontSize: '13px',
-              color: 'rgba(200, 220, 255, 0.8)',
-              textDecoration: 'none',
-              fontWeight: 500,
-              letterSpacing: '0.05em',
-              padding: '10px 20px',
-              borderRadius: '50px',
-              border: '1px solid rgba(200, 220, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.03)',
-              backdropFilter: 'blur(10px)',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            Sign up
-          </Link>
-        </header>
+        .login-container {
+          min-height: 100vh;
+          background: #0a0a0f;
+          color: #fff;
+          font-family: 'DM Sans', -apple-system, sans-serif;
+          position: relative;
+          overflow-x: hidden;
+        }
 
-        {/* Main Form */}
-        <main
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '40px 24px',
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            style={{
-              width: '100%',
-              maxWidth: '420px',
-              background: 'rgba(255, 255, 255, 0.02)',
-              backdropFilter: 'blur(40px)',
-              WebkitBackdropFilter: 'blur(40px)',
-              borderRadius: '24px',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              padding: '40px 32px',
-              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: '28px',
-                fontWeight: 600,
-                marginBottom: '8px',
-                textAlign: 'center',
-                background: 'linear-gradient(135deg, #ffffff 0%, #c8dcff 50%, #ffffff 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
+        .login-bg {
+          position: fixed;
+          inset: 0;
+          z-index: 1;
+        }
+
+        .login-bg-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(10,10,15,0.8) 0%, rgba(10,10,15,0.55) 50%, rgba(10,10,15,0.8) 100%);
+        }
+
+        .login-ambient {
+          position: absolute;
+          top: 15%;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 700px;
+          height: 700px;
+          background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, rgba(200, 220, 255, 0.03) 40%, transparent 70%);
+          pointer-events: none;
+        }
+
+        .login-content {
+          position: relative;
+          z-index: 10;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .login-header {
+          padding: 20px 32px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .login-header-btn {
+          font-size: 13px;
+          color: #FF6B35;
+          font-weight: 600;
+          text-decoration: none;
+          padding: 10px 20px;
+          border: 1px solid rgba(255, 107, 53, 0.3);
+          border-radius: 8px;
+          background: rgba(255, 107, 53, 0.05);
+          transition: all 0.3s ease;
+        }
+
+        .login-header-btn:hover {
+          background: rgba(255, 107, 53, 0.15);
+          border-color: rgba(255, 107, 53, 0.5);
+          box-shadow: 0 0 20px rgba(255, 107, 53, 0.2);
+        }
+
+        .login-main {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px 24px;
+        }
+
+        .login-card {
+          width: 100%;
+          max-width: 420px;
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(40px);
+          -webkit-backdrop-filter: blur(40px);
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 40px 32px;
+          box-shadow:
+            0 25px 50px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .login-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 28px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          text-align: center;
+          background: linear-gradient(135deg, #ffffff 0%, #FF6B35 50%, #ffffff 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.3));
+        }
+
+        .login-subtitle {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.4);
+          text-align: center;
+          margin-bottom: 32px;
+        }
+
+        .login-error {
+          background: rgba(255, 80, 80, 0.1);
+          backdrop-filter: blur(10px);
+          color: #ff8888;
+          padding: 16px;
+          margin-bottom: 24px;
+          font-size: 14px;
+          border-left: 3px solid rgba(255, 80, 80, 0.5);
+          border-radius: 8px;
+        }
+
+        .login-label {
+          display: block;
+          font-size: 11px;
+          font-weight: 500;
+          margin-bottom: 8px;
+          color: rgba(255, 255, 255, 0.5);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .login-input {
+          width: 100%;
+          padding: 16px 20px;
+          font-size: 15px;
+          font-family: inherit;
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          color: #fff;
+          outline: none;
+          transition: all 0.3s ease;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .login-input::placeholder {
+          color: rgba(255, 255, 255, 0.25);
+        }
+
+        .login-input:focus {
+          border-color: rgba(255, 107, 53, 0.5);
+          background: rgba(255, 255, 255, 0.05);
+          box-shadow:
+            0 0 20px rgba(255, 107, 53, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .login-forgot {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.4);
+          text-decoration: none;
+          transition: all 0.3s ease;
+        }
+
+        .login-forgot:hover {
+          color: #FF6B35;
+          text-shadow: 0 0 10px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Glass Card Button - Log In */
+        .login-submit {
+          width: 100%;
+          padding: 18px;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          background: rgba(255, 107, 53, 0.1);
+          backdrop-filter: blur(20px);
+          color: #FF6B35;
+          border: 1px solid rgba(255, 107, 53, 0.4);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          box-shadow:
+            0 0 30px rgba(255, 107, 53, 0.2),
+            inset 0 1px 0 rgba(255, 200, 150, 0.1);
+        }
+
+        .login-submit::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.2), transparent);
+          animation: submitShine 3s ease-in-out infinite;
+        }
+
+        .login-submit:hover:not(:disabled) {
+          background: rgba(255, 107, 53, 0.2);
+          border-color: rgba(255, 107, 53, 0.6);
+          color: #fff;
+          box-shadow:
+            0 0 40px rgba(255, 107, 53, 0.4),
+            0 0 80px rgba(255, 107, 53, 0.2),
+            inset 0 1px 0 rgba(255, 200, 150, 0.2);
+          text-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+        }
+
+        .login-submit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        @keyframes submitShine {
+          0% { left: -100%; }
+          50%, 100% { left: 150%; }
+        }
+
+        .login-divider {
+          display: flex;
+          align-items: center;
+          margin: 28px 0;
+          gap: 16px;
+        }
+
+        .login-divider-line {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 107, 53, 0.2), transparent);
+        }
+
+        .login-divider-text {
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+
+        .login-oauth {
+          display: flex;
+          gap: 12px;
+        }
+
+        .login-oauth-btn {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 16px;
+          font-size: 13px;
+          font-weight: 500;
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(10px);
+          color: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .login-oauth-btn:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.15);
+          color: #fff;
+        }
+
+        .login-oauth-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .login-signup-link {
+          margin-top: 28px;
+          text-align: center;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-signup-link a {
+          color: #FF6B35;
+          text-decoration: none;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .login-signup-link a:hover {
+          text-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+        }
+
+        .login-footer {
+          padding: 24px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .login-footer-company {
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.15em;
+          color: rgba(255, 255, 255, 0.2);
+        }
+
+        .login-footer-tagline {
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.2em;
+          background: linear-gradient(90deg,
+            rgba(255, 107, 53, 0.6) 0%,
+            rgba(255, 200, 150, 1) 25%,
+            rgba(255, 107, 53, 0.6) 50%,
+            rgba(255, 200, 150, 1) 75%,
+            rgba(255, 107, 53, 0.6) 100%
+          );
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: taglineShimmer 3s ease-in-out infinite;
+          filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.4));
+        }
+
+        @keyframes taglineShimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+
+        .field-group {
+          margin-bottom: 20px;
+        }
+      `}</style>
+
+      <div className="login-container">
+        <div className="login-bg">
+          <Image
+            src="/icons/signin.webp"
+            alt="Background"
+            fill
+            priority
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+          />
+          <div className="login-bg-overlay" />
+          <div className="login-ambient" />
+        </div>
+
+        <div className="login-content">
+          <header className="login-header">
+            <AnimatedLogo size="small" href="/" />
+            <Link href="/signup" className="login-header-btn">
+              Sign up
+            </Link>
+          </header>
+
+          <main className="login-main">
+            <motion.div
+              className="login-card"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              Welcome Back
-            </h1>
-            <p
-              style={{
-                fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.4)',
-                textAlign: 'center',
-                marginBottom: '32px',
-              }}
-            >
-              Log in to continue
-            </p>
+              <h1 className="login-title">Welcome Back</h1>
+              <p className="login-subtitle">Log in to continue</p>
 
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                role="alert"
-                id={errorId}
-                style={{
-                  background: 'rgba(255, 100, 100, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  color: '#ff9999',
-                  padding: '16px',
-                  marginBottom: '24px',
-                  fontSize: '14px',
-                  borderLeft: '3px solid rgba(255, 100, 100, 0.5)',
-                  borderRadius: '8px',
-                }}
-              >
-                {error}
-              </motion.div>
-            )}
-
-            <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
-              <div style={{ marginBottom: '20px' }}>
-                <label
-                  htmlFor={emailId}
-                  style={{
-                    display: 'block',
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    marginBottom: '8px',
-                    color: 'rgba(200, 220, 255, 0.6)',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
+              {error && (
+                <motion.div
+                  className="login-error"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  role="alert"
+                  id={errorId}
                 >
-                  Email address
-                </label>
-                <input
-                  id={emailId}
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                  aria-required="true"
-                  style={inputStyle}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
-              </div>
+                  {error}
+                </motion.div>
+              )}
 
-              <div style={{ marginBottom: '8px' }}>
-                <label
-                  htmlFor={passwordId}
-                  style={{
-                    display: 'block',
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    marginBottom: '8px',
-                    color: 'rgba(200, 220, 255, 0.6)',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  Password
-                </label>
-                <input
-                  id={passwordId}
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  aria-required="true"
-                  style={inputStyle}
-                  onFocus={handleInputFocus}
-                  onBlur={handleInputBlur}
-                />
-              </div>
+              <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
+                <div className="field-group">
+                  <label htmlFor={emailId} className="login-label">
+                    Email address
+                  </label>
+                  <input
+                    id={emailId}
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="login-input"
+                  />
+                </div>
 
-              <div style={{ textAlign: 'right', marginBottom: '24px' }}>
-                <Link
-                  href="/forgot-password"
-                  style={{
-                    fontSize: '13px',
-                    color: 'rgba(200, 220, 255, 0.5)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  Forgot password?
-                </Link>
-              </div>
+                <div className="field-group" style={{ marginBottom: '8px' }}>
+                  <label htmlFor={passwordId} className="login-label">
+                    Password
+                  </label>
+                  <input
+                    id={passwordId}
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="login-input"
+                  />
+                </div>
 
-              <motion.button
-                type="submit"
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  width: '100%',
-                  padding: '18px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  background: 'linear-gradient(135deg, rgba(200, 220, 255, 0.9) 0%, rgba(255, 255, 255, 1) 50%, rgba(200, 220, 255, 0.9) 100%)',
-                  color: '#0a0a0f',
-                  border: 'none',
-                  borderRadius: '50px',
-                  cursor: loading || oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: loading || oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  boxShadow: '0 0 30px rgba(200, 220, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.5)',
-                  transition: 'all 0.3s ease',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                <span style={{ position: 'relative', zIndex: 1 }}>
-                  {loading ? 'Logging in...' : 'Log In'}
-                </span>
-              </motion.button>
-            </form>
+                <div style={{ textAlign: 'right', marginBottom: '24px' }}>
+                  <Link href="/forgot-password" className="login-forgot">
+                    Forgot password?
+                  </Link>
+                </div>
 
-            {/* OAuth Divider */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                margin: '28px 0',
-                gap: '16px',
-              }}
-            >
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
-              <span style={{ fontSize: '11px', color: 'rgba(200, 220, 255, 0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                or continue with
-              </span>
-              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
-            </div>
-
-            {/* OAuth Buttons */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              {[
-                { provider: 'google' as const, icon: <GoogleIcon />, label: 'Google' },
-                { provider: 'twitter' as const, icon: <TwitterIcon />, label: 'X' },
-                { provider: 'facebook' as const, icon: <FacebookIcon />, label: 'Facebook' },
-              ].map(({ provider, icon, label }) => (
                 <motion.button
-                  key={provider}
-                  type="button"
-                  onClick={() => handleOAuthLogin(provider)}
+                  type="submit"
                   disabled={loading || oauthLoading !== null}
-                  whileHover={{ scale: 1.02 }}
+                  className="login-submit"
                   whileTap={{ scale: 0.98 }}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '14px 16px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    backdropFilter: 'blur(10px)',
-                    color: '#FFFFFF',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '50px',
-                    cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                    opacity: oauthLoading !== null ? 0.6 : 1,
-                    outline: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
                 >
-                  {icon}
-                  {oauthLoading === provider ? '...' : label}
+                  {loading ? 'Logging in...' : 'Log In'}
                 </motion.button>
-              ))}
-            </div>
+              </form>
 
-            <p
-              style={{
-                marginTop: '28px',
-                textAlign: 'center',
-                fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.4)',
-              }}
-            >
-              Don't have an account?{' '}
-              <Link
-                href="/signup"
-                style={{
-                  color: 'rgba(200, 220, 255, 0.9)',
-                  textDecoration: 'none',
-                  fontWeight: 600,
-                }}
-              >
-                Sign up
-              </Link>
-            </p>
-          </motion.div>
-        </main>
+              <div className="login-divider">
+                <div className="login-divider-line" />
+                <span className="login-divider-text">or continue with</span>
+                <div className="login-divider-line" />
+              </div>
 
-        {/* Footer */}
-        <footer
-          style={{
-            padding: '24px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-          }}
-        >
-          <p
-            style={{
-              fontSize: '11px',
-              color: 'rgba(255, 255, 255, 0.2)',
-              letterSpacing: '0.1em',
-              margin: 0,
-            }}
-          >
-            © 2025 SLTR DIGITAL LLC
-          </p>
-          <p
-            style={{
-              fontSize: '9px',
-              color: 'rgba(200, 220, 255, 0.35)',
-              letterSpacing: '0.15em',
-              margin: 0,
-            }}
-          >
-            INTELLIGENT | INNOVATIVE | INTUITIVE
-          </p>
-        </footer>
+              <div className="login-oauth">
+                <button
+                  type="button"
+                  onClick={() => handleOAuthLogin('google')}
+                  disabled={loading || oauthLoading !== null}
+                  className="login-oauth-btn"
+                >
+                  <GoogleIcon />
+                  {oauthLoading === 'google' ? '...' : 'Google'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOAuthLogin('twitter')}
+                  disabled={loading || oauthLoading !== null}
+                  className="login-oauth-btn"
+                >
+                  <TwitterIcon />
+                  {oauthLoading === 'twitter' ? '...' : 'X'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOAuthLogin('facebook')}
+                  disabled={loading || oauthLoading !== null}
+                  className="login-oauth-btn"
+                >
+                  <FacebookIcon />
+                  {oauthLoading === 'facebook' ? '...' : 'Facebook'}
+                </button>
+              </div>
+
+              <p className="login-signup-link">
+                Don't have an account? <Link href="/signup">Sign up</Link>
+              </p>
+            </motion.div>
+          </main>
+
+          <footer className="login-footer">
+            <span className="login-footer-company">© 2025 SLTR DIGITAL LLC</span>
+            <span className="login-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
+          </footer>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
