@@ -68,18 +68,18 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--color-glass-light);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-glass-border);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
-  color: var(--color-text-muted);
+  color: #FFFFFF;
   cursor: pointer;
   transition: var(--transition-smooth);
   text-decoration: none;
   font-family: 'Orbitron', sans-serif;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   height: 40px;
@@ -154,19 +154,21 @@
 }
 
 .pulseTitle {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--color-accent);
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 700;
+  color: #FF6B35;
+  letter-spacing: 0.1em;
   white-space: nowrap;
+  text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
 }
 
 .pulseTagline {
-  font-size: 7px;
-  color: rgba(255, 107, 53, 0.5);
+  font-size: 8px;
+  color: #4ade80;
   letter-spacing: 0.1em;
   margin-top: 1px;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .liveDot {
@@ -196,15 +198,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 107, 53, 0.06);
+  padding: 10px 18px;
+  background: rgba(255, 107, 53, 0.15);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 107, 53, 0.25);
+  border: 1px solid rgba(255, 107, 53, 0.5);
   border-radius: 20px;
   cursor: pointer;
   transition: var(--transition-smooth);
   overflow: hidden;
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
 }
 
 .cruisingFab:hover {
@@ -215,18 +218,17 @@
 }
 
 .cruisingFabIcon {
-  color: var(--color-accent);
-  opacity: 0.9;
-  width: 14px;
-  height: 14px;
+  color: #FF6B35;
+  width: 16px;
+  height: 16px;
 }
 
 .cruisingFabText {
   font-family: 'Orbitron', sans-serif;
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.12em;
-  color: var(--color-accent);
+  color: #FFFFFF;
   text-transform: uppercase;
 }
 
@@ -259,7 +261,7 @@
   gap: 3px;
   background: transparent;
   border: none;
-  color: var(--color-accent);
+  color: #FFFFFF;
   cursor: pointer;
   padding: 6px 10px;
   transition: var(--transition-smooth);
@@ -277,9 +279,10 @@
 }
 
 .navItemIcon svg {
-  width: 18px;
-  height: 18px;
-  stroke: var(--color-accent);
+  width: 20px;
+  height: 20px;
+  stroke: #FFFFFF;
+  stroke-width: 2;
   fill: none;
 }
 
@@ -315,11 +318,11 @@
 
 .navItemLabel {
   font-family: 'Orbitron', sans-serif;
-  font-size: 7px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: #FFFFFF;
 }
 
 .navItem.active::after {
@@ -336,10 +339,11 @@
 
 .navItemSltr {
   font-family: 'Orbitron', sans-serif;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--color-accent);
+  letter-spacing: 0.08em;
+  color: #FF6B35;
+  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
 }
 
 /* -----------------------------------------------------------------------------
