@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import posthog from 'posthog-js';
+import { AnimatedLogo } from '../../components/AnimatedLogo';
 
 // OAuth Icons
 function GoogleIcon() {
@@ -98,6 +99,35 @@ export default function LoginPage() {
     }
   };
 
+  // Liquid glass input style
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '16px 20px',
+    fontSize: '15px',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '12px',
+    boxSizing: 'border-box',
+    outline: 'none',
+    color: '#FFFFFF',
+    transition: 'all 0.3s ease',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+  };
+
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = 'rgba(200, 220, 255, 0.4)';
+    e.target.style.boxShadow = '0 0 20px rgba(200, 220, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.1)';
+    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+  };
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)';
+    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+  };
+
   return (
     <div
       style={{
@@ -131,7 +161,20 @@ export default function LoginPage() {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.7) 100%)',
+          }}
+        />
+        {/* Ambient glow */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '20%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(200, 220, 255, 0.03) 0%, transparent 60%)',
+            pointerEvents: 'none',
           }}
         />
       </div>
@@ -146,36 +189,30 @@ export default function LoginPage() {
           flexDirection: 'column',
         }}
       >
-        {/* Header */}
+        {/* Header with Animated Logo */}
         <header
           style={{
-            padding: '24px 32px',
+            padding: '20px 32px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Link
-            href="/"
-            style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: '24px',
-              fontWeight: 700,
-              letterSpacing: '0.15em',
-              textDecoration: 'none',
-              color: '#FFFFFF',
-            }}
-          >
-            sltr
-          </Link>
+          <AnimatedLogo size="small" href="/" />
           <Link
             href="/signup"
             style={{
               fontSize: '13px',
-              color: '#FF6B35',
+              color: 'rgba(200, 220, 255, 0.8)',
               textDecoration: 'none',
-              fontWeight: 600,
+              fontWeight: 500,
               letterSpacing: '0.05em',
+              padding: '10px 20px',
+              borderRadius: '50px',
+              border: '1px solid rgba(200, 220, 255, 0.2)',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(10px)',
+              transition: 'all 0.3s ease',
             }}
           >
             Sign up
@@ -198,16 +235,27 @@ export default function LoginPage() {
             transition={{ duration: 0.6 }}
             style={{
               width: '100%',
-              maxWidth: '400px',
+              maxWidth: '420px',
+              background: 'rgba(255, 255, 255, 0.02)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              padding: '40px 32px',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
             }}
           >
             <h1
               style={{
                 fontFamily: "'Orbitron', sans-serif",
-                fontSize: '32px',
+                fontSize: '28px',
                 fontWeight: 600,
                 marginBottom: '8px',
                 textAlign: 'center',
+                background: 'linear-gradient(135deg, #ffffff 0%, #c8dcff 50%, #ffffff 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
               }}
             >
               Welcome Back
@@ -215,9 +263,9 @@ export default function LoginPage() {
             <p
               style={{
                 fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: 'rgba(255, 255, 255, 0.4)',
                 textAlign: 'center',
-                marginBottom: '40px',
+                marginBottom: '32px',
               }}
             >
               Log in to continue
@@ -230,13 +278,14 @@ export default function LoginPage() {
                 role="alert"
                 id={errorId}
                 style={{
-                  background: 'rgba(255, 107, 53, 0.1)',
-                  color: '#FF6B35',
+                  background: 'rgba(255, 100, 100, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  color: '#ff9999',
                   padding: '16px',
                   marginBottom: '24px',
                   fontSize: '14px',
-                  borderLeft: '3px solid #FF6B35',
-                  borderRadius: '4px',
+                  borderLeft: '3px solid rgba(255, 100, 100, 0.5)',
+                  borderRadius: '8px',
                 }}
               >
                 {error}
@@ -249,11 +298,11 @@ export default function LoginPage() {
                   htmlFor={emailId}
                   style={{
                     display: 'block',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     fontWeight: 500,
                     marginBottom: '8px',
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    letterSpacing: '0.05em',
+                    color: 'rgba(200, 220, 255, 0.6)',
+                    letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                   }}
                 >
@@ -268,26 +317,9 @@ export default function LoginPage() {
                   required
                   autoComplete="email"
                   aria-required="true"
-                  style={{
-                    width: '100%',
-                    padding: '16px 20px',
-                    fontSize: '15px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    color: '#FFFFFF',
-                    transition: 'border-color 0.2s, box-shadow 0.2s',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#FF6B35';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    e.target.style.boxShadow = 'none';
-                  }}
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                 />
               </div>
 
@@ -296,11 +328,11 @@ export default function LoginPage() {
                   htmlFor={passwordId}
                   style={{
                     display: 'block',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     fontWeight: 500,
                     marginBottom: '8px',
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    letterSpacing: '0.05em',
+                    color: 'rgba(200, 220, 255, 0.6)',
+                    letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                   }}
                 >
@@ -315,26 +347,9 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   aria-required="true"
-                  style={{
-                    width: '100%',
-                    padding: '16px 20px',
-                    fontSize: '15px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    color: '#FFFFFF',
-                    transition: 'border-color 0.2s, box-shadow 0.2s',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#FF6B35';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    e.target.style.boxShadow = 'none';
-                  }}
+                  style={inputStyle}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
                 />
               </div>
 
@@ -343,7 +358,7 @@ export default function LoginPage() {
                   href="/forgot-password"
                   style={{
                     fontSize: '13px',
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: 'rgba(200, 220, 255, 0.5)',
                     textDecoration: 'none',
                   }}
                 >
@@ -363,18 +378,22 @@ export default function LoginPage() {
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
-                  background: '#FF6B35',
-                  color: '#000000',
+                  background: 'linear-gradient(135deg, rgba(200, 220, 255, 0.9) 0%, rgba(255, 255, 255, 1) 50%, rgba(200, 220, 255, 0.9) 100%)',
+                  color: '#0a0a0f',
                   border: 'none',
                   borderRadius: '50px',
                   cursor: loading || oauthLoading !== null ? 'not-allowed' : 'pointer',
                   opacity: loading || oauthLoading !== null ? 0.6 : 1,
                   outline: 'none',
-                  boxShadow: '0 0 30px rgba(255, 107, 53, 0.4)',
-                  transition: 'box-shadow 0.2s',
+                  boxShadow: '0 0 30px rgba(200, 220, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                {loading ? 'Logging in...' : 'Log In'}
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  {loading ? 'Logging in...' : 'Log In'}
+                </span>
               </motion.button>
             </form>
 
@@ -387,116 +406,66 @@ export default function LoginPage() {
                 gap: '16px',
               }}
             >
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
+              <span style={{ fontSize: '11px', color: 'rgba(200, 220, 255, 0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 or continue with
               </span>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
             </div>
 
             {/* OAuth Buttons */}
             <div style={{ display: 'flex', gap: '12px' }}>
-              <motion.button
-                type="button"
-                onClick={() => handleOAuthLogin('google')}
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '14px 16px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '50px',
-                  cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  transition: 'background 0.2s, border-color 0.2s',
-                }}
-              >
-                <GoogleIcon />
-                {oauthLoading === 'google' ? '...' : 'Google'}
-              </motion.button>
-
-              <motion.button
-                type="button"
-                onClick={() => handleOAuthLogin('twitter')}
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '14px 16px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '50px',
-                  cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  transition: 'background 0.2s, border-color 0.2s',
-                }}
-              >
-                <TwitterIcon />
-                {oauthLoading === 'twitter' ? '...' : 'X'}
-              </motion.button>
-
-              <motion.button
-                type="button"
-                onClick={() => handleOAuthLogin('facebook')}
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '14px 16px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '50px',
-                  cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  transition: 'background 0.2s, border-color 0.2s',
-                }}
-              >
-                <FacebookIcon />
-                {oauthLoading === 'facebook' ? '...' : 'Facebook'}
-              </motion.button>
+              {[
+                { provider: 'google' as const, icon: <GoogleIcon />, label: 'Google' },
+                { provider: 'twitter' as const, icon: <TwitterIcon />, label: 'X' },
+                { provider: 'facebook' as const, icon: <FacebookIcon />, label: 'Facebook' },
+              ].map(({ provider, icon, label }) => (
+                <motion.button
+                  key={provider}
+                  type="button"
+                  onClick={() => handleOAuthLogin(provider)}
+                  disabled={loading || oauthLoading !== null}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 16px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(10px)',
+                    color: '#FFFFFF',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50px',
+                    cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
+                    opacity: oauthLoading !== null ? 0.6 : 1,
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  {icon}
+                  {oauthLoading === provider ? '...' : label}
+                </motion.button>
+              ))}
             </div>
 
             <p
               style={{
-                marginTop: '32px',
+                marginTop: '28px',
                 textAlign: 'center',
                 fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: 'rgba(255, 255, 255, 0.4)',
               }}
             >
               Don't have an account?{' '}
               <Link
                 href="/signup"
                 style={{
-                  color: '#FF6B35',
+                  color: 'rgba(200, 220, 255, 0.9)',
                   textDecoration: 'none',
                   fontWeight: 600,
                 }}
@@ -517,7 +486,7 @@ export default function LoginPage() {
           <p
             style={{
               fontSize: '12px',
-              color: 'rgba(255, 255, 255, 0.3)',
+              color: 'rgba(255, 255, 255, 0.2)',
             }}
           >
             © 2025 SLTR Digital LLC

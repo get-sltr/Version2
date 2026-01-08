@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import { isValidAge, validatePassword, isValidEmail, calculateAge } from '../../lib/validation';
 import posthog from 'posthog-js';
+import { AnimatedLogo } from '../../components/AnimatedLogo';
 
 // OAuth Icons
 function GoogleIcon() {
@@ -164,38 +165,44 @@ export default function SignupPage() {
     }
   };
 
+  // Liquid glass input style
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    padding: '16px 20px',
+    padding: '14px 18px',
     fontSize: '15px',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '8px',
+    borderRadius: '12px',
     boxSizing: 'border-box',
     outline: 'none',
     color: '#FFFFFF',
     fontFamily: "'DM Sans', sans-serif",
-    transition: 'border-color 0.2s, box-shadow 0.2s',
+    transition: 'all 0.3s ease',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
   };
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: 500,
     marginBottom: '8px',
-    color: 'rgba(255, 255, 255, 0.7)',
-    letterSpacing: '0.05em',
+    color: 'rgba(200, 220, 255, 0.6)',
+    letterSpacing: '0.1em',
     textTransform: 'uppercase',
   };
 
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.style.borderColor = '#FF6B35';
-    e.target.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+    e.target.style.borderColor = 'rgba(200, 220, 255, 0.4)';
+    e.target.style.boxShadow = '0 0 20px rgba(200, 220, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.1)';
+    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
   };
 
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-    e.target.style.boxShadow = 'none';
+    e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)';
+    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
   };
 
   return (
@@ -231,7 +238,20 @@ export default function SignupPage() {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.75) 100%)',
+          }}
+        />
+        {/* Ambient glow */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '15%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(200, 220, 255, 0.03) 0%, transparent 60%)',
+            pointerEvents: 'none',
           }}
         />
       </div>
@@ -246,39 +266,39 @@ export default function SignupPage() {
           flexDirection: 'column',
         }}
       >
-        {/* Header */}
+        {/* Header with Animated Logo */}
         <header
           style={{
-            padding: '24px 32px',
+            padding: '20px 32px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
         >
-          <Link
-            href="/"
-            style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: '24px',
-              fontWeight: 700,
-              letterSpacing: '0.15em',
-              textDecoration: 'none',
-              color: '#FFFFFF',
-            }}
-          >
-            sltr
-          </Link>
+          <AnimatedLogo size="small" href="/" />
           <Link
             href="/login"
             style={{
               fontSize: '13px',
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'rgba(200, 220, 255, 0.7)',
               textDecoration: 'none',
               letterSpacing: '0.02em',
             }}
           >
             Already have an account?{' '}
-            <span style={{ color: '#FF6B35', fontWeight: 600 }}>Log in</span>
+            <span
+              style={{
+                color: 'rgba(200, 220, 255, 0.9)',
+                fontWeight: 600,
+                padding: '8px 16px',
+                marginLeft: '8px',
+                borderRadius: '50px',
+                border: '1px solid rgba(200, 220, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.03)',
+              }}
+            >
+              Log in
+            </span>
           </Link>
         </header>
 
@@ -298,16 +318,27 @@ export default function SignupPage() {
             transition={{ duration: 0.6 }}
             style={{
               width: '100%',
-              maxWidth: '420px',
+              maxWidth: '440px',
+              background: 'rgba(255, 255, 255, 0.02)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              borderRadius: '24px',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              padding: '32px 28px',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05)',
             }}
           >
             <h1
               style={{
                 fontFamily: "'Orbitron', sans-serif",
-                fontSize: '32px',
+                fontSize: '28px',
                 fontWeight: 600,
                 marginBottom: '8px',
                 textAlign: 'center',
+                background: 'linear-gradient(135deg, #ffffff 0%, #c8dcff 50%, #ffffff 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
               }}
             >
               Create Account
@@ -315,9 +346,9 @@ export default function SignupPage() {
             <p
               style={{
                 fontSize: '14px',
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: 'rgba(255, 255, 255, 0.4)',
                 textAlign: 'center',
-                marginBottom: '32px',
+                marginBottom: '28px',
               }}
             >
               Join the community
@@ -330,13 +361,14 @@ export default function SignupPage() {
                 role="alert"
                 id={errorId}
                 style={{
-                  background: 'rgba(255, 107, 53, 0.1)',
-                  color: '#FF6B35',
-                  padding: '16px',
-                  marginBottom: '24px',
+                  background: 'rgba(255, 100, 100, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  color: '#ff9999',
+                  padding: '14px',
+                  marginBottom: '20px',
                   fontSize: '14px',
-                  borderLeft: '3px solid #FF6B35',
-                  borderRadius: '4px',
+                  borderLeft: '3px solid rgba(255, 100, 100, 0.5)',
+                  borderRadius: '8px',
                 }}
               >
                 {error}
@@ -344,9 +376,9 @@ export default function SignupPage() {
             )}
 
             <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: '16px' }}>
                 <label htmlFor={emailId} style={labelStyle}>
-                  Email address <span style={{ color: '#FF6B35' }}>*</span>
+                  Email address <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
                 </label>
                 <input
                   id={emailId}
@@ -363,9 +395,9 @@ export default function SignupPage() {
                 />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: '16px' }}>
                 <label htmlFor={passwordId} style={labelStyle}>
-                  Password <span style={{ color: '#FF6B35' }}>*</span>
+                  Password <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
                 </label>
                 <input
                   id={passwordId}
@@ -385,8 +417,8 @@ export default function SignupPage() {
                 <p
                   id={`${passwordId}-hint`}
                   style={{
-                    fontSize: '11px',
-                    color: 'rgba(255, 255, 255, 0.4)',
+                    fontSize: '10px',
+                    color: 'rgba(200, 220, 255, 0.35)',
                     marginTop: '6px',
                     marginBottom: 0,
                   }}
@@ -395,9 +427,9 @@ export default function SignupPage() {
                 </p>
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: '16px' }}>
                 <label htmlFor={confirmPasswordId} style={labelStyle}>
-                  Confirm Password <span style={{ color: '#FF6B35' }}>*</span>
+                  Confirm Password <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
                 </label>
                 <input
                   id={confirmPasswordId}
@@ -414,9 +446,9 @@ export default function SignupPage() {
                 />
               </div>
 
-              <div style={{ marginBottom: '18px' }}>
+              <div style={{ marginBottom: '16px' }}>
                 <label htmlFor={dobId} style={labelStyle}>
-                  Date of Birth <span style={{ color: '#FF6B35' }}>*</span>
+                  Date of Birth <span style={{ color: 'rgba(200, 220, 255, 0.8)' }}>*</span>
                 </label>
                 <input
                   id={dobId}
@@ -436,8 +468,8 @@ export default function SignupPage() {
                 <p
                   id={`${dobId}-hint`}
                   style={{
-                    fontSize: '11px',
-                    color: 'rgba(255, 255, 255, 0.4)',
+                    fontSize: '10px',
+                    color: 'rgba(200, 220, 255, 0.35)',
                     marginTop: '6px',
                     marginBottom: 0,
                   }}
@@ -446,7 +478,7 @@ export default function SignupPage() {
                 </p>
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '20px' }}>
                 <label
                   htmlFor={termsId}
                   style={{
@@ -454,7 +486,7 @@ export default function SignupPage() {
                     alignItems: 'flex-start',
                     gap: '12px',
                     cursor: 'pointer',
-                    fontSize: '13px',
+                    fontSize: '12px',
                     lineHeight: 1.6,
                   }}
                 >
@@ -466,24 +498,24 @@ export default function SignupPage() {
                     required
                     aria-required="true"
                     style={{
-                      marginTop: '4px',
+                      marginTop: '3px',
                       width: '18px',
                       height: '18px',
-                      accentColor: '#FF6B35',
+                      accentColor: 'rgba(200, 220, 255, 0.8)',
                       flexShrink: 0,
                     }}
                   />
-                  <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
                     I am at least 18 years old and agree to the{' '}
-                    <Link href="/terms" style={{ color: '#FF6B35', textDecoration: 'none' }}>
+                    <Link href="/terms" style={{ color: 'rgba(200, 220, 255, 0.8)', textDecoration: 'none' }}>
                       Terms of Service
                     </Link>
                     ,{' '}
-                    <Link href="/privacy" style={{ color: '#FF6B35', textDecoration: 'none' }}>
+                    <Link href="/privacy" style={{ color: 'rgba(200, 220, 255, 0.8)', textDecoration: 'none' }}>
                       Privacy Policy
                     </Link>
                     , and{' '}
-                    <Link href="/guidelines" style={{ color: '#FF6B35', textDecoration: 'none' }}>
+                    <Link href="/guidelines" style={{ color: 'rgba(200, 220, 255, 0.8)', textDecoration: 'none' }}>
                       Community Guidelines
                     </Link>
                   </span>
@@ -497,20 +529,20 @@ export default function SignupPage() {
                 whileTap={{ scale: 0.98 }}
                 style={{
                   width: '100%',
-                  padding: '18px',
+                  padding: '16px',
                   fontSize: '14px',
                   fontWeight: 600,
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
-                  background: '#FF6B35',
-                  color: '#000000',
+                  background: 'linear-gradient(135deg, rgba(200, 220, 255, 0.9) 0%, rgba(255, 255, 255, 1) 50%, rgba(200, 220, 255, 0.9) 100%)',
+                  color: '#0a0a0f',
                   border: 'none',
                   borderRadius: '50px',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.6 : 1,
                   outline: 'none',
-                  boxShadow: '0 0 30px rgba(255, 107, 53, 0.4)',
-                  transition: 'box-shadow 0.2s',
+                  boxShadow: '0 0 30px rgba(200, 220, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  transition: 'all 0.3s ease',
                 }}
               >
                 {loading ? 'Creating Account...' : 'Create Account'}
@@ -522,113 +554,63 @@ export default function SignupPage() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                margin: '24px 0',
+                margin: '20px 0',
                 gap: '16px',
               }}
             >
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
+              <span style={{ fontSize: '10px', color: 'rgba(200, 220, 255, 0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 or sign up with
               </span>
-              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
+              <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, rgba(200, 220, 255, 0.2), transparent)' }} />
             </div>
 
             {/* OAuth Buttons */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <motion.button
-                type="button"
-                onClick={() => handleOAuthSignup('google')}
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  padding: '14px 20px',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '50px',
-                  cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  transition: 'background 0.2s, border-color 0.2s',
-                }}
-              >
-                <GoogleIcon />
-                {oauthLoading === 'google' ? 'Connecting...' : 'Google'}
-              </motion.button>
-
-              <motion.button
-                type="button"
-                onClick={() => handleOAuthSignup('twitter')}
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  padding: '14px 20px',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '50px',
-                  cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  transition: 'background 0.2s, border-color 0.2s',
-                }}
-              >
-                <TwitterIcon />
-                {oauthLoading === 'twitter' ? 'Connecting...' : 'X'}
-              </motion.button>
-
-              <motion.button
-                type="button"
-                onClick={() => handleOAuthSignup('facebook')}
-                disabled={loading || oauthLoading !== null}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  padding: '14px 20px',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  color: '#FFFFFF',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '50px',
-                  cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
-                  opacity: oauthLoading !== null ? 0.6 : 1,
-                  outline: 'none',
-                  transition: 'background 0.2s, border-color 0.2s',
-                }}
-              >
-                <FacebookIcon />
-                {oauthLoading === 'facebook' ? 'Connecting...' : 'Facebook'}
-              </motion.button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {[
+                { provider: 'google' as const, icon: <GoogleIcon />, label: 'Google' },
+                { provider: 'twitter' as const, icon: <TwitterIcon />, label: 'X' },
+                { provider: 'facebook' as const, icon: <FacebookIcon />, label: 'Facebook' },
+              ].map(({ provider, icon, label }) => (
+                <motion.button
+                  key={provider}
+                  type="button"
+                  onClick={() => handleOAuthSignup(provider)}
+                  disabled={loading || oauthLoading !== null}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 14px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(10px)',
+                    color: '#FFFFFF',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '50px',
+                    cursor: oauthLoading !== null ? 'not-allowed' : 'pointer',
+                    opacity: oauthLoading !== null ? 0.6 : 1,
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  {icon}
+                  {oauthLoading === provider ? '...' : label}
+                </motion.button>
+              ))}
             </div>
 
             <p
               style={{
                 textAlign: 'center',
-                marginTop: '24px',
-                fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.3)',
+                marginTop: '20px',
+                fontSize: '11px',
+                color: 'rgba(200, 220, 255, 0.3)',
               }}
             >
               By signing up, you confirm you are at least 18 years old.
@@ -646,7 +628,7 @@ export default function SignupPage() {
           <p
             style={{
               fontSize: '12px',
-              color: 'rgba(255, 255, 255, 0.3)',
+              color: 'rgba(255, 255, 255, 0.2)',
             }}
           >
             © 2025 SLTR Digital LLC
