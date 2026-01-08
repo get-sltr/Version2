@@ -74,36 +74,56 @@ export interface ViewportChangeEvent {
   visible: MapProfile[];
 }
 
+// Cruising update
+export interface CruisingUpdate {
+  id: string;
+  userId: string;
+  text: string;
+  createdAt: string;
+}
+
 // Props interfaces for components
 export interface ProfileDrawerProps {
   profile: MapProfile;
   onClose: () => void;
-  accentColor?: string;
+  isOpen: boolean;
 }
 
 export interface GroupDrawerProps {
   group: MapGroup;
   onClose: () => void;
-  accentColor?: string;
-}
-
-export interface VisibleProfilesBarProps {
-  profiles: MapProfile[];
-  onSelectProfile: (profile: MapProfile) => void;
-}
-
-export interface MapControlsProps {
-  viewMode: MapViewMode;
-  onRefresh: () => void;
+  isOpen: boolean;
 }
 
 export interface MapHeaderProps {
-  userImage: string | null;
+  onMenuOpen: () => void;
 }
 
-export interface MapToggleTabsProps {
-  viewMode: MapViewMode;
-  onChangeMode: (mode: MapViewMode) => void;
-  userCount: number;
-  groupCount: number;
+export interface MenuPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onRefresh: () => void;
+  onFiltersOpen: () => void;
+  clusterEnabled: boolean;
+  onClusterToggle: () => void;
 }
+
+export interface CruisingPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onPost: (text: string) => void;
+}
+
+export interface CruisingFABProps {
+  onClick: () => void;
+}
+
+export interface BottomNavProps {
+  activeTab: NavTab;
+  onTabChange: (tab: NavTab) => void;
+  messageCount?: number;
+  viewCount?: number;
+  tapCount?: number;
+}
+
+export type NavTab = 'explore' | 'taps' | 'sltr' | 'messages' | 'views';

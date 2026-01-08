@@ -1,83 +1,67 @@
 // =============================================================================
-// ProfileDrawer - Bottom sheet showing profile preview (same info as grid)
+// ProfileDrawer - True Liquid Glass profile preview
 // =============================================================================
 
-import { useTheme } from '@/contexts/ThemeContext';
+'use client';
+
+import Link from 'next/link';
 import { feetToMiles } from '@/lib/geo';
 import type { ProfileDrawerProps } from '@/types/map';
 import styles from './Map.module.css';
 
-export function ProfileDrawer({ profile, onClose, accentColor }: ProfileDrawerProps) {
-  const { colors } = useTheme();
-  const accent = accentColor || colors.accent || '#FF6B35';
+const CloseIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
 
+export function ProfileDrawer({ profile, onClose, isOpen }: ProfileDrawerProps) {
   const distanceText =
-    profile.distance !== null
-      ? `${feetToMiles(profile.distance).toFixed(1)} mi away`
-      : 'Nearby';
+    profile.distance !== null ? `${feetToMiles(profile.distance).toFixed(1)} mi` : 'Nearby';
 
   return (
-    <>
-      {/* Drawer */}
-      <div className={styles.drawer}>
-        {/* Close Button */}
-        <button onClick={onClose} className={styles.drawerClose}>
-          ✕
-        </button>
+    <div className={`${styles.profileDrawer} ${isOpen ? styles.open : ''}`}>
+      <button className={styles.profileDrawerClose} onClick={onClose}>
+        <CloseIcon />
+      </button>
 
-        {/* Profile Image */}
+      <div className={styles.profileDrawerContent}>
         <div
-          className={styles.drawerImage}
-          style={{ backgroundImage: `url(${profile.image || '/images/5.jpg'})` }}
-        >
-          {/* Gradient Overlay */}
-          <div className={styles.drawerImageGradient} />
+          className={styles.profileDrawerAvatar}
+          style={{ backgroundImage: `url(${profile.image || '/images/default-avatar.jpg'})` }}
+        />
 
-          {/* Name & Status - same info as grid */}
-          <div className={styles.drawerImageInfo}>
-            <h2 className={styles.drawerName} style={{ color: '#fff' }}>
-              {profile.name}
-              {profile.age ? `, ${profile.age}` : ''}
-            </h2>
+        <div className={styles.profileDrawerDetails}>
+          <h2 className={styles.profileDrawerName}>
+            {profile.name}
+            {profile.age ? `, ${profile.age}` : ''}
+          </h2>
 
-            <div className={styles.drawerStatus}>
-              <div className={styles.onlineDot} style={{ background: accent }} />
-              <span style={{ color: accent }}>Online</span>
-              <span style={{ color: 'rgba(255,255,255,0.6)' }}>•</span>
-              <span style={{ color: 'rgba(255,255,255,0.6)' }}>{distanceText}</span>
-            </div>
-
-            {profile.position && (
-              <div
-                className={styles.positionBadge}
-                style={{ borderColor: accent, color: accent }}
-              >
-                {profile.position}
-              </div>
+          <div className={styles.profileDrawerStatus}>
+            {profile.online && (
+              <>
+                <div className={styles.statusDot} />
+                <span className={styles.onlineText}>Online</span>
+                <span>•</span>
+              </>
             )}
+            <span>{distanceText}</span>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className={styles.drawerContent}>
-          <div className={styles.drawerActions}>
-            <a
-              href={`/messages/${profile.id}`}
-              className={styles.secondaryButton}
-              style={{ width: 56, height: 56 }}
-            >
-              💬
-            </a>
-            <a
-              href={`/profile/${profile.id}`}
-              className={styles.primaryButton}
-              style={{ background: accent }}
-            >
-              View Profile
-            </a>
-          </div>
+          {profile.position && (
+            <span className={styles.profileDrawerPosition}>{profile.position}</span>
+          )}
         </div>
       </div>
-    </>
+
+      <div className={styles.profileDrawerActions}>
+        <Link href={`/messages/${profile.id}`} className={styles.profileBtnSecondary}>
+          💬
+        </Link>
+        <Link href={`/profile/${profile.id}`} className={styles.profileBtnPrimary}>
+          View Profile
+        </Link>
+      </div>
+    </div>
   );
 }
