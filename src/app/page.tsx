@@ -4,109 +4,152 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+  const [phase, setPhase] = useState<'stars' | 'flash' | 'reveal'>('stars');
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Show content after brief delay for smooth entrance
-    const contentTimer = setTimeout(() => setShowContent(true), 300);
+    const FLASH_DELAY = 3600;
+    const REVEAL_DELAY = 4000;
 
-    // Handle video load state
-    const video = videoRef.current;
-    if (video) {
-      const handleCanPlay = () => setIsLoaded(true);
-      video.addEventListener('canplay', handleCanPlay);
+    const flashTimer = setTimeout(() => setPhase('flash'), FLASH_DELAY);
+    const revealTimer = setTimeout(() => setPhase('reveal'), REVEAL_DELAY);
 
-      // Fallback: show content even if video takes too long
-      const fallbackTimer = setTimeout(() => setIsLoaded(true), 2000);
-
-      return () => {
-        video.removeEventListener('canplay', handleCanPlay);
-        clearTimeout(fallbackTimer);
-        clearTimeout(contentTimer);
-      };
-    }
-
-    return () => clearTimeout(contentTimer);
+    return () => {
+      clearTimeout(flashTimer);
+      clearTimeout(revealTimer);
+    };
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      const handleCanPlay = () => setVideoLoaded(true);
+      video.addEventListener('canplay', handleCanPlay);
+      const fallback = setTimeout(() => setVideoLoaded(true), 2000);
+      return () => {
+        video.removeEventListener('canplay', handleCanPlay);
+        clearTimeout(fallback);
+      };
+    }
+  }, []);
+
+  const handleSkip = () => {
+    if (phase !== 'reveal') setPhase('reveal');
+  };
+
   return (
-    <div className="landing-container">
+    <div className="landing-container" onClick={handleSkip}>
       {/* Video Background */}
       <div className="video-wrapper">
         <video
           ref={videoRef}
-          className={`bg-video ${isLoaded ? 'loaded' : ''}`}
+          className={`bg-video ${videoLoaded ? 'loaded' : ''}`}
           autoPlay
           muted
           loop
           playsInline
-          poster="/images/landing-poster.jpg"
         >
           <source src="/Videos/landingvid.mp4" type="video/mp4" />
         </video>
-        {/* Gradient Overlay */}
         <div className="video-overlay" />
       </div>
 
+      {/* Flash Overlay */}
+      <div className={`flash-overlay ${phase === 'flash' ? 'active' : ''}`} />
+
+      {/* Flying Stars Animation */}
+      <div className={`animation-stage ${phase !== 'stars' ? 'hidden' : ''}`}>
+        <div className="flying-star star-white"><FlyingStarSVG color1="#ffffff" color2="#f0f0f0" /></div>
+        <div className="flying-star star-orange"><FlyingStarSVG color1="#FF8C42" color2="#FF6B35" /></div>
+        <div className="flying-star star-black"><FlyingStarSVG color1="#3a3a3a" color2="#1a1a1a" /></div>
+        <div className="flying-star star-gold"><FlyingStarSVG color1="#FFE55C" color2="#FFD700" /></div>
+      </div>
+
       {/* Main Content */}
-      <main className={`content ${showContent ? 'visible' : ''}`}>
-        {/* Logo Star */}
-        <div className="logo-star">
-          <StarSVG />
-          <div className="star-glow" />
+      <main className={`main-content ${phase === 'reveal' ? 'visible' : ''}`}>
+        {/* Centered Logo Composition: Star + SLTR */}
+        <div className="logo-composition">
+          {/* Star Section */}
+          <div className="star-section">
+            {/* Rotating Beams */}
+            <div className="beam-container">
+              <div className="beam beam-1" />
+              <div className="beam beam-2" />
+              <div className="beam beam-3" />
+              <div className="beam beam-4" />
+              <div className="beam beam-5" />
+              <div className="beam beam-6" />
+            </div>
+
+            {/* Glow Rings */}
+            <div className="glow-ring ring-1" />
+            <div className="glow-ring ring-2" />
+            <div className="glow-ring ring-3" />
+
+            {/* Crystalline Star with Liquid Glass */}
+            <div className="star-crystalline">
+              <div className="orange-glow" />
+              <div className="black-base" />
+              <div className="inner-glow" />
+              <div className="glass-shine" />
+              <CrystallineStarSVG />
+            </div>
+          </div>
+
+          {/* Connector Line */}
+          <div className="connector" />
+
+          {/* Text Section */}
+          <div className="text-section">
+            <h1 className="logo-text">
+              <span className="glass-letter">S</span>
+              <span className="glass-letter">L</span>
+              <span className="glass-letter">T</span>
+              <span className="glass-letter">R</span>
+            </h1>
+            <p className="tagline">Rules Don&apos;t Apply</p>
+          </div>
         </div>
 
-        {/* Brand */}
-        <h1 className="brand">SLTR</h1>
-        <p className="tagline">RULES DON&apos;T APPLY</p>
-
         {/* CTA Buttons */}
-        <div className="cta-group">
-          <Link href="/signup" className="btn btn-primary">
+        <div className="cta-container">
+          <Link href="/signup" className="cta-btn cta-btn-primary">
+            <span className="btn-shine" />
             Get Started
           </Link>
-          <Link href="/login" className="btn btn-secondary">
+          <Link href="/login" className="cta-btn cta-btn-secondary">
+            <span className="btn-shine" />
             Sign In
           </Link>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className={`footer ${showContent ? 'visible' : ''}`}>
+      <footer className={`landing-footer ${phase === 'reveal' ? 'visible' : ''}`}>
         <Link href="/privacy">Privacy</Link>
-        <span className="dot">·</span>
         <Link href="/terms">Terms</Link>
-        <span className="dot">·</span>
         <Link href="/about">About</Link>
       </footer>
 
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        html, body {
-          height: 100%;
-          overflow: hidden;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
 
         .landing-container {
           position: fixed;
           inset: 0;
-          background: #000;
+          background: #050508;
           font-family: 'Orbitron', sans-serif;
           overflow: hidden;
+          cursor: pointer;
         }
 
-        /* ============================================
+        /* ===========================================
            VIDEO BACKGROUND
-           ============================================ */
+           =========================================== */
         .video-wrapper {
           position: absolute;
           inset: 0;
@@ -127,130 +170,432 @@ export default function LandingPage() {
           transition: opacity 1.5s ease;
         }
 
-        .bg-video.loaded {
-          opacity: 1;
-        }
+        .bg-video.loaded { opacity: 1; }
 
         .video-overlay {
           position: absolute;
           inset: 0;
           background: linear-gradient(
             180deg,
-            rgba(0, 0, 0, 0.4) 0%,
-            rgba(0, 0, 0, 0.2) 30%,
-            rgba(0, 0, 0, 0.3) 70%,
-            rgba(0, 0, 0, 0.7) 100%
+            rgba(5, 5, 8, 0.6) 0%,
+            rgba(5, 5, 8, 0.3) 30%,
+            rgba(5, 5, 8, 0.4) 70%,
+            rgba(5, 5, 8, 0.8) 100%
           );
           pointer-events: none;
         }
 
-        /* ============================================
-           MAIN CONTENT
-           ============================================ */
-        .content {
-          position: relative;
+        /* ===========================================
+           FLASH OVERLAY
+           =========================================== */
+        .flash-overlay {
+          position: fixed;
+          inset: 0;
+          background: white;
+          z-index: 1000;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .flash-overlay.active {
+          animation: flash-burst 1s ease-out forwards;
+        }
+
+        @keyframes flash-burst {
+          0% { opacity: 0; }
+          15% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+
+        /* ===========================================
+           FLYING STARS
+           =========================================== */
+        .animation-stage {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 100;
+          transition: opacity 0.5s ease;
+        }
+
+        .animation-stage.hidden {
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .flying-star {
+          position: absolute;
+          width: 60px;
+          height: 90px;
+          opacity: 0;
           z-index: 10;
+        }
+
+        .flying-star svg {
+          width: 100%;
+          height: 100%;
+          filter: drop-shadow(0 0 20px var(--star-glow));
+        }
+
+        .star-white { --star-glow: rgba(255, 255, 255, 0.8); }
+        .star-orange { --star-glow: rgba(255, 107, 53, 0.8); }
+        .star-black { --star-glow: rgba(100, 100, 100, 0.5); }
+        .star-gold { --star-glow: rgba(255, 215, 0, 0.8); }
+
+        .star-white { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .star-orange { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.2s; }
+        .star-black { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.4s; }
+        .star-gold { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.6s; }
+
+        @keyframes star-fly {
+          0% { opacity: 0; transform: translate(-50vw, 50vh) scale(0.3) rotate(-30deg); }
+          10% { opacity: 1; }
+          30% { transform: translate(-20vw, -10vh) scale(0.6) rotate(-15deg); }
+          50% { transform: translate(10vw, -30vh) scale(0.8) rotate(0deg); }
+          70% { transform: translate(5vw, -10vh) scale(0.9) rotate(10deg); }
+          85% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+          100% { opacity: 0; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+        }
+
+        /* ===========================================
+           MAIN CONTENT
+           =========================================== */
+        .main-content {
+          position: relative;
+          z-index: 50;
           height: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 24px;
           opacity: 0;
-          transform: translateY(20px);
+          transform: scale(0.9);
           transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .content.visible {
+        .main-content.visible {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        /* ===========================================
+           LOGO COMPOSITION (Star + SLTR centered)
+           =========================================== */
+        .logo-composition {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 20px;
+          position: relative;
+        }
+
+        /* Star Section */
+        .star-section {
+          position: relative;
+          width: 140px;
+          height: 200px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Rotating Beams */
+        .beam-container {
+          position: absolute;
+          top: 45%;
+          left: 50%;
+          width: 100%;
+          height: 100%;
+          transform: translate(-50%, -50%);
+          animation: beam-rotate 12s linear infinite;
+          opacity: 0;
+          transition: opacity 1s ease 0.5s;
+        }
+
+        .main-content.visible .beam-container { opacity: 1; }
+
+        .beam {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 2px;
+          background: linear-gradient(to bottom, rgba(200, 220, 255, 0.9), transparent 100%);
+          transform-origin: top center;
+        }
+
+        .beam-1 { height: 90px; transform: translate(-50%, 0) rotate(0deg); }
+        .beam-2 { height: 75px; transform: translate(-50%, 0) rotate(60deg); }
+        .beam-3 { height: 85px; transform: translate(-50%, 0) rotate(120deg); }
+        .beam-4 { height: 70px; transform: translate(-50%, 0) rotate(180deg); }
+        .beam-5 { height: 88px; transform: translate(-50%, 0) rotate(240deg); }
+        .beam-6 { height: 78px; transform: translate(-50%, 0) rotate(300deg); }
+
+        @keyframes beam-rotate {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Glow Rings */
+        .glow-ring {
+          position: absolute;
+          top: 45%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          border: 1px solid rgba(200, 220, 255, 0.2);
+          border-radius: 50%;
+          animation: ring-expand 1.8s ease-in-out infinite;
+          opacity: 0;
+          transition: opacity 1s ease 0.8s;
+        }
+
+        .main-content.visible .glow-ring { opacity: 1; }
+
+        .ring-1 { width: 60px; height: 60px; }
+        .ring-2 { width: 85px; height: 85px; animation-delay: 0.2s; }
+        .ring-3 { width: 110px; height: 110px; animation-delay: 0.4s; }
+
+        @keyframes ring-expand {
+          0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.15); }
+        }
+
+        /* Crystalline Star with Liquid Glass */
+        .star-crystalline {
+          position: relative;
+          width: 100px;
+          height: 150px;
+          z-index: 10;
+        }
+
+        .star-crystalline svg {
+          width: 100%;
+          height: 100%;
+          animation: crystalline-pulse 1.8s ease-in-out infinite;
+          filter: drop-shadow(0 0 25px rgba(200, 220, 255, 0.6));
+        }
+
+        /* Liquid Glass Shine on Star */
+        .glass-shine {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 150%;
+          height: 100%;
+          background: linear-gradient(
+            105deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.15) 35%,
+            rgba(255, 255, 255, 0.4) 40%,
+            rgba(255, 255, 255, 0.15) 45%,
+            transparent 60%
+          );
+          animation: glass-sweep 3s ease-in-out infinite;
+          pointer-events: none;
+          z-index: 20;
+        }
+
+        @keyframes glass-sweep {
+          0% { left: -100%; }
+          50%, 100% { left: 150%; }
+        }
+
+        .orange-glow {
+          position: absolute;
+          top: 38%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 70px;
+          height: 70px;
+          background: radial-gradient(circle, rgba(255, 107, 53, 0.5) 0%, rgba(255, 107, 53, 0.15) 50%, transparent 70%);
+          filter: blur(15px);
+          z-index: -1;
+          animation: orange-pulse 1.8s ease-in-out infinite;
+        }
+
+        .black-base {
+          position: absolute;
+          bottom: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50px;
+          height: 12px;
+          background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+          filter: blur(6px);
+        }
+
+        .inner-glow {
+          position: absolute;
+          top: 38%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 30px;
+          height: 30px;
+          background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200, 220, 255, 0.6) 40%, transparent 70%);
+          animation: inner-beat 1.8s ease-in-out infinite;
+          z-index: 5;
+        }
+
+        @keyframes crystalline-pulse {
+          0%, 100% { filter: drop-shadow(0 0 25px rgba(200, 220, 255, 0.5)); }
+          50% {
+            filter: drop-shadow(0 0 40px rgba(200, 220, 255, 0.9))
+                   drop-shadow(0 0 60px rgba(180, 200, 255, 0.5))
+                   drop-shadow(0 0 90px rgba(160, 180, 255, 0.3));
+          }
+        }
+
+        @keyframes orange-pulse {
+          0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); }
+        }
+
+        @keyframes inner-beat {
+          0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+        }
+
+        /* Connector Line */
+        .connector {
+          width: 40px;
+          height: 2px;
+          background: linear-gradient(to right, rgba(200, 220, 255, 0.8), rgba(200, 220, 255, 0.4));
+          animation: connector-glow 1.8s ease-in-out infinite;
+          opacity: 0;
+          transform: scaleX(0);
+          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+          margin-bottom: 40px;
+        }
+
+        .main-content.visible .connector {
+          opacity: 1;
+          transform: scaleX(1);
+        }
+
+        @keyframes connector-glow {
+          0%, 100% { opacity: 0.6; box-shadow: 0 0 10px rgba(200, 220, 255, 0.3); }
+          50% { opacity: 1; box-shadow: 0 0 25px rgba(200, 220, 255, 0.7); }
+        }
+
+        /* Text Section */
+        .text-section {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          margin-bottom: 40px;
+        }
+
+        .logo-text {
+          display: flex;
+          gap: 4px;
+          font-size: clamp(2.5rem, 10vw, 4rem);
+          font-weight: 900;
+          letter-spacing: 0.15em;
+          margin: 0;
+        }
+
+        /* Liquid Glass Letters */
+        .glass-letter {
+          position: relative;
+          color: transparent;
+          background: linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #c8dcff 40%,
+            #ffffff 50%,
+            #a8c4ff 60%,
+            #ffffff 100%
+          );
+          -webkit-background-clip: text;
+          background-clip: text;
+          filter: drop-shadow(0 0 20px rgba(200, 220, 255, 0.5));
+          animation: letter-glow 1.8s ease-in-out infinite;
+        }
+
+        .glass-letter::before {
+          content: attr(data-letter);
+          position: absolute;
+          top: 0;
+          left: 0;
+          background: linear-gradient(
+            105deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.6) 45%,
+            transparent 55%
+          );
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: letter-shine 2.5s ease-in-out infinite;
+        }
+
+        .glass-letter:nth-child(1) { animation-delay: 0s; }
+        .glass-letter:nth-child(2) { animation-delay: 0.1s; }
+        .glass-letter:nth-child(3) { animation-delay: 0.2s; }
+        .glass-letter:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes letter-glow {
+          0%, 100% {
+            filter: drop-shadow(0 0 15px rgba(200, 220, 255, 0.4));
+          }
+          50% {
+            filter: drop-shadow(0 0 30px rgba(200, 220, 255, 0.8))
+                   drop-shadow(0 0 50px rgba(200, 220, 255, 0.4));
+          }
+        }
+
+        @keyframes letter-shine {
+          0% { background-position: -200% 0; }
+          50%, 100% { background-position: 200% 0; }
+        }
+
+        .tagline {
+          font-size: 0.7rem;
+          letter-spacing: 0.35em;
+          color: #FF6B35;
+          text-transform: uppercase;
+          margin-top: 8px;
+          text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+          opacity: 0;
+          transition: opacity 0.8s ease 0.6s;
+        }
+
+        .main-content.visible .tagline { opacity: 1; }
+
+        /* ===========================================
+           LIQUID GLASS CTA BUTTONS
+           =========================================== */
+        .cta-container {
+          display: flex;
+          gap: 16px;
+          margin-top: 40px;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s;
+        }
+
+        .main-content.visible .cta-container {
           opacity: 1;
           transform: translateY(0);
         }
 
-        /* ============================================
-           LOGO STAR
-           ============================================ */
-        .logo-star {
+        .cta-btn {
           position: relative;
-          width: 100px;
-          height: 150px;
-          margin-bottom: 24px;
-          animation: float 4s ease-in-out infinite;
-        }
-
-        .logo-star svg {
-          width: 100%;
-          height: 100%;
-          filter: drop-shadow(0 0 30px rgba(200, 220, 255, 0.6));
-        }
-
-        .star-glow {
-          position: absolute;
-          top: 30%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 50px;
-          height: 50px;
-          background: radial-gradient(circle, rgba(255, 107, 53, 0.5) 0%, transparent 70%);
-          filter: blur(12px);
-          animation: glow-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
-        @keyframes glow-pulse {
-          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-        }
-
-        /* ============================================
-           BRAND TEXT
-           ============================================ */
-        .brand {
-          font-size: clamp(56px, 18vw, 120px);
-          font-weight: 900;
-          letter-spacing: 0.25em;
-          color: #fff;
-          text-shadow:
-            0 0 40px rgba(200, 220, 255, 0.4),
-            0 4px 20px rgba(0, 0, 0, 0.5);
-          margin-bottom: 8px;
-          animation: text-breathe 3s ease-in-out infinite;
-        }
-
-        @keyframes text-breathe {
-          0%, 100% {
-            text-shadow: 0 0 40px rgba(200, 220, 255, 0.3), 0 4px 20px rgba(0, 0, 0, 0.5);
-          }
-          50% {
-            text-shadow: 0 0 60px rgba(200, 220, 255, 0.5), 0 0 100px rgba(200, 220, 255, 0.2), 0 4px 20px rgba(0, 0, 0, 0.5);
-          }
-        }
-
-        .tagline {
-          font-size: clamp(10px, 3vw, 14px);
-          letter-spacing: 0.5em;
-          color: #FF6B35;
-          text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
-          margin-bottom: 48px;
-        }
-
-        /* ============================================
-           CTA BUTTONS
-           ============================================ */
-        .cta-group {
-          display: flex;
-          gap: 16px;
-        }
-
-        .btn {
           display: flex;
           align-items: center;
           justify-content: center;
           height: 54px;
           padding: 0 36px;
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(255, 255, 255, 0.1) 100%
+          );
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 16px;
           font-family: 'Orbitron', sans-serif;
           font-size: 12px;
@@ -258,129 +603,218 @@ export default function LandingPage() {
           letter-spacing: 0.15em;
           text-transform: uppercase;
           text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-        }
-
-        .btn-primary {
-          background: rgba(255, 107, 53, 0.25);
-          border: 1.5px solid rgba(255, 107, 53, 0.6);
-          color: #FF6B35;
-          box-shadow: 0 4px 24px rgba(255, 107, 53, 0.15);
-        }
-
-        .btn-primary:hover {
-          background: rgba(255, 107, 53, 0.4);
-          border-color: #FF6B35;
-          color: #fff;
-          transform: translateY(-3px);
-          box-shadow: 0 12px 40px rgba(255, 107, 53, 0.35);
-        }
-
-        .btn-primary:active {
-          transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-          background: rgba(255, 255, 255, 0.08);
-          border: 1.5px solid rgba(255, 255, 255, 0.2);
           color: rgba(255, 255, 255, 0.8);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          overflow: hidden;
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.15);
-          border-color: rgba(255, 255, 255, 0.4);
-          color: #fff;
+        /* Glass shine sweep */
+        .btn-shine {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            105deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.2) 40%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0.2) 60%,
+            transparent 80%
+          );
+          animation: btn-shine-sweep 4s ease-in-out infinite;
+        }
+
+        @keyframes btn-shine-sweep {
+          0% { left: -100%; }
+          50%, 100% { left: 150%; }
+        }
+
+        .cta-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 50%;
+          background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
+          border-radius: 16px 16px 0 0;
+          pointer-events: none;
+        }
+
+        .cta-btn:hover {
           transform: translateY(-3px);
-          box-shadow: 0 12px 40px rgba(255, 255, 255, 0.1);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 8px 30px rgba(200, 220, 255, 0.3),
+            0 0 50px rgba(200, 220, 255, 0.15);
+          border-color: rgba(200, 220, 255, 0.4);
         }
 
-        .btn-secondary:active {
-          transform: translateY(-1px);
+        .cta-btn-primary {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 107, 53, 0.25) 0%,
+            rgba(255, 107, 53, 0.15) 50%,
+            rgba(255, 107, 53, 0.25) 100%
+          );
+          border-color: rgba(255, 107, 53, 0.5);
+          color: #FF6B35;
+          box-shadow:
+            inset 0 1px 0 rgba(255, 200, 150, 0.3),
+            0 4px 20px rgba(255, 107, 53, 0.2);
         }
 
-        /* ============================================
+        .cta-btn-primary:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 107, 53, 0.35) 0%,
+            rgba(255, 107, 53, 0.25) 50%,
+            rgba(255, 107, 53, 0.35) 100%
+          );
+          border-color: rgba(255, 107, 53, 0.7);
+          color: #fff;
+          box-shadow:
+            inset 0 1px 0 rgba(255, 200, 150, 0.4),
+            0 8px 40px rgba(255, 107, 53, 0.4),
+            0 0 60px rgba(255, 107, 53, 0.2);
+        }
+
+        .cta-btn-secondary {
+          background: linear-gradient(
+            135deg,
+            rgba(200, 220, 255, 0.1) 0%,
+            rgba(200, 220, 255, 0.05) 50%,
+            rgba(200, 220, 255, 0.1) 100%
+          );
+        }
+
+        .cta-btn-secondary:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(200, 220, 255, 0.2) 0%,
+            rgba(200, 220, 255, 0.1) 50%,
+            rgba(200, 220, 255, 0.2) 100%
+          );
+          color: #fff;
+        }
+
+        /* ===========================================
            FOOTER
-           ============================================ */
-        .footer {
+           =========================================== */
+        .landing-footer {
           position: fixed;
-          bottom: 0;
+          bottom: 24px;
           left: 0;
           right: 0;
           display: flex;
-          align-items: center;
           justify-content: center;
-          gap: 12px;
-          padding: 24px;
-          background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+          gap: 24px;
           opacity: 0;
-          transition: opacity 0.8s ease 0.3s;
-          z-index: 20;
+          transition: opacity 0.8s ease 1.2s;
+          z-index: 60;
         }
 
-        .footer.visible {
-          opacity: 1;
-        }
+        .landing-footer.visible { opacity: 1; }
 
-        .footer a {
+        .landing-footer a {
           font-size: 11px;
-          letter-spacing: 0.1em;
-          color: rgba(255, 255, 255, 0.4);
+          color: rgba(255, 255, 255, 0.35);
           text-decoration: none;
-          transition: color 0.3s ease;
+          transition: all 0.3s ease;
         }
 
-        .footer a:hover {
+        .landing-footer a:hover {
           color: #FF6B35;
+          text-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
         }
 
-        .footer .dot {
-          color: rgba(255, 255, 255, 0.2);
-          font-size: 10px;
-        }
+        /* ===========================================
+           RESPONSIVE
+           =========================================== */
+        @media (max-width: 700px) {
+          .logo-composition {
+            flex-direction: column;
+            gap: 10px;
+          }
 
-        /* ============================================
-           MOBILE RESPONSIVE
-           ============================================ */
-        @media (max-width: 600px) {
-          .logo-star {
-            width: 70px;
-            height: 105px;
-            margin-bottom: 20px;
+          .connector {
+            width: 2px;
+            height: 30px;
+            margin-bottom: 0;
+            background: linear-gradient(to bottom, rgba(200, 220, 255, 0.8), rgba(200, 220, 255, 0.4));
+          }
+
+          .text-section {
+            align-items: center;
+            margin-bottom: 0;
+          }
+
+          .star-section {
+            width: 120px;
+            height: 170px;
+          }
+
+          .star-crystalline {
+            width: 85px;
+            height: 125px;
+          }
+
+          .logo-text {
+            font-size: 2.2rem;
           }
 
           .tagline {
-            margin-bottom: 36px;
+            text-align: center;
           }
 
-          .cta-group {
+          .cta-container {
             flex-direction: column;
             width: 100%;
-            max-width: 280px;
+            padding: 0 24px;
           }
 
-          .btn {
+          .cta-btn {
             width: 100%;
-            height: 52px;
           }
+
+          .flying-star {
+            width: 40px;
+            height: 60px;
+          }
+
+          .beam-1 { height: 70px; }
+          .beam-2 { height: 58px; }
+          .beam-3 { height: 65px; }
+          .beam-4 { height: 55px; }
+          .beam-5 { height: 68px; }
+          .beam-6 { height: 60px; }
+
+          .ring-1 { width: 45px; height: 45px; }
+          .ring-2 { width: 65px; height: 65px; }
+          .ring-3 { width: 85px; height: 85px; }
         }
 
-        /* Reduce motion for accessibility */
+        /* Reduce motion */
         @media (prefers-reduced-motion: reduce) {
-          .logo-star,
-          .star-glow,
-          .brand {
+          .flying-star,
+          .beam-container,
+          .star-crystalline svg,
+          .orange-glow,
+          .inner-glow,
+          .glow-ring,
+          .glass-shine,
+          .btn-shine,
+          .glass-letter {
             animation: none;
           }
 
-          .bg-video {
-            transition: none;
-          }
-
-          .content,
-          .footer {
-            transition: none;
+          .flash-overlay.active {
+            animation: none;
           }
         }
       `}</style>
@@ -388,20 +822,43 @@ export default function LandingPage() {
   );
 }
 
-// Star SVG Component
-function StarSVG() {
+function FlyingStarSVG({ color1, color2 }: { color1: string; color2: string }) {
+  const id = `grad-${color1.replace('#', '')}`;
   return (
-    <svg viewBox="0 0 100 150" aria-hidden="true">
+    <svg viewBox="0 0 100 150">
       <defs>
-        <linearGradient id="star-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="50%" stopColor="#c8dcff" />
-          <stop offset="100%" stopColor="#ffffff" />
+        <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor={color1} />
+          <stop offset="50%" stopColor={color2} />
+          <stop offset="100%" stopColor={color1} />
         </linearGradient>
       </defs>
       <polygon
         points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
-        fill="url(#star-grad)"
+        fill={`url(#${id})`}
+      />
+    </svg>
+  );
+}
+
+function CrystallineStarSVG() {
+  return (
+    <svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="crystalline-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="30%" stopColor="#e8f0ff" />
+          <stop offset="50%" stopColor="#c8dcff" />
+          <stop offset="70%" stopColor="#e8f0ff" />
+          <stop offset="100%" stopColor="#ffffff" />
+        </linearGradient>
+        <filter id="glass-filter">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
+        </filter>
+      </defs>
+      <polygon
+        points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
+        fill="url(#crystalline-grad)"
       />
     </svg>
   );
