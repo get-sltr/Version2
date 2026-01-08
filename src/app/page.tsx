@@ -1,17 +1,47 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 
+// Particle configuration
+const PARTICLE_COUNT = 80;
+const WHIRLPOOL_DURATION = 4000; // ms
+const FLASH_DELAY = WHIRLPOOL_DURATION - 200;
+const REVEAL_DELAY = WHIRLPOOL_DURATION + 300;
+
+interface Particle {
+  id: number;
+  startX: number;
+  startY: number;
+  size: number;
+  delay: number;
+  duration: number;
+  brightness: number;
+}
+
 export default function LandingPage() {
-  const [phase, setPhase] = useState<'stars' | 'flash' | 'reveal'>('stars');
+  const [phase, setPhase] = useState<'whirlpool' | 'flash' | 'reveal'>('whirlpool');
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  useEffect(() => {
-    const FLASH_DELAY = 3600;
-    const REVEAL_DELAY = 4000;
+  // Generate particles once
+  const particles = useMemo<Particle[]>(() => {
+    return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 30 + Math.random() * 70; // Start from edges
+      return {
+        id: i,
+        startX: 50 + Math.cos(angle) * distance,
+        startY: 50 + Math.sin(angle) * distance,
+        size: 2 + Math.random() * 4,
+        delay: Math.random() * 0.8,
+        duration: 2.5 + Math.random() * 1.5,
+        brightness: 0.5 + Math.random() * 0.5,
+      };
+    });
+  }, []);
 
+  useEffect(() => {
     const flashTimer = setTimeout(() => setPhase('flash'), FLASH_DELAY);
     const revealTimer = setTimeout(() => setPhase('reveal'), REVEAL_DELAY);
 
@@ -40,8 +70,8 @@ export default function LandingPage() {
 
   return (
     <div className="landing-container" onClick={handleSkip}>
-      {/* Video Background */}
-      <div className="video-wrapper">
+      {/* Video Background - hidden during whirlpool */}
+      <div className={`video-wrapper ${phase === 'reveal' ? 'visible' : ''}`}>
         <video
           ref={videoRef}
           className={`bg-video ${videoLoaded ? 'loaded' : ''}`}
@@ -58,21 +88,37 @@ export default function LandingPage() {
       {/* Flash Overlay */}
       <div className={`flash-overlay ${phase === 'flash' ? 'active' : ''}`} />
 
-      {/* Flying Stars Animation */}
-      <div className={`animation-stage ${phase !== 'stars' ? 'hidden' : ''}`}>
-        <div className="flying-star star-white"><FlyingStarSVG color1="#ffffff" color2="#f0f0f0" /></div>
-        <div className="flying-star star-orange"><FlyingStarSVG color1="#FF8C42" color2="#FF6B35" /></div>
-        <div className="flying-star star-black"><FlyingStarSVG color1="#3a3a3a" color2="#1a1a1a" /></div>
-        <div className="flying-star star-gold"><FlyingStarSVG color1="#FFE55C" color2="#FFD700" /></div>
+      {/* Whirlpool Particle Animation */}
+      <div className={`whirlpool-stage ${phase !== 'whirlpool' ? 'hidden' : ''}`}>
+        {/* Particles */}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="sparkle"
+            style={{
+              '--start-x': `${p.startX}%`,
+              '--start-y': `${p.startY}%`,
+              '--size': `${p.size}px`,
+              '--delay': `${p.delay}s`,
+              '--duration': `${p.duration}s`,
+              '--brightness': p.brightness,
+            } as React.CSSProperties}
+          />
+        ))}
+
+        {/* Center glow that builds up */}
+        <div className="center-glow" />
+
+        {/* Star silhouette that fades in */}
+        <div className="forming-star">
+          <FormingStarSVG />
+        </div>
       </div>
 
       {/* Main Content */}
       <main className={`main-content ${phase === 'reveal' ? 'visible' : ''}`}>
-        {/* Centered Logo Composition: Star + SLTR */}
         <div className="logo-composition">
-          {/* Star Section */}
           <div className="star-section">
-            {/* Rotating Beams */}
             <div className="beam-container">
               <div className="beam beam-1" />
               <div className="beam beam-2" />
@@ -81,13 +127,9 @@ export default function LandingPage() {
               <div className="beam beam-5" />
               <div className="beam beam-6" />
             </div>
-
-            {/* Glow Rings */}
             <div className="glow-ring ring-1" />
             <div className="glow-ring ring-2" />
             <div className="glow-ring ring-3" />
-
-            {/* Crystalline Star with Liquid Glass */}
             <div className="star-crystalline">
               <div className="orange-glow" />
               <div className="black-base" />
@@ -96,11 +138,7 @@ export default function LandingPage() {
               <CrystallineStarSVG />
             </div>
           </div>
-
-          {/* Connector Line */}
           <div className="connector" />
-
-          {/* Text Section */}
           <div className="text-section">
             <h1 className="logo-text">
               <span className="glass-letter">S</span>
@@ -111,8 +149,6 @@ export default function LandingPage() {
             <p className="tagline">Rules Don&apos;t Apply</p>
           </div>
         </div>
-
-        {/* CTA Buttons */}
         <div className="cta-container">
           <Link href="/signup" className="cta-btn cta-btn-primary">
             <span className="btn-shine" />
@@ -141,7 +177,7 @@ export default function LandingPage() {
         .landing-container {
           position: fixed;
           inset: 0;
-          background: #050508;
+          background: #000;
           font-family: 'Orbitron', sans-serif;
           overflow: hidden;
           cursor: pointer;
@@ -154,7 +190,11 @@ export default function LandingPage() {
           position: absolute;
           inset: 0;
           overflow: hidden;
+          opacity: 0;
+          transition: opacity 1s ease;
         }
+
+        .video-wrapper.visible { opacity: 1; }
 
         .bg-video {
           position: absolute;
@@ -167,7 +207,7 @@ export default function LandingPage() {
           transform: translate(-50%, -50%);
           object-fit: cover;
           opacity: 0;
-          transition: opacity 1.5s ease;
+          transition: opacity 1s ease;
         }
 
         .bg-video.loaded { opacity: 1; }
@@ -198,65 +238,140 @@ export default function LandingPage() {
         }
 
         .flash-overlay.active {
-          animation: flash-burst 1s ease-out forwards;
+          animation: flash-burst 0.8s ease-out forwards;
         }
 
         @keyframes flash-burst {
           0% { opacity: 0; }
-          15% { opacity: 1; }
+          20% { opacity: 1; }
           100% { opacity: 0; }
         }
 
         /* ===========================================
-           FLYING STARS
+           WHIRLPOOL PARTICLE ANIMATION
            =========================================== */
-        .animation-stage {
+        .whirlpool-stage {
           position: fixed;
           inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          background: #000;
           z-index: 100;
           transition: opacity 0.5s ease;
         }
 
-        .animation-stage.hidden {
+        .whirlpool-stage.hidden {
           opacity: 0;
           pointer-events: none;
         }
 
-        .flying-star {
+        /* Individual sparkle particles */
+        .sparkle {
           position: absolute;
-          width: 60px;
-          height: 90px;
+          left: var(--start-x);
+          top: var(--start-y);
+          width: var(--size);
+          height: var(--size);
+          background: radial-gradient(circle,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(200, 220, 255, 0.8) 30%,
+            transparent 70%
+          );
+          border-radius: 50%;
+          filter: blur(0.5px);
           opacity: 0;
-          z-index: 10;
+          animation: whirlpool-spiral var(--duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation-delay: var(--delay);
+          box-shadow:
+            0 0 calc(var(--size) * 2) rgba(255, 255, 255, calc(var(--brightness))),
+            0 0 calc(var(--size) * 4) rgba(200, 220, 255, calc(var(--brightness) * 0.5));
         }
 
-        .flying-star svg {
+        @keyframes whirlpool-spiral {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+          }
+          10% {
+            opacity: 1;
+          }
+          30% {
+            transform: translate(
+              calc(-50% + (50% - var(--start-x)) * 0.3),
+              calc(-50% + (50% - var(--start-y)) * 0.3)
+            ) rotate(180deg) scale(0.8);
+          }
+          60% {
+            transform: translate(
+              calc(-50% + (50% - var(--start-x)) * 0.7),
+              calc(-50% + (50% - var(--start-y)) * 0.7)
+            ) rotate(400deg) scale(1);
+          }
+          85% {
+            opacity: 1;
+            transform: translate(
+              calc(-50% + (50% - var(--start-x)) * 0.95),
+              calc(-50% + (50% - var(--start-y)) * 0.95)
+            ) rotate(600deg) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(
+              calc(-50% + (50% - var(--start-x))),
+              calc(-50% + (50% - var(--start-y)))
+            ) rotate(720deg) scale(0);
+          }
+        }
+
+        /* Center glow that builds up as particles converge */
+        .center-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 150px;
+          height: 150px;
+          background: radial-gradient(circle,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(200, 220, 255, 0.4) 30%,
+            rgba(255, 107, 53, 0.2) 50%,
+            transparent 70%
+          );
+          filter: blur(20px);
+          opacity: 0;
+          animation: center-glow-build 4s ease-in forwards;
+        }
+
+        @keyframes center-glow-build {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+          50% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.6); }
+          80% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+          95% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+        }
+
+        /* Star silhouette forming */
+        .forming-star {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 100px;
+          height: 150px;
+          opacity: 0;
+          animation: star-form 4s ease-out forwards;
+        }
+
+        .forming-star svg {
           width: 100%;
           height: 100%;
-          filter: drop-shadow(0 0 20px var(--star-glow));
+          filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.8))
+                 drop-shadow(0 0 60px rgba(200, 220, 255, 0.6));
         }
 
-        .star-white { --star-glow: rgba(255, 255, 255, 0.8); }
-        .star-orange { --star-glow: rgba(255, 107, 53, 0.8); }
-        .star-black { --star-glow: rgba(100, 100, 100, 0.5); }
-        .star-gold { --star-glow: rgba(255, 215, 0, 0.8); }
-
-        .star-white { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        .star-orange { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.2s; }
-        .star-black { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.4s; }
-        .star-gold { animation: star-fly 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.6s; }
-
-        @keyframes star-fly {
-          0% { opacity: 0; transform: translate(-50vw, 50vh) scale(0.3) rotate(-30deg); }
-          10% { opacity: 1; }
-          30% { transform: translate(-20vw, -10vh) scale(0.6) rotate(-15deg); }
-          50% { transform: translate(10vw, -30vh) scale(0.8) rotate(0deg); }
-          70% { transform: translate(5vw, -10vh) scale(0.9) rotate(10deg); }
-          85% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
-          100% { opacity: 0; transform: translate(0, 0) scale(0.5) rotate(0deg); }
+        @keyframes star-form {
+          0%, 60% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+          80% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+          90% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
         }
 
         /* ===========================================
@@ -281,7 +396,7 @@ export default function LandingPage() {
         }
 
         /* ===========================================
-           LOGO COMPOSITION (Star + SLTR centered)
+           LOGO COMPOSITION
            =========================================== */
         .logo-composition {
           display: flex;
@@ -291,7 +406,6 @@ export default function LandingPage() {
           position: relative;
         }
 
-        /* Star Section */
         .star-section {
           position: relative;
           width: 140px;
@@ -301,7 +415,6 @@ export default function LandingPage() {
           justify-content: center;
         }
 
-        /* Rotating Beams */
         .beam-container {
           position: absolute;
           top: 45%;
@@ -337,7 +450,6 @@ export default function LandingPage() {
           to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        /* Glow Rings */
         .glow-ring {
           position: absolute;
           top: 45%;
@@ -361,7 +473,6 @@ export default function LandingPage() {
           50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.15); }
         }
 
-        /* Crystalline Star with Liquid Glass */
         .star-crystalline {
           position: relative;
           width: 100px;
@@ -376,7 +487,6 @@ export default function LandingPage() {
           filter: drop-shadow(0 0 25px rgba(200, 220, 255, 0.6));
         }
 
-        /* Liquid Glass Shine on Star */
         .glass-shine {
           position: absolute;
           top: 0;
@@ -456,7 +566,6 @@ export default function LandingPage() {
           50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
         }
 
-        /* Connector Line */
         .connector {
           width: 40px;
           height: 2px;
@@ -478,7 +587,6 @@ export default function LandingPage() {
           50% { opacity: 1; box-shadow: 0 0 25px rgba(200, 220, 255, 0.7); }
         }
 
-        /* Text Section */
         .text-section {
           display: flex;
           flex-direction: column;
@@ -495,7 +603,6 @@ export default function LandingPage() {
           margin: 0;
         }
 
-        /* Liquid Glass Letters */
         .glass-letter {
           position: relative;
           color: transparent;
@@ -513,41 +620,17 @@ export default function LandingPage() {
           animation: letter-glow 1.8s ease-in-out infinite;
         }
 
-        .glass-letter::before {
-          content: attr(data-letter);
-          position: absolute;
-          top: 0;
-          left: 0;
-          background: linear-gradient(
-            105deg,
-            transparent 30%,
-            rgba(255, 255, 255, 0.6) 45%,
-            transparent 55%
-          );
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          animation: letter-shine 2.5s ease-in-out infinite;
-        }
-
         .glass-letter:nth-child(1) { animation-delay: 0s; }
         .glass-letter:nth-child(2) { animation-delay: 0.1s; }
         .glass-letter:nth-child(3) { animation-delay: 0.2s; }
         .glass-letter:nth-child(4) { animation-delay: 0.3s; }
 
         @keyframes letter-glow {
-          0%, 100% {
-            filter: drop-shadow(0 0 15px rgba(200, 220, 255, 0.4));
-          }
+          0%, 100% { filter: drop-shadow(0 0 15px rgba(200, 220, 255, 0.4)); }
           50% {
             filter: drop-shadow(0 0 30px rgba(200, 220, 255, 0.8))
                    drop-shadow(0 0 50px rgba(200, 220, 255, 0.4));
           }
-        }
-
-        @keyframes letter-shine {
-          0% { background-position: -200% 0; }
-          50%, 100% { background-position: 200% 0; }
         }
 
         .tagline {
@@ -564,7 +647,7 @@ export default function LandingPage() {
         .main-content.visible .tagline { opacity: 1; }
 
         /* ===========================================
-           LIQUID GLASS CTA BUTTONS
+           CTA BUTTONS
            =========================================== */
         .cta-container {
           display: flex;
@@ -611,7 +694,6 @@ export default function LandingPage() {
             0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        /* Glass shine sweep */
         .btn-shine {
           position: absolute;
           top: 0;
@@ -782,11 +864,6 @@ export default function LandingPage() {
             width: 100%;
           }
 
-          .flying-star {
-            width: 40px;
-            height: 60px;
-          }
-
           .beam-1 { height: 70px; }
           .beam-2 { height: 58px; }
           .beam-3 { height: 65px; }
@@ -797,11 +874,18 @@ export default function LandingPage() {
           .ring-1 { width: 45px; height: 45px; }
           .ring-2 { width: 65px; height: 65px; }
           .ring-3 { width: 85px; height: 85px; }
+
+          .forming-star {
+            width: 80px;
+            height: 120px;
+          }
         }
 
         /* Reduce motion */
         @media (prefers-reduced-motion: reduce) {
-          .flying-star,
+          .sparkle,
+          .center-glow,
+          .forming-star,
           .beam-container,
           .star-crystalline svg,
           .orange-glow,
@@ -822,20 +906,19 @@ export default function LandingPage() {
   );
 }
 
-function FlyingStarSVG({ color1, color2 }: { color1: string; color2: string }) {
-  const id = `grad-${color1.replace('#', '')}`;
+function FormingStarSVG() {
   return (
-    <svg viewBox="0 0 100 150">
+    <svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid meet">
       <defs>
-        <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={color1} />
-          <stop offset="50%" stopColor={color2} />
-          <stop offset="100%" stopColor={color1} />
+        <linearGradient id="forming-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="50%" stopColor="#c8dcff" />
+          <stop offset="100%" stopColor="#ffffff" />
         </linearGradient>
       </defs>
       <polygon
         points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
-        fill={`url(#${id})`}
+        fill="url(#forming-grad)"
       />
     </svg>
   );
@@ -852,9 +935,6 @@ function CrystallineStarSVG() {
           <stop offset="70%" stopColor="#e8f0ff" />
           <stop offset="100%" stopColor="#ffffff" />
         </linearGradient>
-        <filter id="glass-filter">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
-        </filter>
       </defs>
       <polygon
         points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
