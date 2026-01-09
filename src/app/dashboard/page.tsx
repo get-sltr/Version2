@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
 import { IconSearch, IconMap, IconMenu, IconStar, IconUser, IconCheck, IconEye, IconCrown, IconClose } from '@/components/Icons';
 import BottomNavWithBadges from '@/components/BottomNavWithBadges';
 import ProBadge from '@/components/ProBadge';
 import OrbitBadge from '@/components/OrbitBadge';
-import { DTFNButton, DTFNBadge } from '@/components/dtfn';
+import { DTFNBadge } from '@/components/dtfn';
+import { useDTFN } from '@/hooks/useDTFN';
 import { usePremium } from '@/hooks/usePremium';
 
 /**
@@ -519,19 +521,100 @@ export default function Dashboard() {
     return filter.label;
   };
 
+  // DTFN hook for floating button
+  const { isActive: dtfnActive, timeRemaining: dtfnTimeRemaining, toggle: toggleDTFN, loading: dtfnLoading } = useDTFN();
+
+  // Format DTFN time
+  const formatDTFNTime = () => {
+    if (!dtfnTimeRemaining) return '';
+    const hours = Math.floor(dtfnTimeRemaining / 3600);
+    const minutes = Math.floor((dtfnTimeRemaining % 3600) / 60);
+    const seconds = dtfnTimeRemaining % 60;
+    if (dtfnTimeRemaining <= 60) return `${seconds}s`;
+    if (dtfnTimeRemaining <= 3600) return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p>Loading...</p>
+      <div style={{ minHeight: '100vh', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          style={{ fontSize: '16px', fontFamily: "'Orbitron', sans-serif", color: '#FF6B35' }}
+        >
+          Loading...
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif", paddingBottom: '80px' }}>
-      <header style={{ position: 'sticky', top: 0, background: colors.background, zIndex: 100, padding: '12px 15px' }}>
+    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", position: 'relative', overflow: 'hidden' }}>
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          opacity: 0.35,
+        }}
+      >
+        <source src="/Videos/premiumpage.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dark overlay */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.7) 100%)',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }} />
+
+      {/* Main Content */}
+      <div style={{ position: 'relative', zIndex: 10, paddingBottom: '100px' }}>
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        background: 'rgba(10, 10, 15, 0.7)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        zIndex: 100,
+        padding: '12px 15px'
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-          <a href="/settings" style={{ width: '44px', height: '44px', borderRadius: '50%', background: colors.surface, backgroundImage: currentUser?.photo_url ? `url(${currentUser.photo_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0, border: `2px solid ${colors.surface}`, display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: colors.text }}>
+          <a href="/settings" style={{
+            width: '46px',
+            height: '46px',
+            borderRadius: '50%',
+            background: currentUser?.photo_url ? 'transparent' : 'linear-gradient(135deg, rgba(255,107,53,0.3) 0%, rgba(255,107,53,0.1) 100%)',
+            backgroundImage: currentUser?.photo_url ? `url(${currentUser.photo_url})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            flexShrink: 0,
+            border: '2px solid rgba(255, 107, 53, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textDecoration: 'none',
+            color: '#fff',
+            boxShadow: '0 0 20px rgba(255, 107, 53, 0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
             {!currentUser?.photo_url && <IconUser size={20} />}
           </a>
           <div style={{ flex: 1, position: 'relative' }}>
@@ -543,13 +626,17 @@ export default function Dashboard() {
               onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
               style={{
                 width: '100%',
-                background: searchedLocation ? 'rgba(255,107,53,0.1)' : colors.surface,
-                borderRadius: '10px',
-                padding: '12px 70px 12px 16px',
-                border: searchedLocation ? '1px solid #ff6b35' : 'none',
-                color: colors.text,
+                background: searchedLocation ? 'rgba(255,107,53,0.1)' : 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+                padding: '14px 70px 14px 16px',
+                border: searchedLocation ? '1px solid rgba(255, 107, 53, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
                 fontSize: '14px',
-                outline: 'none'
+                outline: 'none',
+                fontFamily: 'inherit',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 15px rgba(0,0,0,0.2)',
               }}
             />
             {searchedLocation && (
@@ -557,14 +644,14 @@ export default function Dashboard() {
                 onClick={clearLocationSearch}
                 style={{
                   position: 'absolute',
-                  right: '36px',
+                  right: '45px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  background: 'rgba(255,107,53,0.2)',
+                  background: 'rgba(255,107,53,0.3)',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
+                  width: '22px',
+                  height: '22px',
                   color: '#ff6b35',
                   cursor: 'pointer',
                   display: 'flex',
@@ -580,40 +667,49 @@ export default function Dashboard() {
               onClick={handleLocationSearch}
               style={{
                 position: 'absolute',
-                right: '8px',
+                right: '12px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
-                color: searchedLocation ? '#ff6b35' : colors.textSecondary,
+                color: searchedLocation ? '#ff6b35' : 'rgba(255,255,255,0.5)',
                 cursor: 'pointer',
                 padding: '4px'
               }}
             >
-              <IconSearch size={16} />
+              <IconSearch size={18} />
             </button>
           </div>
           <a href="/map" style={{
-            background: '#0a0a0a',
-            border: '1px solid #ff6b35',
-            borderRadius: '6px',
-            padding: '8px 16px',
-            color: '#ff6b35',
+            background: 'rgba(255, 107, 53, 0.15)',
+            border: '1px solid rgba(255, 107, 53, 0.5)',
+            borderRadius: '10px',
+            padding: '12px 20px',
+            color: '#FF6B35',
             fontSize: '13px',
-            fontWeight: 'bold',
-            letterSpacing: '0.5px',
+            fontWeight: 700,
+            letterSpacing: '1px',
             textDecoration: 'none',
             flexShrink: 0,
             display: 'inline-flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: '6px',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: '0 4px 20px rgba(255,107,53,0.25)',
-            transition: 'all 0.3s ease-out'
+            boxShadow: '0 4px 20px rgba(255, 107, 53, 0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
           }}>
-            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#ff6b35', boxShadow: '0 0 10px rgba(255,107,53,0.8)' }} />
-            <span style={{ position: 'relative', zIndex: 10 }}>MAP</span>
+            {/* Shine animation */}
+            <span style={{
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+              animation: 'buttonShine 2.5s ease-in-out infinite',
+            }} />
+            <IconMap size={14} />
+            <span style={{ position: 'relative', zIndex: 1 }}>MAP</span>
           </a>
         </div>
         {searchedLocation && (
@@ -649,17 +745,17 @@ export default function Dashboard() {
             </button>
           </div>
         )}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginLeft: '-15px', marginRight: '-15px', paddingLeft: '15px', paddingRight: '15px' }}>
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginLeft: '-15px', marginRight: '-15px', paddingLeft: '15px', paddingRight: '15px', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <a href="/favorites" style={{
             position: 'relative',
             overflow: 'hidden',
-            background: '#0a0a0a',
-            color: '#ff6b35',
-            border: '1px solid #333',
-            borderRadius: '6px',
-            padding: '8px 16px',
-            fontSize: '13px',
-            fontWeight: 'bold',
+            background: 'rgba(255, 255, 255, 0.05)',
+            color: '#FF6B35',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '10px',
+            padding: '10px 16px',
+            fontSize: '12px',
+            fontWeight: 600,
             letterSpacing: '0.5px',
             flexShrink: 0,
             textDecoration: 'none',
@@ -667,15 +763,10 @@ export default function Dashboard() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '6px',
-            transition: 'all 0.3s ease-out'
+            fontFamily: 'inherit',
           }}>
-            <span style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '2px', background: '#333' }} />
-            <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <svg style={{ width: '14px', height: '14px', fill: '#ff6b35' }} viewBox="0 0 12 24">
-                <path d="M6 0L7.35 7.56L12 8.18L6 12.96V24L0 17.77V8.18L6 0Z"/>
-              </svg>
-              Faves
-            </span>
+            <IconStar size={14} />
+            Faves
           </a>
           {filters.map(filter => {
             const isFilterActive = (filter.id === 'position' && selectedPositions.length > 0) ||
@@ -687,7 +778,7 @@ export default function Dashboard() {
                                    (filter.id === 'position' && showPositionDropdown) ||
                                    (filter.id === 'tribes' && showTribesDropdown);
 
-            // Special DTFN button with droplets
+            // Special DTFN button with droplets - Glass style
             if (filter.id === 'dtfn') {
               return (
                 <button
@@ -696,40 +787,41 @@ export default function Dashboard() {
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    background: '#0a0a0a',
-                    color: '#ff6b35',
-                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
-                    borderRadius: '6px',
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
+                    background: isFilterActive
+                      ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.25) 0%, rgba(255, 107, 53, 0.15) 100%)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    color: isFilterActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.7)',
+                    border: isFilterActive ? '1px solid rgba(255, 107, 53, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    padding: '10px 16px',
+                    fontSize: '12px',
+                    fontWeight: 600,
                     letterSpacing: '0.5px',
                     flexShrink: 0,
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
-                    transition: 'all 0.3s ease-out',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.2)' : 'none',
+                    fontFamily: 'inherit',
                   }}
                 >
-                  <span style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '2px',
-                    background: isFilterActive ? '#ff6b35' : '#333',
-                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
-                    transition: 'all 0.3s',
-                  }} />
+                  {/* Shine on active */}
+                  {isFilterActive && (
+                    <span style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '200%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                      animation: 'buttonShine 3s ease-in-out infinite',
+                    }} />
+                  )}
                   <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center' }}>
                     DTFN
-                    <span style={{ display: 'inline-flex', alignItems: 'flex-end', marginLeft: '2px', gap: 0 }}>
-                      <svg style={{ width: '12px', height: '12px', fill: '#ff6b35', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
-                        <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
-                      </svg>
-                      <svg style={{ width: '8px', height: '8px', marginLeft: '-1px', fill: '#ff6b35', filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                    <span style={{ display: 'inline-flex', alignItems: 'flex-end', marginLeft: '4px', gap: 0 }}>
+                      <svg style={{ width: '14px', height: '14px', fill: isFilterActive ? '#FF6B35' : 'rgba(255,255,255,0.7)' }} viewBox="0 0 24 24">
                         <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
                       </svg>
                     </span>
@@ -738,7 +830,7 @@ export default function Dashboard() {
               );
             }
 
-            // Online button with green dot
+            // Online button with green dot - Glass style
             if (filter.id === 'online') {
               return (
                 <button
@@ -747,13 +839,15 @@ export default function Dashboard() {
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    background: '#0a0a0a',
-                    color: '#ff6b35',
-                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
-                    borderRadius: '6px',
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
+                    background: isFilterActive
+                      ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.25) 0%, rgba(255, 107, 53, 0.15) 100%)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    color: isFilterActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.7)',
+                    border: isFilterActive ? '1px solid rgba(255, 107, 53, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    padding: '10px 16px',
+                    fontSize: '12px',
+                    fontWeight: 600,
                     letterSpacing: '0.5px',
                     flexShrink: 0,
                     cursor: 'pointer',
@@ -761,27 +855,28 @@ export default function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
-                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
-                    transition: 'all 0.3s ease-out',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.2)' : 'none',
+                    fontFamily: 'inherit',
                   }}
                 >
-                  <span style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '2px',
-                    background: isFilterActive ? '#ff6b35' : '#333',
-                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
-                    transition: 'all 0.3s',
-                  }} />
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50', position: 'relative', zIndex: 10 }} />
+                  {isFilterActive && (
+                    <span style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '200%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                      animation: 'buttonShine 3s ease-in-out infinite',
+                    }} />
+                  )}
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4caf50', boxShadow: '0 0 8px rgba(76, 175, 80, 0.6)', position: 'relative', zIndex: 10 }} />
                   <span style={{ position: 'relative', zIndex: 10 }}>Online</span>
                 </button>
               );
             }
 
-            // New button with star icon
+            // New button with star icon - Glass style
             if (filter.id === 'fresh') {
               return (
                 <button
@@ -790,13 +885,15 @@ export default function Dashboard() {
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    background: '#0a0a0a',
-                    color: '#ff6b35',
-                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
-                    borderRadius: '6px',
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
+                    background: isFilterActive
+                      ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.25) 0%, rgba(255, 107, 53, 0.15) 100%)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    color: isFilterActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.7)',
+                    border: isFilterActive ? '1px solid rgba(255, 107, 53, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    padding: '10px 16px',
+                    fontSize: '12px',
+                    fontWeight: 600,
                     letterSpacing: '0.5px',
                     flexShrink: 0,
                     cursor: 'pointer',
@@ -804,21 +901,22 @@ export default function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
-                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
-                    transition: 'all 0.3s ease-out',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.2)' : 'none',
+                    fontFamily: 'inherit',
                   }}
                 >
-                  <span style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '2px',
-                    background: isFilterActive ? '#ff6b35' : '#333',
-                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
-                    transition: 'all 0.3s',
-                  }} />
-                  <svg style={{ width: '14px', height: '14px', fill: '#ff6b35', position: 'relative', zIndex: 10, filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
+                  {isFilterActive && (
+                    <span style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '200%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                      animation: 'buttonShine 3s ease-in-out infinite',
+                    }} />
+                  )}
+                  <svg style={{ width: '14px', height: '14px', fill: isFilterActive ? '#FF6B35' : 'rgba(255,255,255,0.7)', position: 'relative', zIndex: 10 }} viewBox="0 0 24 24">
                     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
                   </svg>
                   <span style={{ position: 'relative', zIndex: 10 }}>New</span>
@@ -826,7 +924,7 @@ export default function Dashboard() {
               );
             }
 
-            // Photos button with camera icon
+            // Photos button with camera icon - Glass style
             if (filter.id === 'photos') {
               return (
                 <button
@@ -835,13 +933,15 @@ export default function Dashboard() {
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
-                    background: '#0a0a0a',
-                    color: '#ff6b35',
-                    border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
-                    borderRadius: '6px',
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
+                    background: isFilterActive
+                      ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.25) 0%, rgba(255, 107, 53, 0.15) 100%)'
+                      : 'rgba(255, 255, 255, 0.05)',
+                    color: isFilterActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.7)',
+                    border: isFilterActive ? '1px solid rgba(255, 107, 53, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                    padding: '10px 16px',
+                    fontSize: '12px',
+                    fontWeight: 600,
                     letterSpacing: '0.5px',
                     flexShrink: 0,
                     cursor: 'pointer',
@@ -849,29 +949,30 @@ export default function Dashboard() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '6px',
-                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
-                    transition: 'all 0.3s ease-out',
+                    boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.2)' : 'none',
+                    fontFamily: 'inherit',
                   }}
                 >
-                  <span style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '2px',
-                    background: isFilterActive ? '#ff6b35' : '#333',
-                    boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
-                    transition: 'all 0.3s',
-                  }} />
-                  <svg style={{ width: '14px', height: '14px', fill: '#ff6b35', position: 'relative', zIndex: 10, filter: isFilterActive ? 'drop-shadow(0 0 4px rgba(255,107,53,0.8))' : 'none', transition: 'all 0.3s' }} viewBox="0 0 24 24">
-                    <path d="M4 4H7L9 2H15L17 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4ZM12 17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17ZM12 9C13.65 9 15 10.35 15 12C15 13.65 13.65 15 12 15C10.35 15 9 13.65 9 12C9 10.35 10.35 9 12 9Z"/>
+                  {isFilterActive && (
+                    <span style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: '-100%',
+                      width: '200%',
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                      animation: 'buttonShine 3s ease-in-out infinite',
+                    }} />
+                  )}
+                  <svg style={{ width: '14px', height: '14px', fill: isFilterActive ? '#FF6B35' : 'rgba(255,255,255,0.7)', position: 'relative', zIndex: 10 }} viewBox="0 0 24 24">
+                    <path d="M4 4H7L9 2H15L17 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4ZM12 17C14.76 17 17 14.76 17 12C17 9.24 14.76 7 12 7C9.24 7 7 9.24 7 12C7 14.76 9.24 17 12 17Z"/>
                   </svg>
                   <span style={{ position: 'relative', zIndex: 10 }}>Photos</span>
                 </button>
               );
             }
 
-            // Regular filter buttons (Age, Position, Tribes) with dropdown
+            // Regular filter buttons (Age, Position, Tribes) with dropdown - Glass style
             return (
               <button
                 key={filter.id}
@@ -879,13 +980,15 @@ export default function Dashboard() {
                 style={{
                   position: 'relative',
                   overflow: 'hidden',
-                  background: '#0a0a0a',
-                  color: '#ff6b35',
-                  border: isFilterActive ? '1px solid #ff6b35' : '1px solid #333',
-                  borderRadius: '6px',
-                  padding: '8px 16px',
-                  fontSize: '13px',
-                  fontWeight: 'bold',
+                  background: isFilterActive
+                    ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.25) 0%, rgba(255, 107, 53, 0.15) 100%)'
+                    : 'rgba(255, 255, 255, 0.05)',
+                  color: isFilterActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.7)',
+                  border: isFilterActive ? '1px solid rgba(255, 107, 53, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  padding: '10px 16px',
+                  fontSize: '12px',
+                  fontWeight: 600,
                   letterSpacing: '0.5px',
                   flexShrink: 0,
                   cursor: 'pointer',
@@ -893,20 +996,21 @@ export default function Dashboard() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '6px',
-                  boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.25)' : 'none',
-                  transition: 'all 0.3s ease-out',
+                  boxShadow: isFilterActive ? '0 4px 20px rgba(255,107,53,0.2)' : 'none',
+                  fontFamily: 'inherit',
                 }}
               >
-                <span style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '2px',
-                  background: isFilterActive ? '#ff6b35' : '#333',
-                  boxShadow: isFilterActive ? '0 0 10px rgba(255,107,53,0.8)' : 'none',
-                  transition: 'all 0.3s',
-                }} />
+                {isFilterActive && (
+                  <span style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '200%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
+                    animation: 'buttonShine 3s ease-in-out infinite',
+                  }} />
+                )}
                 <span style={{ position: 'relative', zIndex: 10 }}>{getFilterButtonLabel(filter)}</span>
                 {filter.hasDropdown && (
                   <span style={{
@@ -1233,38 +1337,131 @@ export default function Dashboard() {
       </header>
 
       {showAd && (
-        <div style={{ margin: '10px 15px', background: colors.surface, borderRadius: '12px', padding: '16px', position: 'relative', border: `1px solid ${colors.border}` }}>
-          <button onClick={() => setShowAd(false)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(128,128,128,0.2)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', color: colors.text, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconClose size={12} /></button>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{ width: '50px', height: '50px', background: colors.accent, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}><IconCrown size={24} /></div>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            margin: '12px 15px',
+            background: 'rgba(255, 107, 53, 0.08)',
+            backdropFilter: 'blur(15px)',
+            WebkitBackdropFilter: 'blur(15px)',
+            borderRadius: '16px',
+            padding: '16px',
+            position: 'relative',
+            border: '1px solid rgba(255, 107, 53, 0.2)',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Background shine */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '200%',
+            height: '100%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
+            animation: 'buttonShine 4s ease-in-out infinite',
+          }} />
+
+          <button
+            onClick={() => setShowAd(false)}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '26px',
+              height: '26px',
+              color: '#fff',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2,
+            }}
+          >
+            <IconClose size={12} />
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '50px',
+                height: '50px',
+                background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.4) 0%, rgba(255, 107, 53, 0.2) 100%)',
+                borderRadius: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+              }}>
+                <IconCrown size={24} />
+              </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600 }}>Upgrade to SLTR+</h3>
-                <p style={{ margin: '4px 0 0', fontSize: '13px', color: colors.textSecondary }}>Unlimited profiles, no ads, see who viewed you</p>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff' }}>Upgrade to SLTR+</h3>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Unlimited profiles, no ads, see who viewed you</p>
               </div>
             </div>
-            <a href="/premium" style={{ background: colors.accent, color: '#fff', padding: '10px 24px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>Upgrade</a>
+            <a
+              href="/premium"
+              style={{
+                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a5c 100%)',
+                color: '#fff',
+                padding: '12px 24px',
+                borderRadius: '10px',
+                fontSize: '12px',
+                fontWeight: 700,
+                textDecoration: 'none',
+                boxShadow: '0 4px 20px rgba(255, 107, 53, 0.4)',
+                fontFamily: 'inherit',
+              }}
+            >
+              Upgrade
+            </a>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      <main style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px', marginBottom: '100px' }}>
+      <main style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px', padding: '3px' }}>
         {profiles.length === 0 ? (
           <div style={{ gridColumn: 'span 3', padding: '60px 20px', textAlign: 'center' }}>
             <div style={{ marginBottom: '20px', opacity: 0.3, display: 'flex', justifyContent: 'center' }}><IconEye size={48} /></div>
-            <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>No profiles yet</h3>
-            <p style={{ fontSize: '14px', opacity: 0.6 }}>Be the first to complete your profile!</p>
-            <a href="/profile/edit" style={{ display: 'inline-block', marginTop: '20px', padding: '12px 24px', background: '#FF6B35', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>Set Up Profile</a>
+            <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No profiles yet</h3>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Be the first to complete your profile!</p>
+            <a href="/profile/edit" style={{
+              display: 'inline-block',
+              marginTop: '20px',
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a5c 100%)',
+              color: '#fff',
+              borderRadius: '10px',
+              textDecoration: 'none',
+              fontWeight: 700,
+              boxShadow: '0 4px 20px rgba(255, 107, 53, 0.4)',
+            }}>
+              Set Up Profile
+            </a>
           </div>
         ) : (
           profiles.map((profile, index) => (
-            <a key={profile.id} href={'/profile/' + profile.id} style={{
-              aspectRatio: '1',
-              position: 'relative',
-              background: '#1a1a1a',
-              overflow: 'hidden',
-              textDecoration: 'none'
-            }}>
+            <motion.a
+              key={profile.id}
+              href={'/profile/' + profile.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.02 }}
+              whileHover={{ scale: 1.02, zIndex: 10 }}
+              style={{
+                aspectRatio: '1',
+                position: 'relative',
+                background: '#1a1a1a',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                textDecoration: 'none',
+              }}
+            >
               {/* Photo */}
               <div style={{
                 position: 'absolute',
@@ -1332,16 +1529,126 @@ export default function Dashboard() {
                   {formatDistance(profile.distance)}
                 </div>
               </div>
-            </a>
+            </motion.a>
           ))
         )}
       </main>
 
-      <div style={{ position: 'fixed', bottom: '90px', right: '15px', zIndex: 50 }}>
-        <DTFNButton />
+      {/* Custom DTFN Floating Button with text and flame icon */}
+      <motion.button
+        onClick={toggleDTFN}
+        disabled={dtfnLoading}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        style={{
+          position: 'fixed',
+          bottom: '100px',
+          right: '15px',
+          zIndex: 50,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '6px',
+          background: 'none',
+          border: 'none',
+          cursor: dtfnLoading ? 'not-allowed' : 'pointer',
+          opacity: dtfnLoading ? 0.5 : 1,
+        }}
+      >
+        {/* Main button */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          padding: '14px 20px',
+          borderRadius: '30px',
+          background: dtfnActive
+            ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.9) 0%, rgba(255, 140, 90, 0.9) 100%)'
+            : 'rgba(30, 30, 35, 0.9)',
+          border: dtfnActive ? '2px solid rgba(255, 255, 255, 0.3)' : '2px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: dtfnActive
+            ? '0 6px 30px rgba(255, 107, 53, 0.5), inset 0 2px 0 rgba(255,255,255,0.3)'
+            : '0 4px 20px rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Shine animation when active */}
+          {dtfnActive && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+              animation: 'buttonShine 2s ease-in-out infinite',
+            }} />
+          )}
+
+          <span style={{
+            fontSize: '14px',
+            fontWeight: 700,
+            letterSpacing: '1px',
+            color: dtfnActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+            position: 'relative',
+            zIndex: 1,
+          }}>
+            DTFN
+          </span>
+
+          {/* Flame/Drip icon */}
+          <svg
+            style={{
+              width: '18px',
+              height: '18px',
+              fill: dtfnActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+              position: 'relative',
+              zIndex: 1,
+              filter: dtfnActive ? 'drop-shadow(0 0 6px rgba(255,255,255,0.5))' : 'none',
+            }}
+            viewBox="0 0 24 24"
+          >
+            {/* Flame icon */}
+            <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.577 1.409-4.824 3.5-6.018C8.5 9 8.5 8 9 6c.5 2 2 4 4 5 0-2 .5-4 1-6 1 2 3 5 3 9 0 3.866-3.134 7-7 7zm0-9c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z" />
+          </svg>
+        </div>
+
+        {/* Timer display */}
+        <span style={{
+          fontSize: '11px',
+          fontWeight: 600,
+          color: dtfnActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.4)',
+          textShadow: dtfnActive ? '0 0 10px rgba(255, 107, 53, 0.5)' : 'none',
+        }}>
+          {dtfnActive ? `${formatDTFNTime()} left` : 'Tap to activate'}
+        </span>
+      </motion.button>
+
       </div>
 
       <BottomNavWithBadges />
+
+      {/* Global Styles for animations */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap');
+
+        @keyframes buttonShine {
+          0% { left: -100%; }
+          50%, 100% { left: 150%; }
+        }
+
+        @keyframes hostingPulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 107, 53, 0.6); }
+          50% { opacity: 0.8; box-shadow: 0 0 20px rgba(255, 107, 53, 0.8); }
+        }
+
+        /* Hide scrollbar */
+        div::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }
