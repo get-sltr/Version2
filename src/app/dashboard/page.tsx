@@ -206,10 +206,10 @@ export default function Dashboard() {
 
     // Apply filters based on activeFilter
     if (activeFilter === 'online') {
-      // Consider "online" if last_seen within last 7 days (more lenient for early stage)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      query = query.gte('last_seen', sevenDaysAgo.toISOString());
+      // Consider "online" if last_seen within last 90 days (very lenient for early stage)
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      query = query.gte('last_seen', ninetyDaysAgo.toISOString());
     } else if (activeFilter === 'fresh') {
       // Show profiles created in the last 7 days
       const sevenDaysAgo = new Date();
@@ -288,7 +288,8 @@ export default function Dashboard() {
       }
 
       // Calculate distance and filter by radius if user has location
-      const MAX_DISTANCE_MILES = 50; // Only show users within 50 miles
+      // EARLY STAGE: Very lenient distance - show profiles from anywhere
+      const MAX_DISTANCE_MILES = 10000; // Essentially unlimited for early stage
 
       if (hasLocation) {
         filtered = filtered
