@@ -172,9 +172,10 @@ export default function ProfileViewPage() {
             setHostedGroups(groupsData);
           }
 
-          // Fetch user's public albums
+          // Fetch user's albums (include private if viewing own profile)
           try {
-            const albumsData = await listUserAlbums(profileId, false);
+            const isOwnProfile = user && user.id === profileId;
+            const albumsData = await listUserAlbums(profileId, isOwnProfile);
             setAlbums(albumsData || []);
           } catch (err) {
             console.error('Failed to load albums:', err);
