@@ -113,6 +113,11 @@ export default function ConversationPage() {
   const [loadingAlbums, setLoadingAlbums] = useState(false);
   const [sharedAlbumsCache, setSharedAlbumsCache] = useState<Record<string, ShareableAlbum>>({});
 
+  // Album viewer states
+  const [viewingAlbum, setViewingAlbum] = useState<ShareableAlbum | null>(null);
+  const [viewingAlbumPhotos, setViewingAlbumPhotos] = useState<{id: string; public_url: string}[]>([]);
+  const [loadingAlbumPhotos, setLoadingAlbumPhotos] = useState(false);
+
   // Hide chat photos feature
   const [hideChatPhotos, setHideChatPhotos] = useState<{ enabled: boolean; blurLevel: 'light' | 'heavy' }>({ enabled: false, blurLevel: 'light' });
   const [revealedImages, setRevealedImages] = useState<Set<string>>(new Set());
@@ -554,6 +559,29 @@ export default function ConversationPage() {
     setShowAlbumShare(false);
   };
 
+  // Open album viewer to show album photos
+  const openAlbumViewer = async (albumId: string, albumInfo?: ShareableAlbum) => {
+    setLoadingAlbumPhotos(true);
+    try {
+      // Set album info from cache or provided info
+      const album = albumInfo || sharedAlbumsCache[albumId];
+      if (album) {
+        setViewingAlbum(album);
+      } else {
+        setViewingAlbum({ id: albumId, name: 'Album', description: null, cover_photo_url: null });
+      }
+
+      // Load photos from the album
+      const photos = await listPhotosInAlbum(albumId);
+      setViewingAlbumPhotos(photos || []);
+    } catch (err) {
+      console.error('Failed to load album photos:', err);
+      setViewingAlbumPhotos([]);
+    } finally {
+      setLoadingAlbumPhotos(false);
+    }
+  };
+
   const handleDeleteMessage = async (messageId: string) => {
     if (!confirm('Delete this message?')) return;
 
@@ -955,9 +983,8 @@ export default function ConversationPage() {
               cursor: 'pointer',
             }}
             onClick={() => {
-              // Open album viewer - for now we navigate to the sender's profile
-              // In future, this could open a dedicated album viewer
-              router.push(`/profile/${m.sender_id}`);
+              // Open album viewer modal
+              openAlbumViewer(m.shared_album_id!, sharedAlbumsCache[m.shared_album_id!]);
             }}
           >
             <div style={{
@@ -1647,6 +1674,124 @@ export default function ConversationPage() {
           </div>
         )}
       </div>
+
+      {/* Album Viewer Modal */}
+      {viewingAlbum && (
+        <>
+          <div
+            onClick={() => {
+              setViewingAlbum(null);
+              setViewingAlbumPhotos([]);
+            }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.9)',
+              zIndex: 1000,
+            }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '90%',
+            maxWidth: '500px',
+            maxHeight: '80vh',
+            background: '#1c1c1e',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            zIndex: 1001,
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px',
+              borderBottom: '1px solid #333',
+            }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>
+                📷 {viewingAlbum.name}
+              </h3>
+              <button
+                onClick={() => {
+                  setViewingAlbum(null);
+                  setViewingAlbumPhotos([]);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Photos Grid */}
+            <div style={{
+              padding: '16px',
+              overflowY: 'auto',
+              flex: 1,
+            }}>
+              {loadingAlbumPhotos ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
+                  Loading photos...
+                </div>
+              ) : viewingAlbumPhotos.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
+                  No photos in this album
+                </div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '8px',
+                }}>
+                  {viewingAlbumPhotos.map((photo) => (
+                    <div
+                      key={photo.id}
+                      style={{
+                        aspectRatio: '1',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        background: '#333',
+                      }}
+                    >
+                      <img
+                        src={photo.public_url}
+                        alt="Album photo"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer with photo count */}
+            <div style={{
+              padding: '12px 16px',
+              borderTop: '1px solid #333',
+              textAlign: 'center',
+              fontSize: '14px',
+              color: '#888',
+            }}>
+              {viewingAlbumPhotos.length} photo{viewingAlbumPhotos.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

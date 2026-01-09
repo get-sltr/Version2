@@ -461,12 +461,14 @@ export default function Dashboard() {
       setShowPositionDropdown(false);
       setShowAgeDropdown(false);
     } else if (filter.id === 'dtfn') {
-      // DTFN filter is premium-only
-      if (!isPremium) {
-        router.push('/premium');
-        return;
+      // DTFN filter - toggle on/off
+      if (activeFilter === 'dtfn') {
+        // Already selected, deselect and go back to 'online'
+        setActiveFilter('online');
+      } else {
+        // Select DTFN filter (no premium check - anyone can filter by DTFN users)
+        setActiveFilter('dtfn');
       }
-      setActiveFilter(filter.id);
       setShowPositionDropdown(false);
       setShowAgeDropdown(false);
       setShowTribesDropdown(false);

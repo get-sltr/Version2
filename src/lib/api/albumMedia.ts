@@ -119,3 +119,66 @@ export async function getAlbumWithPhotos(albumId: string) {
   const photos = await listPhotosInAlbum(albumId);
   return { album, photos };
 }
+
+export async function deleteAlbum(albumId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // First, get all photos in the album to delete from storage
+  const photos = await listPhotosInAlbum(albumId);
+
+  // Delete photos from storage
+  if (photos && photos.length > 0) {
+    const paths = photos.map(p => p.storage_path).filter(Boolean);
+    if (paths.length > 0) {
+      await supabase.storage.from('profile-media').remove(paths);
+    }
+
+    // Delete photo records
+    await supabase
+      .from('profile_photos')
+      .delete()
+      .eq('album_id', albumId)
+      .eq('user_id', user.id);
+  }
+
+  // Delete the album
+  const { error } = await supabase
+    .from('profile_albums')
+    .delete()
+    .eq('id', albumId)
+    .eq('user_id', user.id);
+
+  if (error) throw error;
+  return true;
+}
+
+export async function deleteAlbumPhoto(photoId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // Get the photo to find storage path
+  const { data: photo, error: fetchError } = await supabase
+    .from('profile_photos')
+    .select('storage_path')
+    .eq('id', photoId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // Delete from storage
+  if (photo?.storage_path) {
+    await supabase.storage.from('profile-media').remove([photo.storage_path]);
+  }
+
+  // Delete record
+  const { error } = await supabase
+    .from('profile_photos')
+    .delete()
+    .eq('id', photoId)
+    .eq('user_id', user.id);
+
+  if (error) throw error;
+  return true;
+}
