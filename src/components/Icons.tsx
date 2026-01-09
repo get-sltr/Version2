@@ -465,6 +465,167 @@ export const IconOrbit = ({ size = 24, className, animated = false }: IconProps 
 );
 
 // =============================================================================
+// Premium Feature Icons
+// =============================================================================
+
+export const IconInfinity = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M8 12C8 14.2 6.2 16 4 16C1.8 16 0 14.2 0 12C0 9.8 1.8 8 4 8C6.2 8 8 9.8 8 12Z" stroke="currentColor" strokeWidth="1.5" transform="translate(2, 0)"/>
+    <path d="M16 12C16 9.8 17.8 8 20 8C22.2 8 24 9.8 24 12C24 14.2 22.2 16 20 16C17.8 16 16 14.2 16 12Z" stroke="currentColor" strokeWidth="1.5" transform="translate(-2, 0)"/>
+    <path d="M8 12L16 12" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconTelescope = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M3 21L10 14" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M10 14L7 11" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M7 11L14 4L20 10L13 17L7 11" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="17" cy="7" r="2" stroke="currentColor" strokeWidth="1"/>
+    <path d="M13 17L10 20" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconGhost = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 2C7 2 4 6 4 10V20L6 18L8 20L10 18L12 20L14 18L16 20L18 18L20 20V10C20 6 17 2 12 2Z" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="9" cy="10" r="1.5" fill="currentColor"/>
+    <circle cx="15" cy="10" r="1.5" fill="currentColor"/>
+  </svg>
+);
+
+export const IconShield = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 2L4 6V12C4 16.4 7.4 20.4 12 22C16.6 20.4 20 16.4 20 12V6L12 2Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconSparkles = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M19 2L19.5 4.5L22 5L19.5 5.5L19 8L18.5 5.5L16 5L18.5 4.5L19 2Z" stroke="currentColor" strokeWidth="1"/>
+    <path d="M5 16L5.5 18L8 18.5L5.5 19L5 21L4.5 19L2 18.5L4.5 18L5 16Z" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconTimer = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="14" r="8" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M12 10V14L15 16" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M10 2H14" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M12 2V4" stroke="currentColor" strokeWidth="1"/>
+    <path d="M19 7L20 6" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconUndo = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 8H14C17.3 8 20 10.7 20 14C20 17.3 17.3 20 14 20H8" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 4L4 8L8 12" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconGlobe = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M3 12H21" stroke="currentColor" strokeWidth="1"/>
+    <path d="M12 3C14.5 5.5 16 8.5 16 12C16 15.5 14.5 18.5 12 21" stroke="currentColor" strokeWidth="1"/>
+    <path d="M12 3C9.5 5.5 8 8.5 8 12C8 15.5 9.5 18.5 12 21" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconTyping = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="2" y="6" width="20" height="12" rx="6" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="7" cy="12" r="1.5" fill="currentColor"/>
+    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+    <circle cx="17" cy="12" r="1.5" fill="currentColor"/>
+  </svg>
+);
+
+export const IconAlbums = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="6" y="6" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+    <rect x="4" y="4" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1"/>
+    <path d="M10 14L13 11L17 15" stroke="currentColor" strokeWidth="1"/>
+    <circle cx="11" cy="10" r="1.5" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconDoubleCheck = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M2 12L7 17L12 8" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 12L13 17L22 6" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconBookmark = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M6 4H18V20L12 16L6 20V4Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M9 8H15" stroke="currentColor" strokeWidth="1"/>
+    <path d="M9 11H13" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconVideo = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="2" y="6" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M16 10L22 7V17L16 14" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconBadge = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 2L15 5H19V9L22 12L19 15V19H15L12 22L9 19H5V15L2 12L5 9V5H9L12 2Z" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1"/>
+    <path d="M12 10V14" stroke="currentColor" strokeWidth="1"/>
+    <path d="M10 12H14" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconEyeOff = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 4L20 20" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M6.5 9.5C4.5 11 3 12 3 12C3 12 7 18 12 18C13.5 18 14.8 17.5 16 17" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M17.5 14.5C19.5 13 21 12 21 12C21 12 17 6 12 6C10.5 6 9.2 6.5 8 7" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconPin = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M8 4L16 4L18 10L14 14V20L12 22L10 20V14L6 10L8 4Z" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M6 10H18" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconHeadset = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M4 12V10C4 5.6 7.6 2 12 2C16.4 2 20 5.6 20 10V12" stroke="currentColor" strokeWidth="1.5"/>
+    <rect x="2" y="12" width="4" height="6" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+    <rect x="18" y="12" width="4" height="6" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M20 18V19C20 20.1 19.1 21 18 21H14" stroke="currentColor" strokeWidth="1"/>
+    <circle cx="12" cy="21" r="2" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconAirplane = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 4L14 10H20L22 12L20 14H14L12 20L10 14H4L2 12L4 10H10L12 4Z" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="12" cy="12" r="2" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);
+
+export const IconUnlock = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 11V7C8 4.8 9.8 3 12 3C14.2 3 16 4.8 16 7" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+  </svg>
+);
+
+// =============================================================================
 // Export All
 // =============================================================================
 
@@ -510,6 +671,26 @@ export const Icons = {
   Taps: IconTaps,
   DTFN: IconDTFN,
   Orbit: IconOrbit,
+  // Premium
+  Infinity: IconInfinity,
+  Telescope: IconTelescope,
+  Ghost: IconGhost,
+  Shield: IconShield,
+  Sparkles: IconSparkles,
+  Timer: IconTimer,
+  Undo: IconUndo,
+  Globe: IconGlobe,
+  Typing: IconTyping,
+  Albums: IconAlbums,
+  DoubleCheck: IconDoubleCheck,
+  Bookmark: IconBookmark,
+  Video: IconVideo,
+  Badge: IconBadge,
+  EyeOff: IconEyeOff,
+  Pin: IconPin,
+  Headset: IconHeadset,
+  Airplane: IconAirplane,
+  Unlock: IconUnlock,
 };
 
 export default Icons;
