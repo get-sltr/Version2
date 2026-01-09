@@ -190,12 +190,44 @@ export default function PremiumPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(165deg, #0a0608 0%, #1a0a12 25%, #0d0a0f 50%, #0a0608 100%)',
+      background: '#000',
       color: '#fff',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       position: 'relative',
       overflow: 'hidden',
     }}>
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          opacity: 0.6,
+        }}
+      >
+        <source src="/Videos/premiumpage.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dark overlay for readability */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.8) 100%)',
+        zIndex: 1,
+        pointerEvents: 'none',
+      }} />
+
       {/* Ambient glow effects */}
       <div style={{
         position: 'fixed',
@@ -203,9 +235,10 @@ export default function PremiumPage() {
         right: '-10%',
         width: '60%',
         height: '60%',
-        background: 'radial-gradient(ellipse, rgba(255, 107, 53, 0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse, rgba(255, 107, 53, 0.12) 0%, transparent 70%)',
         pointerEvents: 'none',
         filter: 'blur(80px)',
+        zIndex: 2,
       }} />
       <div style={{
         position: 'fixed',
@@ -213,9 +246,10 @@ export default function PremiumPage() {
         left: '-20%',
         width: '70%',
         height: '70%',
-        background: 'radial-gradient(ellipse, rgba(255, 140, 90, 0.05) 0%, transparent 70%)',
+        background: 'radial-gradient(ellipse, rgba(255, 140, 90, 0.08) 0%, transparent 70%)',
         pointerEvents: 'none',
         filter: 'blur(100px)',
+        zIndex: 2,
       }} />
 
       {/* Header */}
@@ -231,54 +265,83 @@ export default function PremiumPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(180deg, rgba(10,6,8,0.95) 0%, rgba(10,6,8,0.8) 100%)',
+          background: 'linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%)',
           backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
         }}
       >
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.1, boxShadow: '0 0 20px rgba(255, 107, 53, 0.5)' }}
           whileTap={{ scale: 0.95 }}
           onClick={() => router.back()}
           style={{
-            background: 'none',
-            border: 'none',
+            position: 'relative',
+            background: 'rgba(255, 107, 53, 0.1)',
+            border: '1px solid rgba(255, 107, 53, 0.3)',
+            borderRadius: '10px',
             color: '#FF6B35',
             cursor: 'pointer',
             padding: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            overflow: 'hidden',
           }}
         >
           <IconBack size={24} />
+          {/* Reflective shine */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '200%',
+            height: '100%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+            animation: 'buttonShine 2s ease-in-out infinite',
+            pointerEvents: 'none',
+          }} />
         </motion.button>
         <h1 style={{
           fontSize: '14px',
           fontWeight: 600,
           letterSpacing: '3px',
           textTransform: 'uppercase',
-          color: 'rgba(255, 255, 255, 0.9)',
+          color: '#fff',
           margin: 0,
+          textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
         }}>
           UPGRADE
         </h1>
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.1, boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' }}
           whileTap={{ scale: 0.95 }}
           onClick={() => router.push('/dashboard')}
           style={{
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255, 255, 255, 0.5)',
+            position: 'relative',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '10px',
+            color: 'rgba(255, 255, 255, 0.7)',
             cursor: 'pointer',
             padding: '8px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            overflow: 'hidden',
           }}
         >
           <IconClose size={20} />
+          {/* Reflective shine */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '200%',
+            height: '100%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
+            animation: 'buttonShine 2.5s ease-in-out infinite',
+            pointerEvents: 'none',
+          }} />
         </motion.button>
       </motion.header>
 
@@ -286,6 +349,8 @@ export default function PremiumPage() {
         maxWidth: '520px',
         margin: '0 auto',
         padding: '24px 20px 120px',
+        position: 'relative',
+        zIndex: 10,
       }}>
         {/* Premium Badge */}
         <motion.div
