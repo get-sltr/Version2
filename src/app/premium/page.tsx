@@ -810,8 +810,8 @@ export default function PremiumPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
           whileHover={{
-            scale: 1.02,
-            boxShadow: '0 0 50px rgba(255, 107, 53, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            scale: 1.03,
+            boxShadow: '0 0 60px rgba(255, 107, 53, 0.6), 0 0 100px rgba(255, 140, 90, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
           }}
           whileTap={{ scale: 0.98 }}
           onClick={handleContinue}
@@ -819,39 +819,50 @@ export default function PremiumPage() {
           style={{
             width: '100%',
             position: 'relative',
-            padding: '18px',
+            padding: '20px',
             background: loading
               ? 'rgba(255, 255, 255, 0.1)'
-              : 'linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(255, 140, 90, 0.1) 100%)',
-            border: '1px solid rgba(255, 107, 53, 0.5)',
-            borderRadius: '14px',
+              : 'linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(255, 140, 90, 0.2) 50%, rgba(255, 107, 53, 0.3) 100%)',
+            border: '1px solid rgba(255, 107, 53, 0.7)',
+            borderRadius: '16px',
             color: '#fff',
-            fontSize: '13px',
-            fontWeight: 600,
-            letterSpacing: '2px',
+            fontSize: '14px',
+            fontWeight: 700,
+            letterSpacing: '3px',
             textTransform: 'uppercase',
             cursor: loading ? 'not-allowed' : 'pointer',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 30px rgba(255, 107, 53, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(15px)',
+            boxShadow: '0 0 40px rgba(255, 107, 53, 0.35), 0 0 80px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.2)',
             overflow: 'hidden',
             marginBottom: '20px',
+            textShadow: '0 0 15px rgba(255, 255, 255, 0.5)',
           }}
         >
-          {/* Button shine */}
+          {/* Top bright edge */}
           <div style={{
             position: 'absolute',
             top: 0,
+            left: '5%',
+            right: '5%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 25%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 100%)',
+          }} />
+
+          {/* Bottom orange glow edge */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0,
             left: '10%',
             right: '10%',
             height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.6) 50%, transparent 100%)',
           }} />
 
           <span style={{ position: 'relative', zIndex: 1 }}>
             {loading ? 'PROCESSING...' : 'CONTINUE'}
           </span>
 
-          {/* Animated shine */}
+          {/* Primary fast shine */}
           {!loading && (
             <div style={{
               position: 'absolute',
@@ -859,8 +870,23 @@ export default function PremiumPage() {
               left: '-100%',
               width: '200%',
               height: '100%',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-              animation: 'shine 3s ease-in-out infinite',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 55%, transparent 100%)',
+              animation: 'buttonShine 2s ease-in-out infinite',
+              pointerEvents: 'none',
+            }} />
+          )}
+
+          {/* Secondary slower orange shine */}
+          {!loading && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.15) 50%, transparent 100%)',
+              animation: 'buttonShine 3.5s ease-in-out infinite',
+              animationDelay: '0.5s',
               pointerEvents: 'none',
             }} />
           )}
