@@ -11,6 +11,263 @@ import { PremiumPromo } from '@/components/PremiumPromo';
 import { listMyAlbums, listPhotosInAlbum, getAlbumWithPhotos } from '@/lib/api/albumMedia';
 import posthog from 'posthog-js';
 
+// =============================================================================
+// Custom SVG Icons - No Emojis
+// =============================================================================
+
+const Icons = {
+  // Navigation & Actions
+  Back: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  ),
+
+  MoreHorizontal: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" />
+    </svg>
+  ),
+
+  Close: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  ),
+
+  // Communication
+  VideoCall: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 7l-7 5 7 5V7z" />
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+  ),
+
+  Phone: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+    </svg>
+  ),
+
+  Send: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+    </svg>
+  ),
+
+  // Media & Content
+  Camera: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  ),
+
+  Image: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <path d="M21 15l-5-5L5 21" />
+    </svg>
+  ),
+
+  Album: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9h18M9 21V9" />
+    </svg>
+  ),
+
+  // User & Profile
+  User: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+
+  UserShare: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+      <circle cx="8.5" cy="7" r="4" />
+      <path d="M20 8v6M23 11h-6" />
+    </svg>
+  ),
+
+  // Status & Indicators
+  Eye: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
+
+  Clock: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
+    </svg>
+  ),
+
+  Timer: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="13" r="8" />
+      <path d="M12 9v4l2 2M5 3L2 6M22 6l-3-3M12 2v2" />
+    </svg>
+  ),
+
+  Vanish: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c-1.2 0-2.4.6-3 1.7A3.6 3.6 0 0 0 4.6 9c-1 .6-1.6 1.7-1.6 3 0 2.1 1.5 3.9 3.4 4.3.2.9.6 1.7 1.3 2.3.8.7 1.9 1 2.9 1 1.1 0 2.1-.4 2.9-1.1.7-.6 1.1-1.3 1.3-2.2 2-.4 3.4-2.1 3.4-4.3 0-1.3-.6-2.4-1.6-3a3.6 3.6 0 0 0-4.6-4.3A3.7 3.7 0 0 0 12 3z" opacity="0.5" />
+      <path d="M12 3c-1.2 0-2.4.6-3 1.7" />
+      <path d="M3 21l18-18" />
+    </svg>
+  ),
+
+  // Read Receipts - Single & Double Check
+  CheckSingle: ({ size = 14, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  ),
+
+  CheckDouble: ({ size = 16, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6L7 17l-4-4" />
+      <path d="M22 6L11 17" />
+    </svg>
+  ),
+
+  // Emoji/Expression (for emoji picker)
+  Smile: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" />
+    </svg>
+  ),
+
+  // Alert & Warning
+  AlertCircle: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+
+  // Trash/Delete
+  Trash: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+    </svg>
+  ),
+
+  // Loading spinner
+  Loader: ({ size = 20, color = 'currentColor' }: { size?: number; color?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+      <path d="M21 12a9 9 0 11-6.219-8.56" />
+    </svg>
+  ),
+};
+
+// Animated Typing Indicator Component
+const TypingIndicator = ({ color }: { color: string }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '12px 16px',
+    background: 'rgba(255, 255, 255, 0.08)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    borderRadius: '18px 18px 18px 4px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    width: 'fit-content',
+  }}>
+    {[0, 1, 2].map((i) => (
+      <div
+        key={i}
+        style={{
+          width: '8px',
+          height: '8px',
+          borderRadius: '50%',
+          background: color,
+          opacity: 0.7,
+          animation: `typingBounce 1.4s ease-in-out ${i * 0.16}s infinite`,
+        }}
+      />
+    ))}
+    <style jsx>{`
+      @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-8px); }
+      }
+    `}</style>
+  </div>
+);
+
+// Read Receipt Component with Animation
+const ReadReceipt = ({ read, sent, isPremium }: { read: boolean; sent: boolean; isPremium: boolean }) => {
+  if (!sent) return null;
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '3px',
+      marginLeft: '6px',
+    }}>
+      {read && isPremium ? (
+        <div style={{
+          display: 'flex',
+          animation: 'receiptPop 0.3s ease-out',
+        }}>
+          <Icons.CheckDouble size={14} color="#30D158" />
+        </div>
+      ) : (
+        <Icons.CheckSingle size={12} color="rgba(255,255,255,0.5)" />
+      )}
+      <style jsx>{`
+        @keyframes receiptPop {
+          0% { transform: scale(0.5); opacity: 0; }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// Liquid Glass Styles Helper
+const liquidGlass = {
+  primary: {
+    background: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+  },
+  surface: {
+    background: 'rgba(255, 255, 255, 0.06)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  accent: {
+    background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.9) 0%, rgba(255, 140, 90, 0.9) 100%)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+  },
+  header: {
+    background: 'rgba(0, 0, 0, 0.4)',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+};
+
 type MessageRecord = {
   id: string;
   sender_id: string;
@@ -48,10 +305,10 @@ type ShareableAlbum = {
 
 const MAX_MESSAGE_LENGTH = 2000;
 
-// Common emojis for quick picker
+// Common emojis for quick picker (keeping emojis for actual content only)
 const QUICK_EMOJIS = ['😀', '😂', '😍', '🔥', '👍', '👎', '❤️', '😘', '😏', '🙈', '💪', '🍆', '🍑', '👀', '😈', '🥵', '💦', '🤤', '😜', '🤙'];
 
-// Countdown component for expiring photos
+// Countdown component for expiring photos with circular progress
 function ExpiringCountdown({ startTime, duration, onExpire }: { startTime: number; duration: number; onExpire: () => void }) {
   const [remaining, setRemaining] = useState(duration);
 
@@ -70,10 +327,45 @@ function ExpiringCountdown({ startTime, duration, onExpire }: { startTime: numbe
     return () => clearInterval(interval);
   }, [startTime, duration, onExpire]);
 
+  const progress = remaining / duration;
+  const circumference = 2 * Math.PI * 12;
+  const strokeDashoffset = circumference * (1 - progress);
+
   return (
-    <span style={{ color: '#fff', fontSize: '14px', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
-      {remaining}s
-    </span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <svg width="28" height="28" viewBox="0 0 28 28">
+        <circle
+          cx="14"
+          cy="14"
+          r="12"
+          fill="none"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="2"
+        />
+        <circle
+          cx="14"
+          cy="14"
+          r="12"
+          fill="none"
+          stroke="#FF6B35"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          transform="rotate(-90 14 14)"
+          style={{ transition: 'stroke-dashoffset 0.1s linear' }}
+        />
+      </svg>
+      <span style={{
+        color: '#fff',
+        fontSize: '14px',
+        fontWeight: 700,
+        fontVariantNumeric: 'tabular-nums',
+        minWidth: '24px',
+      }}>
+        {remaining}s
+      </span>
+    </div>
   );
 }
 
@@ -699,6 +991,7 @@ export default function ConversationPage() {
 
   const renderMessage = (m: MessageRecord) => {
     const mine = m.sender_id === currentUserId;
+    const isSent = !m.id.startsWith('temp-');
 
     if (m.type === 'image' && m.image_url) {
       const isBlurred = hideChatPhotos.enabled && !revealedImages.has(m.id);
@@ -707,10 +1000,16 @@ export default function ConversationPage() {
       return (
         <div
           key={m.id}
-          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '10px' }}
+          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '12px' }}
         >
           <div style={{ maxWidth: '70%', position: 'relative' }}>
-            <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
+            <div style={{
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: '16px',
+              ...liquidGlass.surface,
+              padding: '4px',
+            }}>
               <img
                 src={m.image_url}
                 alt="Shared image"
@@ -721,6 +1020,7 @@ export default function ConversationPage() {
                   cursor: 'pointer',
                   filter: isBlurred ? `blur(${blurAmount})` : 'none',
                   transition: 'filter 0.3s ease',
+                  display: 'block',
                 }}
                 onClick={() => {
                   if (isBlurred) {
@@ -736,38 +1036,65 @@ export default function ConversationPage() {
                 <div
                   style={{
                     position: 'absolute',
-                    inset: 0,
+                    inset: '4px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'rgba(0,0,0,0.3)',
+                    background: 'rgba(0,0,0,0.4)',
+                    backdropFilter: 'blur(8px)',
                     borderRadius: '12px',
                     cursor: 'pointer',
                   }}
                   onClick={() => toggleImageReveal(m.id)}
                 >
                   <div style={{
-                    background: 'rgba(0,0,0,0.6)',
-                    padding: '8px 16px',
+                    ...liquidGlass.primary,
+                    padding: '10px 18px',
                     borderRadius: '20px',
                     fontSize: '13px',
                     color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}>
-                    👁 Tap to reveal
+                    <Icons.Eye size={16} color="#fff" />
+                    <span>Tap to reveal</span>
                   </div>
                 </div>
               )}
             </div>
-            <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', textAlign: mine ? 'right' : 'left' }}>
+            <div style={{
+              fontSize: '10px',
+              color: colors.textSecondary,
+              marginTop: '6px',
+              textAlign: mine ? 'right' : 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: mine ? 'flex-end' : 'flex-start',
+              gap: '4px',
+            }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && <ReadReceipt read={!!m.read_at} sent={isSent} isPremium={isPremium} />}
             </div>
-            {mine && (
+            {mine && isSent && (
               <button
                 onClick={() => handleDeleteMessage(m.id)}
-                style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', color: '#fff', cursor: 'pointer', fontSize: '12px' }}
+                style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  ...liquidGlass.primary,
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                ×
+                <Icons.Close size={14} color="#fff" />
               </button>
             )}
           </div>
@@ -782,23 +1109,14 @@ export default function ConversationPage() {
       const duration = m.expiring_duration || 5;
       const isViewing = viewedAt && !isExpired;
 
-      // Calculate remaining time
-      let remainingSeconds = duration;
-      if (viewedAt) {
-        const elapsed = Math.floor((Date.now() - viewedAt) / 1000);
-        remainingSeconds = Math.max(0, duration - elapsed);
-      }
-
       // Handle viewing expiring photo
       const handleViewExpiringPhoto = () => {
         if (isExpired || mine) return;
 
         if (!viewedAt) {
-          // First view - start countdown
           const now = Date.now();
           setViewedExpiringPhotos(prev => ({ ...prev, [m.id]: now }));
 
-          // Set up expiration timer
           setTimeout(() => {
             setExpiredPhotos(prev => {
               const newSet = new Set(prev);
@@ -812,25 +1130,36 @@ export default function ConversationPage() {
       return (
         <div
           key={m.id}
-          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '10px' }}
+          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '12px' }}
         >
           <div style={{ maxWidth: '70%', position: 'relative' }}>
             {isExpired ? (
-              // Expired placeholder
+              // Expired placeholder with liquid glass
               <div style={{
                 width: '200px',
                 height: '200px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%)',
+                borderRadius: '16px',
+                ...liquidGlass.surface,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px dashed #444',
+                border: '1px dashed rgba(255,255,255,0.2)',
               }}>
-                <span style={{ fontSize: '32px', marginBottom: '8px' }}>💨</span>
-                <span style={{ color: '#666', fontSize: '14px', fontWeight: 600 }}>Photo Expired</span>
-                <span style={{ color: '#555', fontSize: '12px', marginTop: '4px' }}>This photo has disappeared</span>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '12px',
+                }}>
+                  <Icons.Vanish size={24} color="rgba(255,255,255,0.4)" />
+                </div>
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', fontWeight: 600 }}>Photo Expired</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', marginTop: '4px' }}>This photo has disappeared</span>
               </div>
             ) : !viewedAt && !mine ? (
               // Unrevealed expiring photo - tap to view
@@ -839,8 +1168,8 @@ export default function ConversationPage() {
                 style={{
                   width: '200px',
                   height: '200px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                  borderRadius: '16px',
+                  ...liquidGlass.accent,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -853,15 +1182,33 @@ export default function ConversationPage() {
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  background: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)',
+                  background: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.08) 10px, rgba(0,0,0,0.08) 20px)',
                 }} />
-                <span style={{ fontSize: '32px', marginBottom: '8px', zIndex: 1 }}>⏱️</span>
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '12px',
+                  zIndex: 1,
+                }}>
+                  <Icons.Timer size={28} color="#fff" />
+                </div>
                 <span style={{ color: '#fff', fontSize: '14px', fontWeight: 700, zIndex: 1 }}>Expiring Photo</span>
                 <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', marginTop: '4px', zIndex: 1 }}>Tap to view ({duration}s)</span>
               </div>
             ) : (
               // Viewing expiring photo (or sender viewing their own)
-              <div style={{ position: 'relative', overflow: 'hidden', borderRadius: '12px' }}>
+              <div style={{
+                position: 'relative',
+                overflow: 'hidden',
+                borderRadius: '16px',
+                ...liquidGlass.surface,
+                padding: '4px',
+              }}>
                 <img
                   src={m.image_url}
                   alt="Expiring photo"
@@ -869,21 +1216,21 @@ export default function ConversationPage() {
                     maxWidth: '100%',
                     maxHeight: '300px',
                     borderRadius: '12px',
+                    display: 'block',
                   }}
                 />
                 {isViewing && (
                   <div style={{
                     position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    background: 'rgba(0,0,0,0.7)',
-                    padding: '6px 12px',
+                    top: '12px',
+                    right: '12px',
+                    ...liquidGlass.primary,
+                    padding: '8px 12px',
                     borderRadius: '20px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
                   }}>
-                    <span style={{ fontSize: '14px' }}>⏱️</span>
                     <ExpiringCountdown
                       startTime={viewedAt}
                       duration={duration}
@@ -894,23 +1241,36 @@ export default function ConversationPage() {
                 {mine && (
                   <div style={{
                     position: 'absolute',
-                    top: '8px',
-                    left: '8px',
-                    background: 'rgba(255,107,53,0.9)',
-                    padding: '4px 10px',
+                    top: '12px',
+                    left: '12px',
+                    ...liquidGlass.accent,
+                    padding: '6px 12px',
                     borderRadius: '12px',
                     fontSize: '11px',
                     fontWeight: 600,
                     color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}>
+                    <Icons.Timer size={12} color="#fff" />
                     Expires after {duration}s view
                   </div>
                 )}
               </div>
             )}
-            <div style={{ fontSize: '10px', color: colors.textSecondary, marginTop: '4px', textAlign: mine ? 'right' : 'left' }}>
+            <div style={{
+              fontSize: '10px',
+              color: colors.textSecondary,
+              marginTop: '6px',
+              textAlign: mine ? 'right' : 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: mine ? 'flex-end' : 'flex-start',
+              gap: '4px',
+            }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && <ReadReceipt read={!!m.read_at} sent={isSent} isPremium={isPremium} />}
             </div>
           </div>
         </div>
@@ -922,43 +1282,75 @@ export default function ConversationPage() {
       return (
         <div
           key={m.id}
-          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '10px' }}
+          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '12px' }}
         >
           <div
             style={{
               maxWidth: '70%',
-              background: mine ? colors.accent : colors.surface,
-              borderRadius: '12px',
-              border: `1px solid ${colors.border}`,
+              ...(mine ? liquidGlass.accent : liquidGlass.surface),
+              borderRadius: '16px',
               overflow: 'hidden',
               cursor: 'pointer',
+              transition: 'transform 0.2s ease',
             }}
             onClick={() => router.push(`/profile/${m.shared_profile_id}`)}
           >
-            <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
               {sharedProfile?.photo_url ? (
                 <img
                   src={sharedProfile.photo_url}
                   alt=""
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                  }}
                 />
               ) : (
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: colors.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  👤
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '2px solid rgba(255,255,255,0.2)',
+                }}>
+                  <Icons.User size={22} color="rgba(255,255,255,0.6)" />
                 </div>
               )}
-              <div>
-                <div style={{ fontWeight: 600, color: mine ? '#fff' : colors.text }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, color: '#fff', fontSize: '15px' }}>
                   {sharedProfile?.display_name || 'Profile'}
                 </div>
-                <div style={{ fontSize: '12px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary }}>
+                <div style={{
+                  fontSize: '12px',
+                  color: 'rgba(255,255,255,0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginTop: '2px',
+                }}>
+                  <Icons.UserShare size={12} color="rgba(255,255,255,0.6)" />
                   Tap to view profile
                 </div>
               </div>
             </div>
-            <div style={{ fontSize: '10px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary, padding: '0 12px 8px', textAlign: mine ? 'right' : 'left' }}>
+            <div style={{
+              fontSize: '10px',
+              color: 'rgba(255,255,255,0.5)',
+              padding: '0 14px 10px',
+              textAlign: mine ? 'right' : 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: mine ? 'flex-end' : 'flex-start',
+              gap: '4px',
+            }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && <ReadReceipt read={!!m.read_at} sent={isSent} isPremium={isPremium} />}
             </div>
           </div>
         </div>
@@ -971,48 +1363,95 @@ export default function ConversationPage() {
       return (
         <div
           key={m.id}
-          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '10px' }}
+          style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', marginBottom: '12px' }}
         >
           <div
             style={{
               maxWidth: '70%',
-              background: mine ? colors.accent : colors.surface,
-              borderRadius: '12px',
-              border: `1px solid ${colors.border}`,
+              ...(mine ? liquidGlass.accent : liquidGlass.surface),
+              borderRadius: '16px',
               overflow: 'hidden',
               cursor: 'pointer',
             }}
             onClick={() => {
-              // Open album viewer modal
               openAlbumViewer(m.shared_album_id!, sharedAlbumsCache[m.shared_album_id!]);
             }}
           >
             <div style={{
               width: '100%',
               height: '120px',
-              background: sharedAlbum?.cover_photo_url ? `url(${sharedAlbum.cover_photo_url}) center/cover` : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+              background: sharedAlbum?.cover_photo_url
+                ? `url(${sharedAlbum.cover_photo_url}) center/cover`
+                : 'linear-gradient(135deg, rgba(255, 107, 53, 0.6) 0%, rgba(255, 140, 90, 0.6) 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              position: 'relative',
             }}>
-              {!sharedAlbum?.cover_photo_url && <span style={{ fontSize: '32px' }}>🖼️</span>}
+              {!sharedAlbum?.cover_photo_url && (
+                <div style={{
+                  width: '56px',
+                  height: '56px',
+                  borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Icons.Album size={28} color="#fff" />
+                </div>
+              )}
+              {sharedAlbum?.photo_count && (
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  ...liquidGlass.primary,
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  color: '#fff',
+                }}>
+                  {sharedAlbum.photo_count} photos
+                </div>
+              )}
             </div>
-            <div style={{ padding: '10px 12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '18px' }}>📷</span>
-                <div>
-                  <div style={{ fontWeight: 600, color: mine ? '#fff' : colors.text }}>
+            <div style={{ padding: '12px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  background: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Icons.Image size={18} color="#fff" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, color: '#fff', fontSize: '14px' }}>
                     {sharedAlbum?.name || 'Album'}
                   </div>
-                  <div style={{ fontSize: '12px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary }}>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
                     Tap to view album
                   </div>
                 </div>
               </div>
             </div>
-            <div style={{ fontSize: '10px', color: mine ? 'rgba(255,255,255,0.7)' : colors.textSecondary, padding: '0 12px 8px', textAlign: mine ? 'right' : 'left' }}>
+            <div style={{
+              fontSize: '10px',
+              color: 'rgba(255,255,255,0.5)',
+              padding: '0 14px 10px',
+              textAlign: mine ? 'right' : 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: mine ? 'flex-end' : 'flex-start',
+              gap: '4px',
+            }}>
               {formatTime(m.created_at)}
-              {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
+              {mine && <ReadReceipt read={!!m.read_at} sent={isSent} isPremium={isPremium} />}
             </div>
           </div>
         </div>
@@ -1027,24 +1466,27 @@ export default function ConversationPage() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
-              background: 'rgba(255,107,53,0.1)',
-              border: '1px solid rgba(255,107,53,0.3)',
-              borderRadius: '20px',
-              padding: '10px 16px',
+              gap: '12px',
+              ...liquidGlass.surface,
+              borderRadius: '24px',
+              padding: '12px 18px',
             }}
           >
             <div style={{
-              width: '36px',
-              height: '36px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
-              background: mine ? '#30D158' : 'rgba(255,107,53,0.8)',
+              background: mine
+                ? 'linear-gradient(135deg, #30D158 0%, #34C759 100%)'
+                : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '18px',
+              boxShadow: mine
+                ? '0 4px 12px rgba(48, 209, 88, 0.3)'
+                : '0 4px 12px rgba(255, 107, 53, 0.3)',
             }}>
-              {mine ? '📹' : '📞'}
+              {mine ? <Icons.VideoCall size={20} color="#fff" /> : <Icons.Phone size={20} color="#fff" />}
             </div>
             <div>
               <div style={{ fontSize: '14px', fontWeight: 600, color: colors.text }}>
@@ -1057,21 +1499,21 @@ export default function ConversationPage() {
             <button
               onClick={startVideoCall}
               style={{
-                background: '#30D158',
+                background: 'linear-gradient(135deg, #30D158 0%, #34C759 100%)',
                 border: 'none',
                 borderRadius: '50%',
-                width: '32px',
-                height: '32px',
+                width: '36px',
+                height: '36px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '14px',
                 marginLeft: '8px',
+                boxShadow: '0 4px 12px rgba(48, 209, 88, 0.3)',
               }}
               title="Call back"
             >
-              📞
+              <Icons.Phone size={16} color="#fff" />
             </button>
           </div>
         </div>
@@ -1084,41 +1526,50 @@ export default function ConversationPage() {
         <div
           style={{
             maxWidth: '70%',
-            background: mine ? colors.accent : colors.surface,
-            color: mine ? '#fff' : colors.text,
-            padding: '10px 12px',
-            borderRadius: mine ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
-            border: `1px solid ${colors.border}`,
+            ...(mine ? liquidGlass.accent : liquidGlass.surface),
+            color: '#fff',
+            padding: '12px 14px',
+            borderRadius: mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
             whiteSpace: 'pre-wrap',
             position: 'relative',
+            boxShadow: mine
+              ? '0 4px 16px rgba(255, 107, 53, 0.2)'
+              : '0 4px 16px rgba(0, 0, 0, 0.1)',
           }}
         >
-          {m.content}
-          <div style={{ fontSize: '10px', marginTop: '6px', opacity: 0.7, textAlign: 'right' }}>
+          <span style={{ fontSize: '15px', lineHeight: 1.4 }}>{m.content}</span>
+          <div style={{
+            fontSize: '10px',
+            marginTop: '6px',
+            opacity: 0.7,
+            textAlign: 'right',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '2px',
+          }}>
             {formatTime(m.created_at)}
-            {mine && m.read_at && isPremium && <span style={{ marginLeft: '6px' }}>Seen</span>}
+            {mine && <ReadReceipt read={!!m.read_at} sent={isSent} isPremium={isPremium} />}
           </div>
-          {mine && !m.id.startsWith('temp-') && (
+          {mine && isSent && (
             <button
               onClick={() => handleDeleteMessage(m.id)}
               style={{
                 position: 'absolute',
                 top: '-8px',
                 right: '-8px',
-                background: colors.surface,
-                border: `1px solid ${colors.border}`,
+                ...liquidGlass.primary,
                 borderRadius: '50%',
-                width: '20px',
-                height: '20px',
-                color: colors.textSecondary,
+                width: '22px',
+                height: '22px',
+                color: '#fff',
                 cursor: 'pointer',
-                fontSize: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              ×
+              <Icons.Close size={12} color="#fff" />
             </button>
           )}
         </div>
@@ -1128,46 +1579,127 @@ export default function ConversationPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${colors.border}`, position: 'sticky', top: 0, background: colors.background, zIndex: 10 }}>
-        <Link href="/messages" style={{ color: colors.text, textDecoration: 'none', fontSize: '20px' }}>←</Link>
+      {/* Global styles for animations */}
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes typingBounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-8px); }
+        }
+        @keyframes receiptPop {
+          0% { transform: scale(0.5); opacity: 0; }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
 
-        <Link href={`/profile/${otherUserId}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {/* Header with Liquid Glass */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '14px 16px',
+        ...liquidGlass.header,
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+      }}>
+        <Link href="/messages" style={{
+          color: colors.text,
+          textDecoration: 'none',
+          width: '40px',
+          height: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderRadius: '12px',
+          background: 'rgba(255,255,255,0.06)',
+        }}>
+          <Icons.Back size={22} color={colors.text} />
+        </Link>
+
+        <Link href={`/profile/${otherUserId}`} style={{
+          textDecoration: 'none',
+          color: 'inherit',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '6px 12px',
+          borderRadius: '24px',
+          background: 'rgba(255,255,255,0.04)',
+        }}>
           {otherUser?.photo_url ? (
             <img
               src={otherUser.photo_url}
               alt=""
-              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '2px solid rgba(255,255,255,0.15)',
+              }}
             />
           ) : (
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: colors.surface, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              👤
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '2px solid rgba(255,255,255,0.15)',
+            }}>
+              <Icons.User size={18} color="rgba(255,255,255,0.6)" />
             </div>
           )}
-          <span style={{ fontWeight: 700 }}>{otherUser?.display_name || 'User'}</span>
+          <span style={{ fontWeight: 700, fontSize: '16px' }}>{otherUser?.display_name || 'User'}</span>
         </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button
             onClick={startVideoCall}
             disabled={startingVideoCall}
             style={{
-              background: 'none',
+              background: startingVideoCall ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
               border: 'none',
-              color: startingVideoCall ? colors.textSecondary : colors.accent,
-              fontSize: '20px',
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: startingVideoCall ? 'not-allowed' : 'pointer',
               opacity: startingVideoCall ? 0.5 : 1,
+              boxShadow: startingVideoCall ? 'none' : '0 4px 12px rgba(255, 107, 53, 0.3)',
             }}
             title="Video call"
           >
-            {startingVideoCall ? '⏳' : '📹'}
+            {startingVideoCall ? (
+              <Icons.Loader size={18} color="#fff" />
+            ) : (
+              <Icons.VideoCall size={18} color="#fff" />
+            )}
           </button>
           <button
             onClick={() => setShowMoreOptions(!showMoreOptions)}
-            style={{ background: 'none', border: 'none', color: colors.text, fontSize: '20px', cursor: 'pointer' }}
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: 'none',
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
           >
-            ⋯
+            <Icons.MoreHorizontal size={20} color={colors.text} />
           </button>
         </div>
       </div>
@@ -1176,31 +1708,72 @@ export default function ConversationPage() {
       {showMoreOptions && (
         <div style={{
           position: 'absolute',
-          top: '56px',
+          top: '72px',
           right: '16px',
-          background: colors.surface,
-          border: `1px solid ${colors.border}`,
-          borderRadius: '8px',
+          ...liquidGlass.primary,
+          borderRadius: '14px',
           zIndex: 20,
-          minWidth: '160px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          minWidth: '180px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+          overflow: 'hidden',
         }}>
           <button
             onClick={() => { router.push(`/profile/${otherUserId}`); setShowMoreOptions(false); }}
-            style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', borderBottom: `1px solid ${colors.border}`, color: colors.text, textAlign: 'left', cursor: 'pointer' }}
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              color: colors.text,
+              textAlign: 'left',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              fontSize: '14px',
+            }}
           >
+            <Icons.User size={18} color={colors.textSecondary} />
             View Profile
           </button>
           <button
             onClick={() => { setShowReportModal(true); setShowMoreOptions(false); }}
-            style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', borderBottom: `1px solid ${colors.border}`, color: colors.text, textAlign: 'left', cursor: 'pointer' }}
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              background: 'none',
+              border: 'none',
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              color: colors.text,
+              textAlign: 'left',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              fontSize: '14px',
+            }}
           >
+            <Icons.AlertCircle size={18} color={colors.textSecondary} />
             Report User
           </button>
           <button
             onClick={() => { handleBlockUser(); setShowMoreOptions(false); }}
-            style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', color: '#ff4444', textAlign: 'left', cursor: 'pointer' }}
+            style={{
+              width: '100%',
+              padding: '14px 16px',
+              background: 'none',
+              border: 'none',
+              color: '#ff4444',
+              textAlign: 'left',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              fontSize: '14px',
+            }}
           >
+            <Icons.Close size={18} color="#ff4444" />
             Block User
           </button>
         </div>
@@ -1212,31 +1785,71 @@ export default function ConversationPage() {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px', color: colors.textSecondary }}>Loading...</div>
         ) : messages.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: colors.textSecondary }}>Say hello 👋</div>
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            ...liquidGlass.surface,
+            borderRadius: '20px',
+            margin: '20px',
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(255, 140, 90, 0.3) 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}>
+              <Icons.Send size={28} color={colors.accent} />
+            </div>
+            <div style={{ color: colors.text, fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>
+              Start a conversation
+            </div>
+            <div style={{ color: colors.textSecondary, fontSize: '14px' }}>
+              Send a message to say hello
+            </div>
+          </div>
         ) : (
           messages.map(renderMessage)
         )}
         {otherTyping && (
-          <div style={{ padding: '4px 12px', color: colors.textSecondary, fontSize: '12px' }}>Typing...</div>
+          <div style={{ padding: '4px 12px' }}>
+            <TypingIndicator color={colors.accent} />
+          </div>
         )}
       </div>
 
       {/* Emoji picker */}
       {showEmojiPicker && (
         <div style={{
-          padding: '12px',
-          borderTop: `1px solid ${colors.border}`,
-          background: colors.surface,
+          padding: '14px',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          ...liquidGlass.surface,
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '8px',
+          gap: '6px',
           justifyContent: 'center',
         }}>
           {QUICK_EMOJIS.map(emoji => (
             <button
               key={emoji}
               onClick={() => { setInput(prev => prev + emoji); setShowEmojiPicker(false); }}
-              style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', padding: '4px' }}
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '10px',
+                fontSize: '22px',
+                cursor: 'pointer',
+                padding: '8px',
+                width: '44px',
+                height: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'transform 0.15s ease',
+              }}
             >
               {emoji}
             </button>
@@ -1298,11 +1911,11 @@ export default function ConversationPage() {
                         <img
                           src={profile.photo_url}
                           alt=""
-                          style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', marginBottom: '8px' }}
+                          style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', marginBottom: '8px', border: '2px solid rgba(255,255,255,0.1)' }}
                         />
                       ) : (
-                        <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: colors.border, margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-                          👤
+                        <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.1)' }}>
+                          <Icons.User size={22} color="rgba(255,255,255,0.5)" />
                         </div>
                       )}
                       <div style={{ fontSize: '12px', color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1376,12 +1989,24 @@ export default function ConversationPage() {
                       <div style={{
                         width: '100%',
                         height: '100px',
-                        background: album.cover_photo_url ? `url(${album.cover_photo_url}) center/cover` : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                        background: album.cover_photo_url ? `url(${album.cover_photo_url}) center/cover` : 'linear-gradient(135deg, rgba(255, 107, 53, 0.6) 0%, rgba(255, 140, 90, 0.6) 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        {!album.cover_photo_url && <span style={{ fontSize: '28px' }}>📷</span>}
+                        {!album.cover_photo_url && (
+                          <div style={{
+                            width: '44px',
+                            height: '44px',
+                            borderRadius: '50%',
+                            background: 'rgba(255,255,255,0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                            <Icons.Album size={24} color="#fff" />
+                          </div>
+                        )}
                       </div>
                       <div style={{ padding: '10px' }}>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -1478,38 +2103,81 @@ export default function ConversationPage() {
         />
       )}
 
-      {/* Composer */}
-      <div style={{ padding: '12px 16px', borderTop: `1px solid ${colors.border}`, background: colors.background, position: 'sticky', bottom: 0 }}>
+      {/* Composer with Liquid Glass */}
+      <div style={{
+        padding: '12px 16px',
+        ...liquidGlass.header,
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        position: 'sticky',
+        bottom: 0,
+      }}>
         {/* Action buttons */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingImage}
-            style={{ background: 'none', border: 'none', color: colors.textSecondary, fontSize: '20px', cursor: 'pointer', opacity: uploadingImage ? 0.5 : 1 }}
+            style={{
+              ...liquidGlass.surface,
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: uploadingImage ? 'not-allowed' : 'pointer',
+              opacity: uploadingImage ? 0.5 : 1,
+            }}
             title="Send photo"
           >
-            📷
+            <Icons.Camera size={20} color={colors.textSecondary} />
           </button>
           <button
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            style={{ background: 'none', border: 'none', color: colors.textSecondary, fontSize: '20px', cursor: 'pointer' }}
+            style={{
+              ...liquidGlass.surface,
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
             title="Emoji"
           >
-            😀
+            <Icons.Smile size={20} color={colors.textSecondary} />
           </button>
           <button
             onClick={() => { setShowProfileShare(true); loadShareableProfiles(); }}
-            style={{ background: 'none', border: 'none', color: colors.textSecondary, fontSize: '20px', cursor: 'pointer' }}
+            style={{
+              ...liquidGlass.surface,
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
             title="Share profile"
           >
-            👤
+            <Icons.UserShare size={20} color={colors.textSecondary} />
           </button>
           <button
             onClick={() => { setShowAlbumShare(true); loadShareableAlbums(); }}
-            style={{ background: 'none', border: 'none', color: colors.textSecondary, fontSize: '20px', cursor: 'pointer' }}
+            style={{
+              ...liquidGlass.surface,
+              borderRadius: '12px',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
             title="Share album"
           >
-            🖼️
+            <Icons.Album size={20} color={colors.textSecondary} />
           </button>
         </div>
 
@@ -1558,9 +2226,8 @@ export default function ConversationPage() {
                   style={{
                     width: '100%',
                     padding: '16px',
-                    background: '#333',
-                    border: 'none',
-                    borderRadius: '12px',
+                    ...liquidGlass.surface,
+                    borderRadius: '14px',
                     color: '#fff',
                     fontSize: '16px',
                     fontWeight: 600,
@@ -1568,19 +2235,19 @@ export default function ConversationPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '10px',
+                    gap: '12px',
                   }}
                 >
-                  📷 Send Normal Photo
+                  <Icons.Camera size={22} color="#fff" />
+                  Send Normal Photo
                 </button>
                 <button
                   onClick={() => handleImageUpload(true)}
                   style={{
                     width: '100%',
                     padding: '16px',
-                    background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
-                    border: 'none',
-                    borderRadius: '12px',
+                    ...liquidGlass.accent,
+                    borderRadius: '14px',
                     color: '#fff',
                     fontSize: '16px',
                     fontWeight: 600,
@@ -1588,11 +2255,13 @@ export default function ConversationPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '10px',
+                    gap: '12px',
+                    boxShadow: '0 4px 16px rgba(255, 107, 53, 0.3)',
                   }}
                 >
-                  ⏱️ Send Expiring Photo
-                  <span style={{ fontSize: '12px', opacity: 0.9 }}>(disappears after viewing)</span>
+                  <Icons.Timer size={22} color="#fff" />
+                  <span>Send Expiring Photo</span>
+                  <span style={{ fontSize: '11px', opacity: 0.8 }}>(disappears)</span>
                 </button>
               </div>
               <button
@@ -1617,7 +2286,7 @@ export default function ConversationPage() {
           </>
         )}
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <input
             value={input}
             onChange={(e) => {
@@ -1635,30 +2304,42 @@ export default function ConversationPage() {
             disabled={sending || uploadingImage}
             style={{
               flex: 1,
-              padding: '12px 14px',
+              padding: '14px 18px',
               borderRadius: '24px',
-              border: `1px solid ${colors.border}`,
-              background: colors.surface,
+              ...liquidGlass.surface,
               color: colors.text,
               fontSize: '15px',
               opacity: sending || uploadingImage ? 0.7 : 1,
+              outline: 'none',
             }}
           />
           <button
             onClick={() => sendMessage()}
             disabled={sending || !input.trim() || uploadingImage}
             style={{
-              padding: '12px 18px',
-              borderRadius: '24px',
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
               border: 'none',
-              background: sending || !input.trim() ? colors.textSecondary : colors.accent,
-              color: '#fff',
-              fontWeight: 700,
+              background: sending || !input.trim()
+                ? 'rgba(255,255,255,0.1)'
+                : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               cursor: sending || !input.trim() ? 'not-allowed' : 'pointer',
               opacity: sending ? 0.7 : 1,
+              boxShadow: sending || !input.trim()
+                ? 'none'
+                : '0 4px 16px rgba(255, 107, 53, 0.4)',
+              transition: 'all 0.2s ease',
             }}
           >
-            {sending ? '...' : 'Send'}
+            {sending ? (
+              <Icons.Loader size={20} color="#fff" />
+            ) : (
+              <Icons.Send size={20} color={input.trim() ? '#fff' : colors.textSecondary} />
+            )}
           </button>
         </div>
 
@@ -1711,10 +2392,12 @@ export default function ConversationPage() {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '16px',
-              borderBottom: '1px solid #333',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              ...liquidGlass.header,
             }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700 }}>
-                📷 {viewingAlbum.name}
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Icons.Album size={20} color={colors.accent} />
+                {viewingAlbum.name}
               </h3>
               <button
                 onClick={() => {
@@ -1722,15 +2405,17 @@ export default function ConversationPage() {
                   setViewingAlbumPhotos([]);
                 }}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  fontSize: '24px',
+                  ...liquidGlass.surface,
+                  borderRadius: '10px',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   cursor: 'pointer',
-                  padding: '4px',
                 }}
               >
-                ×
+                <Icons.Close size={18} color="#fff" />
               </button>
             </div>
 
