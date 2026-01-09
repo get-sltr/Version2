@@ -52,7 +52,19 @@ export function usePremium(): PremiumStatus {
       // Check if premium is still valid
       const now = new Date();
       const premiumExpiry = profile.premium_until ? new Date(profile.premium_until) : null;
-      const isCurrentlyPremium = profile.is_premium && (!premiumExpiry || premiumExpiry > now);
+
+      // User is premium if is_premium is true
+      // Expiry is only checked if premium_until is set
+      const isCurrentlyPremium = profile.is_premium === true &&
+        (premiumExpiry === null || premiumExpiry > now);
+
+      console.log('Premium check:', {
+        is_premium: profile.is_premium,
+        premium_until: profile.premium_until,
+        premiumExpiry,
+        now,
+        isCurrentlyPremium
+      });
 
       setIsPremium(isCurrentlyPremium);
       setPremiumUntil(premiumExpiry);

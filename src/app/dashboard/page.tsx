@@ -35,7 +35,7 @@ function formatDistance(distance: number | undefined): string {
 export default function Dashboard() {
   const router = useRouter();
   const { colors } = useTheme();
-  const { isPremium } = usePremium();
+  const { isPremium, isLoading: premiumLoading } = usePremium();
   const [activeFilter, setActiveFilter] = useState('online');
   const [showAd, setShowAd] = useState(true);
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -461,12 +461,17 @@ export default function Dashboard() {
       setShowPositionDropdown(false);
       setShowAgeDropdown(false);
     } else if (filter.id === 'dtfn') {
-      // DTFN filter - toggle on/off
+      // DTFN filter - toggle on/off (premium feature)
       if (activeFilter === 'dtfn') {
         // Already selected, deselect and go back to 'online'
         setActiveFilter('online');
       } else {
-        // Select DTFN filter (no premium check - anyone can filter by DTFN users)
+        // Check premium status (but only after loading completes)
+        if (!premiumLoading && !isPremium) {
+          router.push('/premium');
+          return;
+        }
+        // If still loading, allow access (will validate on next interaction)
         setActiveFilter('dtfn');
       }
       setShowPositionDropdown(false);
