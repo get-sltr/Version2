@@ -18,38 +18,38 @@ import { supabase } from '@/lib/supabase';
 // STYLES
 // ============================================
 
-const ICON_SIZE = 28; // 1.5x bigger (was ~18-22)
-const FONT_SIZE = 13; // 1.5x bigger (was 9)
+const ICON_SIZE = 18; // Compact size
+const FONT_SIZE = 9; // Compact size
 
 const styles = {
   nav: {
     position: 'fixed' as const,
-    bottom: 16,
-    left: 16,
-    right: 16,
+    bottom: 0,
+    left: 0,
+    right: 0,
     zIndex: 50,
     background: '#111',
-    border: '1px solid #222',
-    borderRadius: 24,
+    borderTop: '1px solid #222',
+    borderRadius: 0,
     display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'stretch',
-    padding: '12px 8px',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+    padding: '6px 8px 18px 8px',
+    boxShadow: 'none',
   },
   navItem: {
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    gap: 4,
-    padding: '8px 10px 12px 10px',
+    gap: 2,
+    padding: '4px 8px 6px 8px',
     cursor: 'pointer',
     position: 'relative' as const,
     textDecoration: 'none',
-    borderRadius: 14,
-    minWidth: 56,
-    height: 60, // Fixed height for alignment
+    borderRadius: 10,
+    minWidth: 48,
+    height: 42, // Shorter height
   },
   navItemActive: {
     borderBottom: '3px solid #ff6b35',
@@ -79,23 +79,23 @@ const styles = {
   },
   badge: {
     position: 'absolute' as const,
-    top: 2,
-    right: 2,
-    minWidth: 18,
-    height: 18,
-    padding: '0 5px',
+    top: 0,
+    right: 0,
+    minWidth: 14,
+    height: 14,
+    padding: '0 3px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     background: '#ff6b35',
     color: '#fff',
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: 700,
-    borderRadius: 9,
-    boxShadow: '0 0 8px rgba(255,107,53,0.6)',
+    borderRadius: 7,
+    boxShadow: '0 0 6px rgba(255,107,53,0.6)',
   },
   sltrText: {
-    fontSize: 18, // 1.5x bigger
+    fontSize: 12,
     fontWeight: 800,
     color: '#ff6b35',
     letterSpacing: 0.5,

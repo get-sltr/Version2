@@ -1495,8 +1495,8 @@ export default function Dashboard() {
                   animation: 'hostingPulse 2s ease-in-out infinite',
                   boxShadow: '0 0 10px rgba(255, 107, 53, 0.6)'
                 }}>
-                  <span style={{ fontSize: '8px' }}>👥</span>
-                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', letterSpacing: '0.5px' }}>HOSTING</span>
+                  <span style={{ fontSize: '6px' }}>👥</span>
+                  <span style={{ fontSize: '7px', fontWeight: 700, color: '#fff', letterSpacing: '0.3px' }}>HOSTING</span>
                 </div>
               )}
 
@@ -1517,16 +1517,16 @@ export default function Dashboard() {
                 left: 0,
                 right: 0,
                 background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-                padding: '20px 8px 8px'
+                padding: '16px 6px 6px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {profile.last_seen && (Date.now() - new Date(profile.last_seen).getTime() < 5 * 60 * 1000) && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4caf50', flexShrink: 0 }} />}
-                  <span style={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  {profile.last_seen && (Date.now() - new Date(profile.last_seen).getTime() < 5 * 60 * 1000) && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#4caf50', flexShrink: 0 }} />}
+                  <span style={{ color: '#fff', fontSize: '10px', fontWeight: 600 }}>
                     {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
                   </span>
                 </div>
                 {/* Distance display */}
-                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '10px', marginTop: '2px' }}>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '8px', marginTop: '1px' }}>
                   {formatDistance(profile.distance)}
                 </div>
               </div>
@@ -1560,9 +1560,9 @@ export default function Dashboard() {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
-          padding: '14px 20px',
-          borderRadius: '30px',
+          gap: '4px',
+          padding: '10px 14px',
+          borderRadius: '24px',
           background: dtfnActive
             ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.9) 0%, rgba(255, 140, 90, 0.9) 100%)'
             : 'rgba(30, 30, 35, 0.9)',
@@ -1589,9 +1589,9 @@ export default function Dashboard() {
           )}
 
           <span style={{
-            fontSize: '14px',
+            fontSize: '11px',
             fontWeight: 700,
-            letterSpacing: '1px',
+            letterSpacing: '0.5px',
             color: dtfnActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
             position: 'relative',
             zIndex: 1,
@@ -1602,12 +1602,12 @@ export default function Dashboard() {
           {/* Flame/Drip icon */}
           <svg
             style={{
-              width: '18px',
-              height: '18px',
+              width: '14px',
+              height: '14px',
               fill: dtfnActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
               position: 'relative',
               zIndex: 1,
-              filter: dtfnActive ? 'drop-shadow(0 0 6px rgba(255,255,255,0.5))' : 'none',
+              filter: dtfnActive ? 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' : 'none',
             }}
             viewBox="0 0 24 24"
           >
@@ -1618,10 +1618,10 @@ export default function Dashboard() {
 
         {/* Timer display */}
         <span style={{
-          fontSize: '11px',
+          fontSize: '9px',
           fontWeight: 600,
           color: dtfnActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.4)',
-          textShadow: dtfnActive ? '0 0 10px rgba(255, 107, 53, 0.5)' : 'none',
+          textShadow: dtfnActive ? '0 0 8px rgba(255, 107, 53, 0.5)' : 'none',
         }}>
           {dtfnActive ? `${formatDTFNTime()} left` : 'Tap to activate'}
         </span>

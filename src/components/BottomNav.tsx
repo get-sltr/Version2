@@ -125,7 +125,7 @@ export function BottomNav({ active }: BottomNavProps) {
       borderTop: `1px solid ${colors.border}`,
       display: 'flex',
       justifyContent: 'space-around',
-      padding: '10px 0 25px',
+      padding: '6px 0 18px',
       zIndex: 100
     }}>
       {navItems.map(({ key, href, icon: Icon, label }) => {
@@ -143,7 +143,7 @@ export function BottomNav({ active }: BottomNavProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '4px',
+              gap: '2px',
               position: 'relative'
             }}
           >
@@ -151,30 +151,30 @@ export function BottomNav({ active }: BottomNavProps) {
               position: 'relative',
               display: 'inline-flex'
             }}>
-              <Icon size={24} />
+              <Icon size={18} />
               {badgeCount > 0 && (
                 <div style={{
                   position: 'absolute',
-                  top: '-6px',
-                  right: '-10px',
-                  minWidth: '18px',
-                  height: '18px',
-                  borderRadius: '9px',
+                  top: '-4px',
+                  right: '-8px',
+                  minWidth: '14px',
+                  height: '14px',
+                  borderRadius: '7px',
                   background: colors.accent,
                   color: '#fff',
-                  fontSize: '11px',
+                  fontSize: '9px',
                   fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '0 4px'
+                  padding: '0 3px'
                 }}>
                   {badgeCount > 99 ? '99+' : badgeCount}
                 </div>
               )}
             </div>
             <span style={{
-              fontSize: '11px',
+              fontSize: '9px',
               fontWeight: isActive ? 600 : 400
             }}>
               {label}

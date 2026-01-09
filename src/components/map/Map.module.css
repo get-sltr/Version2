@@ -240,7 +240,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 48px;
   background: rgba(10, 10, 15, 0.95);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
@@ -258,16 +258,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   background: transparent;
   border: none;
   color: #FFFFFF;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 4px 8px;
   transition: var(--transition-smooth);
   text-decoration: none;
   position: relative;
-  min-width: 50px;
+  min-width: 44px;
   height: 100%;
 }
 
@@ -279,8 +279,8 @@
 }
 
 .navItemIcon svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   stroke: #FFFFFF;
   stroke-width: 2;
   fill: none;
@@ -318,9 +318,9 @@
 
 .navItemLabel {
   font-family: 'Orbitron', sans-serif;
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #FFFFFF;
 }
@@ -339,9 +339,9 @@
 
 .navItemSltr {
   font-family: 'Orbitron', sans-serif;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: #FF6B35;
   text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
 }
