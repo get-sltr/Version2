@@ -23,6 +23,23 @@ body {
   line-height: 1.5;
 }
 
+/* Remove default link styling - prevent blue colors */
+a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove tap highlight on all interactive elements */
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+button:focus, a:focus {
+  outline: none;
+}
+
 /* Performance optimizations for animations */
 .will-change-transform {
   will-change: transform;

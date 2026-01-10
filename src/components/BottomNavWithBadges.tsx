@@ -49,7 +49,10 @@ const styles = {
     textDecoration: 'none',
     borderRadius: 10,
     minWidth: 48,
-    height: 42, // Shorter height
+    height: 42,
+    outline: 'none',
+    WebkitTapHighlightColor: 'transparent',
+    background: 'transparent',
   },
   navItemActive: {
     borderBottom: '3px solid #ff6b35',
@@ -168,6 +171,7 @@ function NavItem({ href, label, icon, isActive, badge }: NavItemProps) {
       style={{
         ...styles.navItem,
         ...(isActive ? styles.navItemActive : {}),
+        color: '#ff6b35',
       }}
     >
       <div style={styles.iconWrapper}>
