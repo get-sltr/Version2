@@ -262,7 +262,7 @@ export default function CruisingUpdatesPage() {
         ) : updates.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
-            <div style={{ fontSize: '16px', marginBottom: '8px' }}>No active updates</div>
+            <div style={{ fontSize: '16px', marginBottom: '8px' }}>No updates yet</div>
             <div style={{ fontSize: '14px' }}>Be the first to post!</div>
           </div>
         ) : (
@@ -277,7 +277,7 @@ export default function CruisingUpdatesPage() {
                 position: 'relative'
               }}
             >
-              {/* Profile Image */}
+              {/* Profile Image - Click to view profile */}
               <Link href={`/profile/${update.user_id}`} style={{ position: 'relative', flexShrink: 0 }}>
                 <div style={{
                   width: '56px',
@@ -302,44 +302,106 @@ export default function CruisingUpdatesPage() {
                 )}
               </Link>
 
-              {/* Content */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                  <div style={{ fontSize: '14px', color: '#aaa' }}>
-                    {getUserDisplay(update)}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#666', whiteSpace: 'nowrap' }}>
-                    {formatTime(update.created_at)}
-                    {update.distance !== undefined && ` • ${formatDistance(update.distance)}`}
-                  </div>
+              {/* Content - Click to message */}
+              <div
+                style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                onClick={() => {
+                  if (update.user_id !== currentUserId) {
+                    router.push(`/messages/${update.user_id}`);
+                  }
+                }}
+              >
+                {/* Time and distance row */}
+                <div style={{ fontSize: '12px', color: '#FF6B35', marginBottom: '4px', fontStyle: 'italic' }}>
+                  {formatTime(update.created_at)}
+                  {update.distance !== undefined && `, ${formatDistance(update.distance)}`}
                 </div>
 
+                {/* User stats row */}
+                <div style={{ fontSize: '13px', color: '#888', marginBottom: '6px' }}>
+                  {getUserDisplay(update)}
+                </div>
+
+                {/* Message content */}
                 <div style={{
                   fontSize: '15px',
-                  color: update.is_hosting ? '#FF6B35' : '#fff',
-                  fontWeight: update.is_hosting ? 600 : 400,
+                  color: '#fff',
+                  fontWeight: 500,
                   lineHeight: 1.4
                 }}>
-                  {update.is_hosting && '🏠 '}{update.text}
+                  {update.text}
                 </div>
+
+                {/* Location/hosting indicator */}
+                {update.is_hosting && (
+                  <div style={{
+                    fontSize: '13px',
+                    color: '#FF6B35',
+                    marginTop: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🏠 Hosting
+                  </div>
+                )}
               </div>
 
-              {/* Delete (own updates) */}
-              {update.user_id === currentUserId && (
-                <button
-                  onClick={() => handleDelete(update.id)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#666',
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    padding: '4px'
-                  }}
-                >
-                  ✕
-                </button>
-              )}
+              {/* Action buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                {/* Target/locate button */}
+                {update.lat && update.lng && (
+                  <button
+                    onClick={() => {
+                      window.open(`https://maps.google.com/?q=${update.lat},${update.lng}`, '_blank');
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#666',
+                      fontSize: '20px',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                    title="View on map"
+                  >
+                    ⊕
+                  </button>
+                )}
+
+                {/* More menu / Delete */}
+                {update.user_id === currentUserId ? (
+                  <button
+                    onClick={() => handleDelete(update.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#666',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                    title="Delete"
+                  >
+                    ✕
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push(`/messages/${update.user_id}`)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#666',
+                      fontSize: '18px',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                    title="Message"
+                  >
+                    •••
+                  </button>
+                )}
+              </div>
             </div>
           ))
         )}

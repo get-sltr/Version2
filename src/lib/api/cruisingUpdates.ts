@@ -46,7 +46,7 @@ async function fetchProfilePreview(userId: string): Promise<ProfilePreview | nul
 }
 
 /**
- * Get all active cruising updates
+ * Get all cruising updates (no expiration filter - posts persist)
  */
 export async function getCruisingUpdates(
   userLat?: number,
@@ -56,9 +56,8 @@ export async function getCruisingUpdates(
   const { data, error } = await supabase
     .from('cruising_updates')
     .select('*')
-    .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
-    .limit(50);
+    .limit(100);
 
   if (error) throw error;
 
@@ -120,12 +119,12 @@ export async function postCruisingUpdate(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
-  // Build insert object - only include lat/lng if columns exist
+  // Build insert object - posts persist indefinitely (far future expiration for DB compatibility)
   const insertData: Record<string, unknown> = {
     user_id: user.id,
     text,
     is_hosting: isHosting,
-    expires_at: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()
+    expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year
   };
 
   // Add location if provided (requires migration to add columns)
