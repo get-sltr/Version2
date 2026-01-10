@@ -1036,21 +1036,33 @@ export default function Dashboard() {
 
         {/* Age Dropdown */}
         {showAgeDropdown && (
-          <div style={{
-            position: 'absolute',
-            top: '120px',
-            left: '15px',
-            right: '15px',
-            background: 'rgba(5,5,5,0.9)',
-            backdropFilter: 'blur(14px)',
-            WebkitBackdropFilter: 'blur(14px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '14px',
-            boxShadow: '0 8px 30px rgba(0,0,0,0.5), inset 0 0 30px rgba(255,255,255,0.04)',
-            zIndex: 200,
-            padding: '16px',
-            color: '#ffffff'
-          }}>
+          <motion.div
+            initial={{ opacity: 0, y: -20, rotateX: -15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, rotateX: -10, scale: 0.98 }}
+            transition={{
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+              mass: 0.8
+            }}
+            style={{
+              position: 'absolute',
+              top: '120px',
+              left: '15px',
+              right: '15px',
+              background: 'rgba(5,5,5,0.95)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,107,53,0.2)',
+              borderRadius: '16px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
+              zIndex: 200,
+              padding: '18px',
+              color: '#ffffff',
+              transformOrigin: 'top center',
+              transformStyle: 'preserve-3d',
+            }}>
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
@@ -1161,78 +1173,104 @@ export default function Dashboard() {
                 Clear
               </button>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Tribes Dropdown */}
         {showTribesDropdown && (
-          <div style={{
-            position: 'absolute',
-            top: '120px',
-            left: '15px',
-            right: '15px',
-            background: colors.background,
-            border: `1px solid ${colors.border}`,
-            borderRadius: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            zIndex: 200,
-            padding: '12px',
-            maxHeight: '300px',
-            overflowY: 'auto'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              marginBottom: '12px',
-              paddingBottom: '8px',
-              borderBottom: `1px solid ${colors.border}`
+          <motion.div
+            initial={{ opacity: 0, y: -20, rotateX: -15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, rotateX: -10, scale: 0.98 }}
+            transition={{
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+              mass: 0.8
+            }}
+            style={{
+              position: 'absolute',
+              top: '120px',
+              left: '15px',
+              right: '15px',
+              background: 'rgba(5,5,5,0.95)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,107,53,0.2)',
+              borderRadius: '16px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
+              zIndex: 200,
+              padding: '16px',
+              maxHeight: '350px',
+              overflowY: 'auto',
+              transformOrigin: 'top center',
+              transformStyle: 'preserve-3d',
             }}>
-              <span style={{ fontSize: '14px', fontWeight: 600 }}>Select Tribe(s)</span>
-              <button 
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '14px',
+              paddingBottom: '10px',
+              borderBottom: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>Select Tribe(s)</span>
+              <button
                 onClick={() => setShowTribesDropdown(false)}
-                style={{ 
-                  background: 'none', 
-                  border: 'none', 
-                  color: colors.accent, 
-                  fontSize: '14px', 
+                style={{
+                  background: 'rgba(255,107,53,0.15)',
+                  border: '1px solid rgba(255,107,53,0.3)',
+                  borderRadius: '8px',
+                  padding: '6px 14px',
+                  color: '#FF6B35',
+                  fontSize: '13px',
                   fontWeight: 600,
-                  cursor: 'pointer' 
+                  cursor: 'pointer'
                 }}
               >
                 Done
               </button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-              {tribeOptions.map(option => (
-                <button
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+              {tribeOptions.map((option, index) => (
+                <motion.button
                   key={option.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
                   onClick={() => toggleTribe(option.id)}
                   style={{
-                    background: selectedTribes.includes(option.id) ? 'rgba(255,107,53,0.15)' : colors.surface,
-                    border: selectedTribes.includes(option.id) ? '2px solid #FF6B35' : `1px solid ${colors.border}`,
-                    borderRadius: '8px',
-                    padding: '12px',
-                    color: selectedTribes.includes(option.id) ? colors.accent : colors.text,
-                    fontSize: '14px',
-                    fontWeight: selectedTribes.includes(option.id) ? 600 : 400,
+                    background: selectedTribes.includes(option.id) ? 'rgba(255,107,53,0.2)' : 'rgba(255,255,255,0.05)',
+                    border: selectedTribes.includes(option.id) ? '2px solid #FF6B35' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '10px',
+                    padding: '10px 8px',
+                    color: selectedTribes.includes(option.id) ? '#FF6B35' : 'rgba(255,255,255,0.8)',
+                    fontSize: '12px',
+                    fontWeight: selectedTribes.includes(option.id) ? 600 : 500,
                     cursor: 'pointer',
                     textAlign: 'center',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    position: 'relative'
+                    position: 'relative',
+                    transition: 'all 0.2s ease',
                   }}
                 >
                   {option.label}
                   {selectedTribes.includes(option.id) && (
-                    <span style={{
-                      position: 'absolute',
-                      top: '4px',
-                      right: '4px'
-                    }}><IconCheck size={12} /></span>
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      style={{
+                        position: 'absolute',
+                        top: '3px',
+                        right: '3px'
+                      }}
+                    >
+                      <IconCheck size={10} />
+                    </motion.span>
                   )}
-                </button>
+                </motion.button>
               ))}
             </div>
             {selectedTribes.length > 0 && (
@@ -1240,12 +1278,12 @@ export default function Dashboard() {
                 onClick={() => setSelectedTribes([])}
                 style={{
                   width: '100%',
-                  marginTop: '12px',
-                  background: 'transparent',
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '8px',
+                  marginTop: '14px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '10px',
                   padding: '10px',
-                  color: colors.textSecondary,
+                  color: 'rgba(255,255,255,0.6)',
                   fontSize: '13px',
                   cursor: 'pointer'
                 }}
@@ -1253,28 +1291,42 @@ export default function Dashboard() {
                 Clear All
               </button>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Position Dropdown */}
         {showPositionDropdown && (
-          <div style={{
-            position: 'absolute',
-            top: '120px',
-            left: '15px',
-            right: '15px',
-            background: colors.background,
-            border: `1px solid ${colors.border}`,
-            borderRadius: '12px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-            zIndex: 200,
-            padding: '12px',
-            maxHeight: '300px',
-            overflowY: 'auto'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
+          <motion.div
+            initial={{ opacity: 0, y: -20, rotateX: -15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, rotateX: -10, scale: 0.98 }}
+            transition={{
+              type: 'spring',
+              stiffness: 400,
+              damping: 25,
+              mass: 0.8
+            }}
+            style={{
+              position: 'absolute',
+              top: '120px',
+              left: '15px',
+              right: '15px',
+              background: 'rgba(5,5,5,0.95)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,107,53,0.2)',
+              borderRadius: '16px',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)',
+              zIndex: 200,
+              padding: '16px',
+              maxHeight: '400px',
+              overflowY: 'auto',
+              transformOrigin: 'top center',
+              transformStyle: 'preserve-3d',
+            }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
               marginBottom: '12px',
               paddingBottom: '8px',
@@ -1340,7 +1392,7 @@ export default function Dashboard() {
                 Clear All
               </button>
             )}
-          </div>
+          </motion.div>
         )}
       </header>
 
