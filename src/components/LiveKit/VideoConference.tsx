@@ -214,25 +214,35 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
             >
               <div
                 style={{
-                  padding: '16px',
+                  padding: '12px 16px',
                   borderBottom: '1px solid rgba(255,255,255,0.1)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  background: 'rgba(255,255,255,0.03)',
                 }}
               >
-                <span style={{ color: '#fff', fontWeight: 600 }}>Messages</span>
+                <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>Messages</span>
                 <button
                   onClick={() => setShowChat(false)}
                   style={{
-                    background: 'none',
+                    background: 'rgba(255,255,255,0.1)',
                     border: 'none',
                     color: '#fff',
-                    fontSize: '18px',
+                    fontSize: '16px',
                     cursor: 'pointer',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background 0.2s ease',
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,107,53,0.3)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 >
-                  ×
+                  ✕
                 </button>
               </div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
