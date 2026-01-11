@@ -98,13 +98,8 @@ export default function MapViewPage() {
   }, []);
 
   const handleCruisingPost = useCallback(async (text: string) => {
-    try {
-      await postCruisingUpdate(text, false, mapCenter?.lat, mapCenter?.lng);
-      setCruisingOpen(false);
-    } catch (err: any) {
-      console.error('Failed to post cruising update:', err);
-      alert(err.message || 'Failed to post update');
-    }
+    // Let CruisingPanel handle success/error states - just pass through
+    await postCruisingUpdate(text, false, mapCenter?.lat, mapCenter?.lng);
   }, [mapCenter]);
 
   const handleTabChange = useCallback((tab: NavTab) => {
