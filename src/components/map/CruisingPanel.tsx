@@ -78,7 +78,7 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
     <div className={`${styles.cruisingPanel} ${isOpen ? styles.open : ''}`}>
       <div className={styles.cruisingHeader}>
         <h2 className={styles.cruisingTitle}>Cruising Update</h2>
-        <button className={styles.menuClose} onClick={onClose} disabled={isPosting}>
+        <button className={styles.menuClose} onClick={onClose}>
           <CloseIcon />
         </button>
       </div>
