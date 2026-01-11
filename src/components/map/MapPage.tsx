@@ -58,9 +58,10 @@ export function MapPage({ children }: MapPageProps) {
     setClusterEnabled((prev) => !prev);
   }, []);
 
-  const handleCruisingPost = useCallback((text: string) => {
+  const handleCruisingPost = useCallback(async (text: string): Promise<void> => {
     // Post cruising update to API
     console.log('Posting cruising update:', text);
+    // TODO: Implement actual API call when this component is used
   }, []);
 
   const handleProfileSelect = useCallback((profile: MapProfile) => {
