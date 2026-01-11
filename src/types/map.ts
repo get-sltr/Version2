@@ -111,7 +111,7 @@ export interface MenuPanelProps {
 export interface CruisingPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  onPost: (text: string) => void;
+  onPost: (text: string) => Promise<void>;
 }
 
 export interface CruisingFABProps {

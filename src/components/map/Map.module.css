@@ -543,6 +543,7 @@
   letter-spacing: 0.1em;
   color: var(--color-accent);
   text-transform: uppercase;
+  text-shadow: 0 0 10px var(--color-accent-glow), 0 0 20px rgba(255, 107, 53, 0.3);
 }
 
 .cruisingInputWrapper {
@@ -608,6 +609,7 @@
 
 .cruisingPostBtn:not(:disabled):hover {
   opacity: 1;
+  text-shadow: 0 0 8px var(--color-accent-glow);
 }
 
 .cruisingPostBtn:not(:disabled):active {

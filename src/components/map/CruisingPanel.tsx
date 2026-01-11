@@ -1,5 +1,5 @@
 // =============================================================================
-// CruisingPanel - Marketplace text input
+// CruisingPanel - Marketplace text input with Liquid Glass design
 // =============================================================================
 
 'use client';
@@ -37,26 +37,38 @@ const MAX_LENGTH = 280;
 
 export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
   const [text, setText] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
-  }, []);
+    if (error) setError(null);
+  }, [error]);
 
-  const handlePost = useCallback(() => {
-    if (text.trim()) {
-      onPost(text.trim());
+  const handlePost = useCallback(async () => {
+    if (!text.trim() || isPosting) return;
+
+    setIsPosting(true);
+    setError(null);
+    try {
+      await onPost(text.trim());
       setText('');
       onClose();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to post update';
+      setError(message);
+    } finally {
+      setIsPosting(false);
     }
-  }, [text, onPost, onClose]);
+  }, [text, onPost, onClose, isPosting]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && text.trim()) {
+      if (e.key === 'Enter' && text.trim() && !isPosting) {
         handlePost();
       }
     },
-    [handlePost, text]
+    [handlePost, text, isPosting]
   );
 
   const isNearLimit = text.length >= 260;
@@ -66,7 +78,7 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
     <div className={`${styles.cruisingPanel} ${isOpen ? styles.open : ''}`}>
       <div className={styles.cruisingHeader}>
         <h2 className={styles.cruisingTitle}>Cruising Update</h2>
-        <button className={styles.menuClose} onClick={onClose}>
+        <button className={styles.menuClose} onClick={onClose} disabled={isPosting}>
           <CloseIcon />
         </button>
       </div>
@@ -81,19 +93,30 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             maxLength={MAX_LENGTH}
+            disabled={isPosting}
           />
           <button
             className={styles.cruisingPostBtn}
             onClick={handlePost}
-            disabled={isEmpty}
+            disabled={isEmpty || isPosting}
           >
             <SendIcon />
-            POST
+            {isPosting ? '...' : 'POST'}
           </button>
         </div>
         <span className={`${styles.cruisingCharCount} ${isNearLimit ? styles.limit : ''}`}>
           {text.length}/{MAX_LENGTH}
         </span>
+        {error && (
+          <p style={{
+            color: '#ff4444',
+            fontSize: '12px',
+            marginTop: '8px',
+            fontFamily: 'Inter, sans-serif'
+          }}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );
