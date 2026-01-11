@@ -1,5 +1,5 @@
 // =============================================================================
-// CruisingPanel - Marketplace text input
+// CruisingPanel - Marketplace text input with Liquid Glass design
 // =============================================================================
 
 'use client';
@@ -37,26 +37,35 @@ const MAX_LENGTH = 280;
 
 export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
   const [text, setText] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
   }, []);
 
-  const handlePost = useCallback(() => {
-    if (text.trim()) {
-      onPost(text.trim());
+  const handlePost = useCallback(async () => {
+    if (!text.trim() || isPosting) return;
+
+    setIsPosting(true);
+    try {
+      await onPost(text.trim());
       setText('');
       onClose();
+    } catch (error) {
+      // Error handled by parent - just reset state
+      console.error('Post failed:', error);
+    } finally {
+      setIsPosting(false);
     }
-  }, [text, onPost, onClose]);
+  }, [text, onPost, onClose, isPosting]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && text.trim()) {
+      if (e.key === 'Enter' && text.trim() && !isPosting) {
         handlePost();
       }
     },
-    [handlePost, text]
+    [handlePost, text, isPosting]
   );
 
   const isNearLimit = text.length >= 260;
@@ -65,7 +74,14 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
   return (
     <div className={`${styles.cruisingPanel} ${isOpen ? styles.open : ''}`}>
       <div className={styles.cruisingHeader}>
-        <h2 className={styles.cruisingTitle}>Cruising Update</h2>
+        <h2 className={styles.cruisingTitle}>
+          <span style={{
+            color: '#FF6B35',
+            textShadow: '0 0 10px rgba(255, 107, 53, 0.5), 0 0 20px rgba(255, 107, 53, 0.3)'
+          }}>
+            Cruising Update
+          </span>
+        </h2>
         <button className={styles.menuClose} onClick={onClose}>
           <CloseIcon />
         </button>
@@ -81,14 +97,20 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             maxLength={MAX_LENGTH}
+            disabled={isPosting}
           />
           <button
             className={styles.cruisingPostBtn}
             onClick={handlePost}
-            disabled={isEmpty}
+            disabled={isEmpty || isPosting}
+            style={{
+              color: '#FF6B35',
+              textShadow: isEmpty || isPosting ? 'none' : '0 0 8px rgba(255, 107, 53, 0.6)',
+              transition: 'all 0.3s ease'
+            }}
           >
             <SendIcon />
-            POST
+            {isPosting ? '...' : 'POST'}
           </button>
         </div>
         <span className={`${styles.cruisingCharCount} ${isNearLimit ? styles.limit : ''}`}>
