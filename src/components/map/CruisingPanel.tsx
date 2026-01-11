@@ -76,8 +76,8 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
       <div className={styles.cruisingHeader}>
         <h2 className={styles.cruisingTitle}>
           <span style={{
-            color: '#FF6B35',
-            textShadow: '0 0 10px rgba(255, 107, 53, 0.5), 0 0 20px rgba(255, 107, 53, 0.3)'
+            color: 'var(--color-accent)',
+            textShadow: '0 0 10px var(--color-accent-glow), 0 0 20px color-mix(in srgb, var(--color-accent) 30%, transparent)'
           }}>
             Cruising Update
           </span>
@@ -104,8 +104,8 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
             onClick={handlePost}
             disabled={isEmpty || isPosting}
             style={{
-              color: '#FF6B35',
-              textShadow: isEmpty || isPosting ? 'none' : '0 0 8px rgba(255, 107, 53, 0.6)',
+              color: 'var(--color-accent)',
+              textShadow: isEmpty || isPosting ? 'none' : '0 0 8px var(--color-accent-glow)',
               transition: 'all 0.3s ease'
             }}
           >
