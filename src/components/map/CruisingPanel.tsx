@@ -82,7 +82,7 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
             Cruising Update
           </span>
         </h2>
-        <button className={styles.menuClose} onClick={onClose} disabled={isPosting}>
+        <button className={styles.menuClose} onClick={onClose}>
           <CloseIcon />
         </button>
       </div>
