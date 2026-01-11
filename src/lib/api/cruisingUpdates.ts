@@ -133,14 +133,26 @@ export async function postCruisingUpdate(
     insertData.lng = lng;
   }
 
-  const { data, error } = await supabase
+  // Try insert with location first, fall back to without if columns don't exist
+  let result = await supabase
     .from('cruising_updates')
     .insert(insertData)
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  // If error mentions column doesn't exist, retry without lat/lng
+  if (result.error && result.error.message?.includes('column')) {
+    delete insertData.lat;
+    delete insertData.lng;
+    result = await supabase
+      .from('cruising_updates')
+      .insert(insertData)
+      .select()
+      .single();
+  }
+
+  if (result.error) throw result.error;
+  return result.data;
 }
 
 /**

@@ -38,22 +38,25 @@ const MAX_LENGTH = 280;
 export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
   const [text, setText] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
+    setError(null);
   }, []);
 
   const handlePost = useCallback(async () => {
     if (!text.trim() || isPosting) return;
 
     setIsPosting(true);
+    setError(null);
     try {
       await onPost(text.trim());
       setText('');
       onClose();
-    } catch (error) {
-      // Error handled by parent - just reset state
-      console.error('Post failed:', error);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to post update';
+      setError(message);
     } finally {
       setIsPosting(false);
     }
@@ -103,11 +106,6 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
             className={styles.cruisingPostBtn}
             onClick={handlePost}
             disabled={isEmpty || isPosting}
-            style={{
-              color: '#FF6B35',
-              textShadow: isEmpty || isPosting ? 'none' : '0 0 8px rgba(255, 107, 53, 0.6)',
-              transition: 'all 0.3s ease'
-            }}
           >
             <SendIcon />
             {isPosting ? '...' : 'POST'}
@@ -116,6 +114,16 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
         <span className={`${styles.cruisingCharCount} ${isNearLimit ? styles.limit : ''}`}>
           {text.length}/{MAX_LENGTH}
         </span>
+        {error && (
+          <p style={{
+            color: '#ff4444',
+            fontSize: '12px',
+            marginTop: '8px',
+            fontFamily: 'Inter, sans-serif'
+          }}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -59,15 +59,9 @@ export function MapPage({ children }: MapPageProps) {
   }, []);
 
   const handleCruisingPost = useCallback(async (text: string): Promise<void> => {
-    try {
-      // Post cruising update to API
-      console.log('Posting cruising update:', text);
-      // TODO: Implement actual API call when this component is used
-    } catch (error) {
-      console.error('Error posting cruising update:', error);
-      // Throw a user-friendly error message so the caller can display it in the UI
-      throw new Error('Failed to post cruising update. Please try again.');
-    }
+    // Post cruising update to API
+    console.log('Posting cruising update:', text);
+    // TODO: Implement actual API call when this component is used
   }, []);
 
   const handleProfileSelect = useCallback((profile: MapProfile) => {
