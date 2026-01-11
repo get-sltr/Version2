@@ -42,8 +42,8 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
-    if (error) setError(null);
-  }, [error]);
+    setError(null);
+  }, []);
 
   const handlePost = useCallback(async () => {
     if (!text.trim() || isPosting) return;
