@@ -141,7 +141,7 @@ export async function postCruisingUpdate(
     .single();
 
   // If error indicates column doesn't exist (PostgreSQL error code 42703), retry without lat/lng
-  if (result.error && result.error.code === '42703') {
+  if (result.error?.code === '42703') {
     delete insertData.lat;
     delete insertData.lng;
     result = await supabase
