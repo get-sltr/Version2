@@ -39,7 +39,7 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
   const [text, setText] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const prevOpenRef = useRef(isOpen);
+  const prevOpenRef = useRef(false);
 
   // Clear error state when panel transitions from open to closed
   useEffect(() => {
