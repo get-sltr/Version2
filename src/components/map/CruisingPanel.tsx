@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { CruisingPanelProps } from '@/types/map';
 import styles from './Map.module.css';
 
@@ -39,6 +39,13 @@ export function CruisingPanel({ isOpen, onClose, onPost }: CruisingPanelProps) {
   const [text, setText] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Clear error state when panel closes
+  useEffect(() => {
+    if (!isOpen) {
+      setError(null);
+    }
+  }, [isOpen]);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
