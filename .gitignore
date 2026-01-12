@@ -52,3 +52,4 @@ users-to-migrate.csv
 
 # Sentry Config File
 .env.sentry-build-plugin
+tsconfig.tsbuildinfo

@@ -140,8 +140,11 @@ export async function postCruisingUpdate(
     .select()
     .single();
 
-  // If error mentions column doesn't exist, retry without lat/lng
-  if (result.error && result.error.message?.includes('column')) {
+  // Check for PostgreSQL undefined column error (42703) or specific column error message
+  if (result.error && (
+    result.error.code === '42703' || 
+    result.error.message?.match(/column "(?:lat|lng)" of relation "cruising_updates" does not exist/i)
+  )) {
     delete insertData.lat;
     delete insertData.lng;
     result = await supabase
