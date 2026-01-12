@@ -143,7 +143,7 @@ export async function postCruisingUpdate(
   // Check for PostgreSQL undefined column error (42703) or specific column error message
   if (result.error && (
     result.error.code === '42703' || 
-    result.error.message?.match(/column "(?:lat|lng)" (?:does not exist|of relation)/i)
+    result.error.message?.match(/column "(?:lat|lng)" of relation "cruising_updates" does not exist/i)
   )) {
     delete insertData.lat;
     delete insertData.lng;
