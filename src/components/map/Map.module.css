@@ -15,6 +15,7 @@
   --color-accent: #ff6b35;
   --color-accent-secondary: #ff8c42;
   --color-accent-glow: rgba(255, 107, 53, 0.5);
+  --color-accent-glow-light: rgba(255, 107, 53, 0.3);
   --color-text: #ffffff;
   --color-text-muted: rgba(255, 255, 255, 0.6);
   --color-text-dim: rgba(255, 255, 255, 0.4);
@@ -543,7 +544,7 @@
   letter-spacing: 0.1em;
   color: var(--color-accent);
   text-transform: uppercase;
-  text-shadow: 0 0 10px var(--color-accent-glow), 0 0 20px rgba(255, 107, 53, 0.3);
+  text-shadow: 0 0 10px var(--color-accent-glow), 0 0 20px var(--color-accent-glow-light);
 }
 
 .cruisingInputWrapper {
