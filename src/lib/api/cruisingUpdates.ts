@@ -140,8 +140,9 @@ export async function postCruisingUpdate(
     .select()
     .single();
 
-  // If error is undefined column (42703), retry without lat/lng
-  if (result.error && result.error.code === '42703') {
+  // If error indicates column doesn't exist (PostgreSQL error code 42703), retry without lat/lng
+  // This handles the case where the database schema hasn't been migrated to include lat/lng columns yet
+  if (result.error?.code === '42703') {
     delete insertData.lat;
     delete insertData.lng;
     result = await supabase
