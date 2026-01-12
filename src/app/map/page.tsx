@@ -98,7 +98,8 @@ export default function MapViewPage() {
   }, []);
 
   const handleCruisingPost = useCallback(async (text: string) => {
-    // Let CruisingPanel handle success/error states - just pass through
+    // Intentionally let errors bubble so CruisingPanel's try/catch handles
+    // success/error states and only closes on successful updates.
     await postCruisingUpdate(text, false, mapCenter?.lat, mapCenter?.lng);
   }, [mapCenter]);
 
