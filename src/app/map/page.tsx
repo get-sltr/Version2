@@ -13,6 +13,7 @@ import { useMapGroups } from '@/hooks/useMapGroups';
 import { useMapVenues } from '@/hooks/useMapVenues';
 import { useNavBadgeCounts } from '@/hooks/useNavBadgeCounts';
 import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
+import MigrationBanner from '@/components/MigrationBanner';
 import MapboxMap from '@/components/Mapbox/MapboxMap';
 import {
   MapHeader,
@@ -130,6 +131,9 @@ export default function MapViewPage() {
 
   return (
     <div className="mapPageContainer">
+      {/* Migration Banner for old domain users */}
+      <MigrationBanner />
+
       {/* Header */}
       <MapHeader onMenuOpen={() => setMenuOpen(true)} />
 

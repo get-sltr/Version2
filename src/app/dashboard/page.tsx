@@ -13,6 +13,7 @@ import { DTFNBadge } from '@/components/dtfn';
 import { useDTFN } from '@/hooks/useDTFN';
 import { usePremium } from '@/hooks/usePremium';
 import RebrandSplash from '@/components/RebrandSplash';
+import MigrationBanner from '@/components/MigrationBanner';
 
 /**
  * Format distance for display
@@ -562,6 +563,9 @@ export default function Dashboard() {
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", position: 'relative', overflow: 'hidden' }}>
       {/* Rebrand Announcement Splash */}
       <RebrandSplash />
+
+      {/* Migration Banner for old domain users */}
+      <MigrationBanner />
 
       {/* Video Background */}
       <video
