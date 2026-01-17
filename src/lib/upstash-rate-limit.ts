@@ -108,6 +108,19 @@ export const rateLimiters = {
         analytics: true,
       })
     : null,
+
+  /**
+   * Admin endpoints - moderate limit to prevent abuse
+   * 30 requests per minute
+   */
+  admin: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, '1 m'),
+        prefix: 'ratelimit:admin',
+        analytics: true,
+      })
+    : null,
 };
 
 export type RateLimiterType = keyof typeof rateLimiters;

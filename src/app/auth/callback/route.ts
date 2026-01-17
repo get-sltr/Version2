@@ -3,10 +3,69 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Allowed hosts for redirects (add your domains here)
+const ALLOWED_HOSTS = [
+  'getsltr.com',
+  'www.getsltr.com',
+  'primalgay.com',
+  'www.primalgay.com',
+  'localhost',
+  'localhost:3000',
+];
+
+/**
+ * Validate redirect URL to prevent open redirect attacks
+ * Only allows relative paths or URLs to allowed hosts
+ */
+function sanitizeRedirectPath(path: string): string {
+  // Default to dashboard if empty
+  if (!path) return '/dashboard';
+
+  // Must start with / for relative path
+  if (!path.startsWith('/')) return '/dashboard';
+
+  // Block protocol-relative URLs (//evil.com)
+  if (path.startsWith('//')) return '/dashboard';
+
+  // Block URLs with protocol
+  if (path.includes('://')) return '/dashboard';
+
+  // Block encoded characters that could bypass checks
+  if (path.includes('%')) {
+    try {
+      const decoded = decodeURIComponent(path);
+      if (decoded.startsWith('//') || decoded.includes('://')) {
+        return '/dashboard';
+      }
+    } catch {
+      return '/dashboard';
+    }
+  }
+
+  // Remove any @ symbols which can be used for open redirects
+  if (path.includes('@')) return '/dashboard';
+
+  return path;
+}
+
+/**
+ * Validate x-forwarded-host against allowed hosts
+ */
+function isAllowedHost(host: string | null): boolean {
+  if (!host) return false;
+  const normalizedHost = host.toLowerCase().trim();
+  return ALLOWED_HOSTS.some(allowed =>
+    normalizedHost === allowed || normalizedHost.endsWith(`.${allowed}`)
+  );
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/dashboard';
+  const rawNext = searchParams.get('next') ?? '/dashboard';
+
+  // Sanitize the redirect path to prevent open redirect
+  const next = sanitizeRedirectPath(rawNext);
 
   if (code) {
     const cookieStore = await cookies();
@@ -68,9 +127,11 @@ export async function GET(request: NextRequest) {
 
       if (isLocalEnv) {
         return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost) {
+      } else if (forwardedHost && isAllowedHost(forwardedHost)) {
+        // Only use forwarded host if it's in our allowed list
         return NextResponse.redirect(`https://${forwardedHost}${next}`);
       } else {
+        // Fallback to request origin (safe)
         return NextResponse.redirect(`${origin}${next}`);
       }
     }

@@ -18,7 +18,7 @@ export default function DMCAPolicy() {
           <p><strong>SLTR DIGITAL LLC</strong></p>
           <p>Attn: DMCA Agent</p>
           <p>Los Angeles, CA</p>
-          <p><strong>Email:</strong> customersupport@getsltr.com</p>
+          <p><strong>Email:</strong> support@primalgay.com</p>
         </Section>
         <Section title="Counter-Notification">
           <p>If you believe content was removed by mistake, submit a counter-notification with your contact info, consent to jurisdiction, and good faith statement.</p>

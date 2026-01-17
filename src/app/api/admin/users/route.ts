@@ -1,12 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import { getSupabaseAdmin, isAdmin, hasPermission, isFounder } from '@/lib/admin';
+import { checkUpstashRateLimit, getClientIdentifier, rateLimitHeaders } from '@/lib/upstash-rate-limit';
+
+// Whitelist of allowed sort columns to prevent SQL injection
+const ALLOWED_SORT_COLUMNS = ['created_at', 'last_seen', 'display_name', 'email', 'age', 'is_premium', 'is_online'] as const;
+type SortColumn = typeof ALLOWED_SORT_COLUMNS[number];
+
+// UUID validation regex
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Sanitize search input to prevent SQL injection
+ * Escapes special characters used in LIKE patterns
+ */
+function sanitizeSearchInput(input: string): string {
+  return input
+    .trim()
+    .slice(0, 100) // Limit length
+    .replace(/[%_\\]/g, '\\$&') // Escape LIKE special chars
+    .replace(/[<>"'`;()]/g, ''); // Remove potentially dangerous chars
+}
+
+/**
+ * Validate sort column against whitelist
+ */
+function isValidSortColumn(column: string): column is SortColumn {
+  return ALLOWED_SORT_COLUMNS.includes(column as SortColumn);
+}
+
+/**
+ * Validate UUID format
+ */
+function isValidUUID(id: string): boolean {
+  return UUID_REGEX.test(id);
+}
 
 /**
  * GET /api/admin/users
  * Returns paginated user list with search/filter
  */
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const clientId = getClientIdentifier(request);
+  const rateLimit = await checkUpstashRateLimit(clientId, 'admin');
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: rateLimitHeaders(rateLimit) }
+    );
+  }
+
   // Authenticate user
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,12 +71,18 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const search = searchParams.get('search') || '';
-    const filter = searchParams.get('filter') || 'all'; // all, premium, free, online, verified
-    const sort = searchParams.get('sort') || 'created_at';
-    const order = searchParams.get('order') || 'desc';
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50') || 50));
+    const rawSearch = searchParams.get('search') || '';
+    const filter = searchParams.get('filter') || 'all';
+    const rawSort = searchParams.get('sort') || 'created_at';
+    const order = searchParams.get('order') === 'asc' ? 'asc' : 'desc';
+
+    // Validate and sanitize sort column
+    const sort = isValidSortColumn(rawSort) ? rawSort : 'created_at';
+
+    // Sanitize search input
+    const search = sanitizeSearchInput(rawSearch);
 
     const offset = (page - 1) * limit;
 
@@ -51,7 +102,7 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('id, email, display_name, age, photo_url, is_online, is_premium, created_at, last_seen', { count: 'exact' });
 
-    // Apply search filter
+    // Apply search filter with sanitized input
     if (search) {
       query = query.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
     }
@@ -69,12 +120,9 @@ export async function GET(request: NextRequest) {
         fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes() - 15);
         query = query.gte('last_seen', fifteenMinutesAgo.toISOString());
         break;
-      // case 'verified': - column doesn't exist yet
-      //   query = query.eq('is_verified', true);
-      //   break;
     }
 
-    // Apply sorting
+    // Apply sorting with validated column
     const ascending = order === 'asc';
     query = query.order(sort, { ascending });
 
@@ -87,21 +135,22 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json({
-      users: users || [],
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
-      },
-    });
-  } catch (error: any) {
-    console.error('Admin users error:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch users' },
-      { status: 500 }
+      {
+        users: users || [],
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit),
+        },
+      },
+      { headers: rateLimitHeaders(rateLimit) }
     );
+  } catch (error: unknown) {
+    console.error('Admin users error:', error);
+    const message = error instanceof Error ? error.message : 'Failed to fetch users';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -110,6 +159,17 @@ export async function GET(request: NextRequest) {
  * Update a user (ban, verify, grant premium, etc.)
  */
 export async function PATCH(request: NextRequest) {
+  // Rate limiting
+  const clientId = getClientIdentifier(request);
+  const rateLimit = await checkUpstashRateLimit(clientId, 'admin');
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429, headers: rateLimitHeaders(rateLimit) }
+    );
+  }
+
   // Authenticate user
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -129,6 +189,17 @@ export async function PATCH(request: NextRequest) {
 
     if (!userId || !action) {
       return NextResponse.json({ error: 'Missing userId or action' }, { status: 400 });
+    }
+
+    // Validate userId is a proper UUID
+    if (!isValidUUID(userId)) {
+      return NextResponse.json({ error: 'Invalid userId format' }, { status: 400 });
+    }
+
+    // Validate action is one of allowed values
+    const ALLOWED_ACTIONS = ['verify', 'unverify', 'grant_premium', 'revoke_premium', 'ban', 'unban', 'delete'];
+    if (!ALLOWED_ACTIONS.includes(action)) {
+      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
     const admin = getSupabaseAdmin();

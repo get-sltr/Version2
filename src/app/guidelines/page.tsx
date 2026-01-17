@@ -31,7 +31,7 @@ export default function CommunityGuidelines() {
           <p><strong>Crisis Text Line:</strong> Text HOME to 741741</p>
         </Section>
         <Section title="Contact">
-          <p><strong>Email:</strong> customersupport@getsltr.com</p>
+          <p><strong>Email:</strong> support@primalgay.com</p>
         </Section>
       </main>
       <footer style={{ padding: '40px 30px', borderTop: '1px solid #eee', textAlign: 'center' }}>

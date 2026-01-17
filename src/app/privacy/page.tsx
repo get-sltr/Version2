@@ -32,7 +32,7 @@ export default function PrivacyPolicy() {
           <p>Access, correct, or delete your data anytime. Export your data in portable format. Opt out of marketing communications.</p>
         </Section>
         <Section title="6. Contact">
-          <p><strong>Email:</strong> customersupport@getsltr.com</p>
+          <p><strong>Email:</strong> support@primalgay.com</p>
           <p><strong>Company:</strong> SLTR DIGITAL LLC, Los Angeles, CA</p>
         </Section>
       </main>

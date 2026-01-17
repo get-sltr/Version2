@@ -18,23 +18,43 @@ const ROLE_HIERARCHY: Record<AdminRole, number> = {
   support: 20,     // Can view and help users
 };
 
-// Founder email - has ultimate platform authority
-export const FOUNDER_EMAIL = 'kminn121@gmail.com';
+// Founder email - loaded from environment variable for security
+// Set FOUNDER_EMAIL in your .env.local file
+export const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || '';
+
+// Additional admin emails from environment (comma-separated)
+// Format: ADMIN_EMAILS="admin@example.com:admin,mod@example.com:moderator"
+function parseAdminEmails(): Record<string, AdminRole> {
+  const admins: Record<string, AdminRole> = {};
+
+  // Add founder if configured
+  if (FOUNDER_EMAIL) {
+    admins[FOUNDER_EMAIL.toLowerCase()] = 'founder';
+  }
+
+  // Parse additional admins from environment
+  const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+  if (adminEmailsEnv) {
+    adminEmailsEnv.split(',').forEach((entry) => {
+      const [email, role] = entry.trim().split(':');
+      if (email && role && ['admin', 'moderator', 'support'].includes(role)) {
+        admins[email.toLowerCase()] = role as AdminRole;
+      }
+    });
+  }
+
+  return admins;
+}
 
 // Admin emails and their roles (all lowercase for consistent lookup)
-// Add more admins here as needed
-const ADMIN_ROLES: Record<string, AdminRole> = {
-  [FOUNDER_EMAIL.toLowerCase()]: 'founder',
-  // Add more admins:
-  // 'admin@example.com': 'admin',
-  // 'mod@example.com': 'moderator',
-};
+const ADMIN_ROLES: Record<string, AdminRole> = parseAdminEmails();
 
 /**
  * Check if an email is the founder
  */
 export function isFounder(email: string | null | undefined): boolean {
-  return email?.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
+  if (!email || !FOUNDER_EMAIL) return false;
+  return email.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
 }
 
 /**

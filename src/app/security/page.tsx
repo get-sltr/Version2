@@ -24,7 +24,7 @@ export default function SecurityPage() {
           <p>24/7 automated threat monitoring. Regular security updates. Certified infrastructure providers.</p>
         </Section>
         <Section title="Report Issues">
-          <p><strong>Email:</strong> customersupport@getsltr.com</p>
+          <p><strong>Email:</strong> support@primalgay.com</p>
           <p><strong>Response Time:</strong> 24-48 hours</p>
         </Section>
       </main>

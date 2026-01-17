@@ -2,5 +2,29 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "getsltr.com"
+        }
+      ],
+      "destination": "https://primalgay.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.getsltr.com"
+        }
+      ],
+      "destination": "https://primalgay.com/:path*",
+      "permanent": true
+    }
+  ]
 }

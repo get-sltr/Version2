@@ -30,10 +30,10 @@ export default function TermsOfService() {
           <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.</p>
         </Section>
         <Section title="7. Arbitration">
-          <p>Disputes will be resolved by binding arbitration. You may opt out within 30 days by emailing customersupport@getsltr.com</p>
+          <p>Disputes will be resolved by binding arbitration. You may opt out within 30 days by emailing support@primalgay.com</p>
         </Section>
         <Section title="8. Contact">
-          <p><strong>Email:</strong> customersupport@getsltr.com</p>
+          <p><strong>Email:</strong> support@primalgay.com</p>
           <p><strong>Company:</strong> SLTR DIGITAL LLC, Los Angeles, CA</p>
         </Section>
       </main>

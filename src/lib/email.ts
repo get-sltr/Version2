@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { Resend } from 'resend';
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const defaultFromAddress = process.env.EMAIL_FROM_ADDRESS || 'SLTR <welcome@getsltr.com>';
+const defaultFromAddress = process.env.EMAIL_FROM_ADDRESS || 'Primal <welcome@primalgay.com>';
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 

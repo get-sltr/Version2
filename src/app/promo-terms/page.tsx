@@ -68,7 +68,7 @@ export default function PromoTerms() {
               <strong style={{ color: '#fff' }}>No Refunds:</strong> Cancellations are effective at the end of the current billing period. You will retain access to premium features until the end of your paid period. No partial refunds will be issued for unused portions of the billing period.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              <strong style={{ color: '#fff' }}>How to Cancel:</strong> You may cancel your subscription at any time through your account settings or by contacting customer support at support@getsltr.com.
+              <strong style={{ color: '#fff' }}>How to Cancel:</strong> You may cancel your subscription at any time through your account settings or by contacting customer support at support@primalgay.com.
             </p>
           </section>
 
@@ -172,8 +172,8 @@ export default function PromoTerms() {
               marginTop: '16px'
             }}>
               <p style={{ fontWeight: 600, marginBottom: '8px' }}>SLTR Digital LLC</p>
-              <p style={{ color: 'rgba(255,255,255,0.7)' }}>Email: support@getsltr.com</p>
-              <p style={{ color: 'rgba(255,255,255,0.7)' }}>Website: https://getsltr.com</p>
+              <p style={{ color: 'rgba(255,255,255,0.7)' }}>Email: support@primalgay.com</p>
+              <p style={{ color: 'rgba(255,255,255,0.7)' }}>Website: https://primalgay.com</p>
             </div>
           </section>
 

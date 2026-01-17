@@ -11,6 +11,7 @@ import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
 import { useMapGroups } from '@/hooks/useMapGroups';
 import { useMapVenues } from '@/hooks/useMapVenues';
+import { useNavBadgeCounts } from '@/hooks/useNavBadgeCounts';
 import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import MapboxMap from '@/components/Mapbox/MapboxMap';
 import {
@@ -69,6 +70,9 @@ export default function MapViewPage() {
     enabled: true,
     radius: 8000,
   });
+
+  // Badge counts for bottom nav
+  const { counts: badgeCounts } = useNavBadgeCounts();
 
   // Handlers
   const handleSelectProfile = useCallback((profile: MapProfile) => {
@@ -187,9 +191,9 @@ export default function MapViewPage() {
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        messageCount={3}
-        viewCount={12}
-        tapCount={5}
+        messageCount={badgeCounts.messages}
+        viewCount={badgeCounts.views}
+        tapCount={badgeCounts.taps}
       />
 
       {/* Global Styles */}

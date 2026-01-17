@@ -27,7 +27,7 @@ export default function CookiePolicy() {
           <p>Control cookies through your browser settings. Disabling may affect some functionality.</p>
         </Section>
         <Section title="Contact">
-          <p><strong>Email:</strong> customersupport@getsltr.com</p>
+          <p><strong>Email:</strong> support@primalgay.com</p>
         </Section>
       </main>
       <footer style={{ padding: '40px 30px', borderTop: '1px solid #eee', textAlign: 'center' }}>

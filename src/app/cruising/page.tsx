@@ -5,8 +5,19 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { usePremium } from '@/hooks/usePremium';
-import { getCruisingUpdates, postCruisingUpdate, deleteCruisingUpdate } from '@/lib/api/cruisingUpdates';
-import type { CruisingUpdateWithUser } from '@/lib/api/cruisingUpdates';
+import {
+  getCruisingUpdates,
+  postCruisingUpdate,
+  deleteCruisingUpdate,
+  likeCruisingUpdate,
+  unlikeCruisingUpdate,
+  getMyLikedUpdateIds,
+  addCruisingReply,
+  getCruisingReplies,
+  reportCruisingUpdate,
+  type CruisingReportReason
+} from '@/lib/api/cruisingUpdates';
+import type { CruisingUpdateWithUser, CruisingReply } from '@/lib/api/cruisingUpdates';
 
 export default function CruisingUpdatesPage() {
   const router = useRouter();
@@ -21,6 +32,13 @@ export default function CruisingUpdatesPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [expandedReplies, setExpandedReplies] = useState<string | null>(null);
+  const [replies, setReplies] = useState<Record<string, CruisingReply[]>>({});
+  const [replyText, setReplyText] = useState('');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [reportingUpdate, setReportingUpdate] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState<CruisingReportReason>('offensive');
 
   // Get user location
   useEffect(() => {
@@ -41,8 +59,14 @@ export default function CruisingUpdatesPage() {
       if (user) setCurrentUserId(user.id);
 
       try {
-        const data = await getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy);
-        if (mounted) setUpdates(data);
+        const [data, myLikes] = await Promise.all([
+          getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy),
+          getMyLikedUpdateIds()
+        ]);
+        if (mounted) {
+          setUpdates(data);
+          setLikedIds(myLikes);
+        }
       } catch (err) {
         console.error('Failed to load updates:', err);
       } finally {
@@ -104,6 +128,70 @@ export default function CruisingUpdatesPage() {
       setUpdates(prev => prev.filter(u => u.id !== updateId));
     } catch (err) {
       alert('Failed to delete');
+    }
+  };
+
+  // Like/unlike update
+  const handleLike = async (updateId: string) => {
+    const isLiked = likedIds.has(updateId);
+    try {
+      if (isLiked) {
+        await unlikeCruisingUpdate(updateId);
+        setLikedIds(prev => { const next = new Set(prev); next.delete(updateId); return next; });
+        setUpdates(prev => prev.map(u => u.id === updateId ? { ...u, like_count: Math.max(0, (u.like_count || 0) - 1) } : u));
+      } else {
+        await likeCruisingUpdate(updateId);
+        setLikedIds(prev => new Set(prev).add(updateId));
+        setUpdates(prev => prev.map(u => u.id === updateId ? { ...u, like_count: (u.like_count || 0) + 1 } : u));
+      }
+    } catch (err) {
+      console.error('Failed to like/unlike:', err);
+    }
+  };
+
+  // Toggle replies
+  const handleToggleReplies = async (updateId: string) => {
+    if (expandedReplies === updateId) {
+      setExpandedReplies(null);
+      return;
+    }
+    setExpandedReplies(updateId);
+    if (!replies[updateId]) {
+      try {
+        const data = await getCruisingReplies(updateId);
+        setReplies(prev => ({ ...prev, [updateId]: data }));
+      } catch (err) {
+        console.error('Failed to load replies:', err);
+      }
+    }
+  };
+
+  // Submit reply
+  const handleSubmitReply = async (updateId: string) => {
+    if (!replyText.trim()) return;
+    try {
+      const newReply = await addCruisingReply(updateId, replyText);
+      setReplies(prev => ({
+        ...prev,
+        [updateId]: [...(prev[updateId] || []), { ...newReply, user: { display_name: null, photo_url: null } }]
+      }));
+      setUpdates(prev => prev.map(u => u.id === updateId ? { ...u, reply_count: (u.reply_count || 0) + 1 } : u));
+      setReplyText('');
+      setReplyingTo(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to post reply');
+    }
+  };
+
+  // Report update
+  const handleReport = async () => {
+    if (!reportingUpdate) return;
+    try {
+      await reportCruisingUpdate(reportingUpdate, reportReason);
+      alert('Report submitted. Thank you.');
+      setReportingUpdate(null);
+    } catch (err) {
+      alert('Failed to submit report');
     }
   };
 
@@ -347,62 +435,157 @@ export default function CruisingUpdatesPage() {
                 )}
               </div>
 
-              {/* Action buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                {/* Target/locate button */}
+              {/* Action buttons - vertical on right */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                {/* Location button */}
                 {update.lat && update.lng && (
                   <button
-                    onClick={() => {
-                      window.open(`https://maps.google.com/?q=${update.lat},${update.lng}`, '_blank');
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#666',
-                      fontSize: '20px',
-                      cursor: 'pointer',
-                      padding: '4px'
-                    }}
+                    onClick={() => window.open(`https://maps.google.com/?q=${update.lat},${update.lng}`, '_blank')}
+                    style={{ background: 'none', border: 'none', color: '#666', fontSize: '18px', cursor: 'pointer', padding: '4px' }}
                     title="View on map"
                   >
-                    ⊕
+                    📍
                   </button>
                 )}
 
-                {/* More menu / Delete */}
+                {/* Delete (own) or Report (others) */}
                 {update.user_id === currentUserId ? (
                   <button
                     onClick={() => handleDelete(update.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#666',
-                      fontSize: '18px',
-                      cursor: 'pointer',
-                      padding: '4px'
-                    }}
+                    style={{ background: 'none', border: 'none', color: '#666', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
                     title="Delete"
                   >
                     ✕
                   </button>
                 ) : (
                   <button
-                    onClick={() => router.push(`/messages/${update.user_id}`)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#666',
-                      fontSize: '18px',
-                      cursor: 'pointer',
-                      padding: '4px'
-                    }}
-                    title="Message"
+                    onClick={() => setReportingUpdate(update.id)}
+                    style={{ background: 'none', border: 'none', color: '#666', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
+                    title="Report"
                   >
-                    •••
+                    ⚑
                   </button>
                 )}
               </div>
             </div>
+
+            {/* Interaction bar - like, reply, message */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              padding: '8px 20px 12px 88px',
+              borderBottom: '1px solid #1c1c1e'
+            }}>
+              {/* Like button */}
+              <button
+                onClick={() => handleLike(update.id)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: likedIds.has(update.id) ? '#FF6B35' : '#666',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: 0
+                }}
+              >
+                {likedIds.has(update.id) ? '❤️' : '🤍'} {update.like_count || 0}
+              </button>
+
+              {/* Reply button */}
+              <button
+                onClick={() => handleToggleReplies(update.id)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: expandedReplies === update.id ? '#FF6B35' : '#666',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: 0
+                }}
+              >
+                💬 {update.reply_count || 0}
+              </button>
+
+              {/* Message button (for others' posts) */}
+              {update.user_id !== currentUserId && (
+                <button
+                  onClick={() => router.push(`/messages/${update.user_id}`)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#666',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
+                >
+                  ✉️ Message
+                </button>
+              )}
+            </div>
+
+            {/* Replies section (expanded) */}
+            {expandedReplies === update.id && (
+              <div style={{ padding: '12px 20px 12px 88px', background: 'rgba(255,255,255,0.02)' }}>
+                {/* Existing replies */}
+                {(replies[update.id] || []).map(reply => (
+                  <div key={reply.id} style={{ marginBottom: '12px', fontSize: '14px' }}>
+                    <span style={{ color: '#FF6B35', fontWeight: 500 }}>
+                      {reply.user?.display_name || 'User'}
+                    </span>
+                    <span style={{ color: '#fff', marginLeft: '8px' }}>{reply.text}</span>
+                    <span style={{ color: '#666', marginLeft: '8px', fontSize: '12px' }}>
+                      {formatTime(reply.created_at)}
+                    </span>
+                  </div>
+                ))}
+
+                {/* Reply input */}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <input
+                    type="text"
+                    value={replyingTo === update.id ? replyText : ''}
+                    onChange={(e) => { setReplyingTo(update.id); setReplyText(e.target.value); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubmitReply(update.id)}
+                    placeholder="Write a reply..."
+                    maxLength={500}
+                    style={{
+                      flex: 1,
+                      background: '#1c1c1e',
+                      border: 'none',
+                      borderRadius: '16px',
+                      padding: '10px 14px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    onClick={() => handleSubmitReply(update.id)}
+                    disabled={!replyText.trim() || replyingTo !== update.id}
+                    style={{
+                      background: replyText.trim() && replyingTo === update.id ? '#FF6B35' : '#333',
+                      border: 'none',
+                      borderRadius: '16px',
+                      padding: '10px 16px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      cursor: replyText.trim() ? 'pointer' : 'not-allowed'
+                    }}
+                  >
+                    Reply
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           ))
         )}
 
@@ -596,6 +779,99 @@ export default function CruisingUpdatesPage() {
             >
               Maybe Later
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Report Modal */}
+      {reportingUpdate && (
+        <div
+          onClick={() => setReportingUpdate(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 1000
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#1c1c1e',
+              borderRadius: '24px',
+              padding: '32px 24px',
+              maxWidth: '340px',
+              width: '100%'
+            }}
+          >
+            <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '20px', textAlign: 'center' }}>
+              Report Post
+            </h3>
+            <p style={{ fontSize: '14px', color: '#888', marginBottom: '20px', textAlign: 'center' }}>
+              Why are you reporting this post?
+            </p>
+
+            {/* Report reasons */}
+            {(['spam', 'offensive', 'harassment', 'fake', 'other'] as CruisingReportReason[]).map((reason) => (
+              <button
+                key={reason}
+                onClick={() => setReportReason(reason)}
+                style={{
+                  width: '100%',
+                  background: reportReason === reason ? 'rgba(255,107,53,0.2)' : 'transparent',
+                  border: reportReason === reason ? '1px solid #FF6B35' : '1px solid #333',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  color: reportReason === reason ? '#FF6B35' : '#fff',
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  marginBottom: '8px',
+                  textTransform: 'capitalize'
+                }}
+              >
+                {reason === 'fake' ? 'Fake / Misleading' : reason}
+              </button>
+            ))}
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <button
+                onClick={() => setReportingUpdate(null)}
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: '1px solid #333',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReport}
+                style={{
+                  flex: 1,
+                  background: '#FF6B35',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Submit
+              </button>
+            </div>
           </div>
         </div>
       )}
