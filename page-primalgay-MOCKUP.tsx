@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Particle configuration
 const PARTICLE_COUNT = 80;
@@ -135,7 +136,11 @@ export default function LandingPage() {
               <div className="black-base" />
               <div className="inner-glow" />
               <div className="glass-shine" />
-              <img src="/icons/primallogo.png" alt="PrimalGay Logo" className="primal-logo-img" />
+              <img
+                src="/icons/primallogo.png"
+                alt="PrimalGay Logo"
+                className="primal-logo-img"
+              />
             </div>
           </div>
           <div className="connector" />
@@ -969,43 +974,5 @@ export default function LandingPage() {
         }
       `}</style>
     </div>
-  );
-}
-
-function FormingStarSVG() {
-  return (
-    <svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <linearGradient id="forming-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="50%" stopColor="#c8dcff" />
-          <stop offset="100%" stopColor="#ffffff" />
-        </linearGradient>
-      </defs>
-      <polygon
-        points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
-        fill="url(#forming-grad)"
-      />
-    </svg>
-  );
-}
-
-function CrystallineStarSVG() {
-  return (
-    <svg viewBox="0 0 100 150" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <linearGradient id="crystalline-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="30%" stopColor="#e8f0ff" />
-          <stop offset="50%" stopColor="#c8dcff" />
-          <stop offset="70%" stopColor="#e8f0ff" />
-          <stop offset="100%" stopColor="#ffffff" />
-        </linearGradient>
-      </defs>
-      <polygon
-        points="50,0 53,48 85,22 58,54 100,58 58,62 85,92 53,70 50,150 47,70 15,92 42,62 0,58 42,54 15,22 47,48"
-        fill="url(#crystalline-grad)"
-      />
-    </svg>
   );
 }

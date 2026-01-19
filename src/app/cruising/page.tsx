@@ -747,7 +747,7 @@ export default function CruisingUpdatesPage() {
               Post Cruising Updates
             </h3>
             <p style={{ fontSize: '15px', color: '#888', marginBottom: '24px', lineHeight: 1.5 }}>
-              Upgrade to SLTR Pro to post updates and let others know where you are
+              Upgrade to Primal Pro to post updates and let others know where you are
             </p>
             <button
               onClick={() => router.push('/premium')}
@@ -764,7 +764,7 @@ export default function CruisingUpdatesPage() {
                 marginBottom: '12px'
               }}
             >
-              Upgrade to Pro
+              Upgrade to Primal Pro
             </button>
             <button
               onClick={() => setShowPremiumPrompt(false)}

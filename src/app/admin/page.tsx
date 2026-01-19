@@ -319,6 +319,7 @@ export default function AdminDashboard() {
       }}>
         {[
           { label: 'View All Users', href: '/admin/users', icon: '👥' },
+          { label: 'Cruising Reports', href: '/admin/reports', icon: '🚩' },
           { label: 'View Payments', href: '/admin/payments', icon: '💰' },
           { label: 'View Errors', href: '/admin/errors', icon: '🐛' },
         ].map((action) => (

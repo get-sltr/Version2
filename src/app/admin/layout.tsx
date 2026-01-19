@@ -62,6 +62,7 @@ export default function AdminLayout({
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: '📊' },
     { href: '/admin/users', label: 'Users', icon: '👥' },
+    { href: '/admin/reports', label: 'Reports', icon: '🚩' },
     { href: '/admin/payments', label: 'Payments', icon: '💰' },
     { href: '/admin/errors', label: 'Errors', icon: '🐛' },
   ];
@@ -106,7 +107,7 @@ export default function AdminLayout({
             color: '#FF6B35',
             margin: 0,
           }}>
-            SLTR Admin
+            Primal Admin
           </h1>
           {isFounder(userEmail) && (
             <span style={{
