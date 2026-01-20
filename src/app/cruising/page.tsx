@@ -354,7 +354,8 @@ export default function CruisingUpdatesPage() {
             <div style={{ fontSize: '14px' }}>Be the first to post!</div>
           </div>
         ) : (
-          updates.map((update) => (
+          <>
+          {updates.map((update) => (
             <div
               key={update.id}
               style={{
@@ -586,7 +587,8 @@ export default function CruisingUpdatesPage() {
               </div>
             )}
           </div>
-          ))
+          ))}
+          </>
         )}
 
         {/* Refresh Button - Liquid Glass Effect */}
