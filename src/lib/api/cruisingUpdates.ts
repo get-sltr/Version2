@@ -76,7 +76,6 @@ export async function getCruisingUpdates(
     .limit(100);
 
   if (error) throw error;
-
   const updates = data || [];
 
   // Get unique user IDs
@@ -325,14 +324,33 @@ export async function getCruisingReplies(updateId: string): Promise<CruisingRepl
 
   if (error) throw error;
 
-  return (data || []).map(reply => ({
-    id: reply.id,
-    update_id: reply.update_id,
-    user_id: reply.user_id,
-    text: reply.text,
-    created_at: reply.created_at,
-    user: reply.profiles as { display_name: string | null; photo_url: string | null } | undefined
-  }));
+  return (data || []).map(reply => {
+    // Supabase returns joined data as array or object depending on relationship
+    // Handle both cases safely
+    const profiles = reply.profiles;
+    let userProfile: { display_name: string | null; photo_url: string | null } | undefined;
+    
+    if (Array.isArray(profiles) && profiles.length > 0) {
+      userProfile = {
+        display_name: profiles[0].display_name ?? null,
+        photo_url: profiles[0].photo_url ?? null
+      };
+    } else if (profiles && typeof profiles === 'object' && !Array.isArray(profiles)) {
+      userProfile = {
+        display_name: (profiles as any).display_name ?? null,
+        photo_url: (profiles as any).photo_url ?? null
+      };
+    }
+
+    return {
+      id: reply.id,
+      update_id: reply.update_id,
+      user_id: reply.user_id,
+      text: reply.text,
+      created_at: reply.created_at,
+      user: userProfile
+    };
+  });
 }
 
 /**

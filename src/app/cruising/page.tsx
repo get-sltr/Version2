@@ -354,241 +354,240 @@ export default function CruisingUpdatesPage() {
             <div style={{ fontSize: '14px' }}>Be the first to post!</div>
           </div>
         ) : (
-          <>
-          {updates.map((update) => (
-            <div
-              key={update.id}
-              style={{
-                padding: '16px 20px',
-                borderBottom: '1px solid #1c1c1e',
-                display: 'flex',
-                gap: '12px',
-                position: 'relative'
-              }}
-            >
-              {/* Profile Image - Click to view profile */}
-              <Link href={`/profile/${update.user_id}`} style={{ position: 'relative', flexShrink: 0 }}>
-                <div style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '50%',
-                  backgroundImage: `url(${update.user.photo_url || '/images/default-avatar.png'})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  border: update.is_hosting ? '2px solid #FF6B35' : '2px solid #333'
-                }} />
-                {update.user.is_online && (
-                  <div style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    right: 0,
-                    width: '14px',
-                    height: '14px',
-                    borderRadius: '50%',
-                    background: '#4CD964',
-                    border: '2px solid #000'
-                  }} />
-                )}
-              </Link>
-
-              {/* Content - Click to message */}
+          updates.map((update) => (
+            <div key={update.id}>
+              {/* Main update card */}
               <div
-                style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
-                onClick={() => {
-                  if (update.user_id !== currentUserId) {
-                    router.push(`/messages/${update.user_id}`);
-                  }
+                style={{
+                  padding: '16px 20px',
+                  borderBottom: '1px solid #1c1c1e',
+                  display: 'flex',
+                  gap: '12px',
+                  position: 'relative'
                 }}
               >
-                {/* Time and distance row */}
-                <div style={{ fontSize: '12px', color: '#FF6B35', marginBottom: '4px', fontStyle: 'italic' }}>
-                  {formatTime(update.created_at)}
-                  {update.distance !== undefined && `, ${formatDistance(update.distance)}`}
-                </div>
-
-                {/* User stats row */}
-                <div style={{ fontSize: '13px', color: '#888', marginBottom: '6px' }}>
-                  {getUserDisplay(update)}
-                </div>
-
-                {/* Message content */}
-                <div style={{
-                  fontSize: '15px',
-                  color: '#fff',
-                  fontWeight: 500,
-                  lineHeight: 1.4
-                }}>
-                  {update.text}
-                </div>
-
-                {/* Location/hosting indicator */}
-                {update.is_hosting && (
+                {/* Profile Image - Click to view profile */}
+                <Link href={`/profile/${update.user_id}`} style={{ position: 'relative', flexShrink: 0 }}>
                   <div style={{
-                    fontSize: '13px',
-                    color: '#FF6B35',
-                    marginTop: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    🏠 Hosting
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    backgroundImage: `url(${update.user.photo_url || '/images/default-avatar.png'})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    border: update.is_hosting ? '2px solid #FF6B35' : '2px solid #333'
+                  }} />
+                  {update.user.is_online && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      width: '14px',
+                      height: '14px',
+                      borderRadius: '50%',
+                      background: '#4CD964',
+                      border: '2px solid #000'
+                    }} />
+                  )}
+                </Link>
+
+                {/* Content - Click to message */}
+                <div
+                  style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                  onClick={() => {
+                    if (update.user_id !== currentUserId) {
+                      router.push(`/messages/${update.user_id}`);
+                    }
+                  }}
+                >
+                  {/* Time and distance row */}
+                  <div style={{ fontSize: '12px', color: '#FF6B35', marginBottom: '4px', fontStyle: 'italic' }}>
+                    {formatTime(update.created_at)}
+                    {update.distance !== undefined && `, ${formatDistance(update.distance)}`}
                   </div>
-                )}
+
+                  {/* User stats row */}
+                  <div style={{ fontSize: '13px', color: '#888', marginBottom: '6px' }}>
+                    {getUserDisplay(update)}
+                  </div>
+
+                  {/* Message content */}
+                  <div style={{
+                    fontSize: '15px',
+                    color: '#fff',
+                    fontWeight: 500,
+                    lineHeight: 1.4
+                  }}>
+                    {update.text}
+                  </div>
+
+                  {/* Location/hosting indicator */}
+                  {update.is_hosting && (
+                    <div style={{
+                      fontSize: '13px',
+                      color: '#FF6B35',
+                      marginTop: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      🏠 Hosting
+                    </div>
+                  )}
+                </div>
+
+                {/* Action buttons - vertical on right */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                  {/* Location button */}
+                  {update.lat && update.lng && (
+                    <button
+                      onClick={() => window.open(`https://maps.google.com/?q=${update.lat},${update.lng}`, '_blank')}
+                      style={{ background: 'none', border: 'none', color: '#666', fontSize: '18px', cursor: 'pointer', padding: '4px' }}
+                      title="View on map"
+                    >
+                      📍
+                    </button>
+                  )}
+
+                  {/* Delete (own) or Report (others) */}
+                  {update.user_id === currentUserId ? (
+                    <button
+                      onClick={() => handleDelete(update.id)}
+                      style={{ background: 'none', border: 'none', color: '#666', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
+                      title="Delete"
+                    >
+                      ✕
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setReportingUpdate(update.id)}
+                      style={{ background: 'none', border: 'none', color: '#666', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
+                      title="Report"
+                    >
+                      ⚑
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Action buttons - vertical on right */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
-                {/* Location button */}
-                {update.lat && update.lng && (
-                  <button
-                    onClick={() => window.open(`https://maps.google.com/?q=${update.lat},${update.lng}`, '_blank')}
-                    style={{ background: 'none', border: 'none', color: '#666', fontSize: '18px', cursor: 'pointer', padding: '4px' }}
-                    title="View on map"
-                  >
-                    📍
-                  </button>
-                )}
-
-                {/* Delete (own) or Report (others) */}
-                {update.user_id === currentUserId ? (
-                  <button
-                    onClick={() => handleDelete(update.id)}
-                    style={{ background: 'none', border: 'none', color: '#666', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
-                    title="Delete"
-                  >
-                    ✕
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setReportingUpdate(update.id)}
-                    style={{ background: 'none', border: 'none', color: '#666', fontSize: '16px', cursor: 'pointer', padding: '4px' }}
-                    title="Report"
-                  >
-                    ⚑
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Interaction bar - like, reply, message */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              padding: '8px 20px 12px 88px',
-              borderBottom: '1px solid #1c1c1e'
-            }}>
-              {/* Like button */}
-              <button
-                onClick={() => handleLike(update.id)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: likedIds.has(update.id) ? '#FF6B35' : '#666',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: 0
-                }}
-              >
-                {likedIds.has(update.id) ? '❤️' : '🤍'} {update.like_count || 0}
-              </button>
-
-              {/* Reply button */}
-              <button
-                onClick={() => handleToggleReplies(update.id)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: expandedReplies === update.id ? '#FF6B35' : '#666',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: 0
-                }}
-              >
-                💬 {update.reply_count || 0}
-              </button>
-
-              {/* Message button (for others' posts) */}
-              {update.user_id !== currentUserId && (
+              {/* Interaction bar - like, reply, message */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                padding: '8px 20px 12px 88px',
+                borderBottom: '1px solid #1c1c1e'
+              }}>
+                {/* Like button */}
                 <button
-                  onClick={() => router.push(`/messages/${update.user_id}`)}
+                  onClick={() => handleLike(update.id)}
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#666',
+                    color: likedIds.has(update.id) ? '#FF6B35' : '#666',
                     fontSize: '14px',
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
                     padding: 0
                   }}
                 >
-                  ✉️ Message
+                  {likedIds.has(update.id) ? '❤️' : '🤍'} {update.like_count || 0}
                 </button>
-              )}
-            </div>
 
-            {/* Replies section (expanded) */}
-            {expandedReplies === update.id && (
-              <div style={{ padding: '12px 20px 12px 88px', background: 'rgba(255,255,255,0.02)' }}>
-                {/* Existing replies */}
-                {(replies[update.id] || []).map(reply => (
-                  <div key={reply.id} style={{ marginBottom: '12px', fontSize: '14px' }}>
-                    <span style={{ color: '#FF6B35', fontWeight: 500 }}>
-                      {reply.user?.display_name || 'User'}
-                    </span>
-                    <span style={{ color: '#fff', marginLeft: '8px' }}>{reply.text}</span>
-                    <span style={{ color: '#666', marginLeft: '8px', fontSize: '12px' }}>
-                      {formatTime(reply.created_at)}
-                    </span>
-                  </div>
-                ))}
+                {/* Reply button */}
+                <button
+                  onClick={() => handleToggleReplies(update.id)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: expandedReplies === update.id ? '#FF6B35' : '#666',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: 0
+                  }}
+                >
+                  💬 {update.reply_count || 0}
+                </button>
 
-                {/* Reply input */}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                  <input
-                    type="text"
-                    value={replyingTo === update.id ? replyText : ''}
-                    onChange={(e) => { setReplyingTo(update.id); setReplyText(e.target.value); }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSubmitReply(update.id)}
-                    placeholder="Write a reply..."
-                    maxLength={500}
-                    style={{
-                      flex: 1,
-                      background: '#1c1c1e',
-                      border: 'none',
-                      borderRadius: '16px',
-                      padding: '10px 14px',
-                      color: '#fff',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
+                {/* Message button (for others' posts) */}
+                {update.user_id !== currentUserId && (
                   <button
-                    onClick={() => handleSubmitReply(update.id)}
-                    disabled={!replyText.trim() || replyingTo !== update.id}
+                    onClick={() => router.push(`/messages/${update.user_id}`)}
                     style={{
-                      background: replyText.trim() && replyingTo === update.id ? '#FF6B35' : '#333',
+                      background: 'none',
                       border: 'none',
-                      borderRadius: '16px',
-                      padding: '10px 16px',
-                      color: '#fff',
+                      color: '#666',
                       fontSize: '14px',
-                      cursor: replyText.trim() ? 'pointer' : 'not-allowed'
+                      cursor: 'pointer',
+                      padding: 0
                     }}
                   >
-                    Reply
+                    ✉️ Message
                   </button>
-                </div>
+                )}
               </div>
-            )}
-          </div>
-          ))}
-          </>
+
+              {/* Replies section (expanded) */}
+              {expandedReplies === update.id && (
+                <div style={{ padding: '12px 20px 12px 88px', background: 'rgba(255,255,255,0.02)' }}>
+                  {/* Existing replies */}
+                  {(replies[update.id] || []).map(reply => (
+                    <div key={reply.id} style={{ marginBottom: '12px', fontSize: '14px' }}>
+                      <span style={{ color: '#FF6B35', fontWeight: 500 }}>
+                        {reply.user?.display_name || 'User'}
+                      </span>
+                      <span style={{ color: '#fff', marginLeft: '8px' }}>{reply.text}</span>
+                      <span style={{ color: '#666', marginLeft: '8px', fontSize: '12px' }}>
+                        {formatTime(reply.created_at)}
+                      </span>
+                    </div>
+                  ))}
+
+                  {/* Reply input */}
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                    <input
+                      type="text"
+                      value={replyingTo === update.id ? replyText : ''}
+                      onChange={(e) => { setReplyingTo(update.id); setReplyText(e.target.value); }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSubmitReply(update.id)}
+                      placeholder="Write a reply..."
+                      maxLength={500}
+                      style={{
+                        flex: 1,
+                        background: '#1c1c1e',
+                        border: 'none',
+                        borderRadius: '16px',
+                        padding: '10px 14px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      onClick={() => handleSubmitReply(update.id)}
+                      disabled={!replyText.trim() || replyingTo !== update.id}
+                      style={{
+                        background: replyText.trim() && replyingTo === update.id ? '#FF6B35' : '#333',
+                        border: 'none',
+                        borderRadius: '16px',
+                        padding: '10px 16px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        cursor: replyText.trim() ? 'pointer' : 'not-allowed'
+                      }}
+                    >
+                      Reply
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
         )}
 
         {/* Refresh Button - Liquid Glass Effect */}
@@ -880,3 +879,4 @@ export default function CruisingUpdatesPage() {
     </div>
   );
 }
+
