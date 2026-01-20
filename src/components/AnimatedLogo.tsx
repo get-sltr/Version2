@@ -54,7 +54,7 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
 
         {/* Primal Logo PNG */}
         <Image
-          src="/images/primallogo.png"
+          src="/icons/primallogo.png"
           alt="Primal"
           width={s.logo}
           height={s.logo}
