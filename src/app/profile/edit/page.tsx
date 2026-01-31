@@ -193,8 +193,13 @@ export default function EditProfilePage() {
           if (profile.health_practices) setHealthPractices(profile.health_practices);
           if (profile.vaccinations) setVaccinations(profile.vaccinations);
 
-          // PnP
-          if (typeof profile.pnp_visible === 'boolean') setPnpVisible(profile.pnp_visible);
+          // PnP - load from user_settings table
+          const { data: pnpSettings } = await supabase
+            .from('user_settings')
+            .select('pnp_visible')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (pnpSettings) setPnpVisible(pnpSettings.pnp_visible ?? false);
 
           // Social Links
           if (profile.instagram) setInstagram(profile.instagram);
@@ -306,8 +311,6 @@ export default function EditProfilePage() {
         last_tested: lastTested || null,
         health_practices: healthPractices,
         vaccinations: vaccinations,
-        // PnP
-        pnp_visible: pnpVisible,
         // Social Links
         instagram: instagram || null,
         twitter: twitter || null,

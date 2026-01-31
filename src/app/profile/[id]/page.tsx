@@ -151,7 +151,14 @@ export default function ProfileViewPage() {
           console.error('Error loading profile:', profileError);
           setError('Failed to load profile');
         } else if (data) {
-          setProfile(data);
+          // Fetch pnp_visible from user_settings
+          const { data: settingsData } = await supabase
+            .from('user_settings')
+            .select('pnp_visible')
+            .eq('user_id', profileId)
+            .maybeSingle();
+
+          setProfile({ ...data, pnp_visible: settingsData?.pnp_visible ?? false });
 
           // Record profile view (only if viewing someone else's profile)
           if (user && profileId !== user.id) {

@@ -12,8 +12,9 @@ import OrbitBadge from '@/components/OrbitBadge';
 import { DTFNBadge } from '@/components/dtfn';
 import { useDTFN } from '@/hooks/useDTFN';
 import { usePremium } from '@/hooks/usePremium';
-import RebrandSplash from '@/components/RebrandSplash';
 import MigrationBanner from '@/components/MigrationBanner';
+import { AddToHomeScreenSplash } from '@/components/AddToHomeScreenSplash';
+import { PushNotificationPrompt } from '@/components/PushNotificationPrompt';
 
 /**
  * Format distance for display
@@ -54,6 +55,12 @@ export default function Dashboard() {
   const [hostingUserIds, setHostingUserIds] = useState<Set<string>>(new Set());
   const [locationSearch, setLocationSearch] = useState('');
   const [searchedLocation, setSearchedLocation] = useState<{ lat: number; lng: number; name: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const filters = [
     { id: 'online', label: 'Online' },
@@ -331,7 +338,25 @@ export default function Dashboard() {
       }
 
       // Limit to 50 for display
-      setProfiles(filtered.slice(0, 50));
+      const displayProfiles = filtered.slice(0, 50);
+
+      // Fetch pnp_visible from user_settings for displayed profiles
+      const profileIds = displayProfiles.map(p => p.id);
+      if (profileIds.length > 0) {
+        const { data: settingsData } = await supabase
+          .from('user_settings')
+          .select('user_id, pnp_visible')
+          .in('user_id', profileIds);
+
+        if (settingsData) {
+          const pnpMap = new Map(settingsData.map(s => [s.user_id, s.pnp_visible]));
+          displayProfiles.forEach(p => {
+            p.pnp_visible = pnpMap.get(p.id) ?? false;
+          });
+        }
+      }
+
+      setProfiles(displayProfiles);
     } else {
       setProfiles([]);
     }
@@ -390,11 +415,11 @@ export default function Dashboard() {
         // Fetch profiles near this location
         fetchProfilesAtLocation(lat, lng);
       } else {
-        alert('Location not found. Try a different city name.');
+        showToast('Location not found. Try a different city name.');
       }
     } catch (error) {
       console.error('Geocoding error:', error);
-      alert('Failed to search location');
+      showToast('Failed to search location');
     }
   };
 
@@ -561,8 +586,35 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", position: 'relative', overflow: 'hidden' }}>
-      {/* Rebrand Announcement Splash */}
-      <RebrandSplash />
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`toast-notification ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
+          {toast.message}
+        </div>
+      )}
+
+      {/* Dropdown backdrop dismiss */}
+      {(showPositionDropdown || showAgeDropdown || showTribesDropdown) && (
+        <div
+          onClick={() => {
+            setShowPositionDropdown(false);
+            setShowAgeDropdown(false);
+            setShowTribesDropdown(false);
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99,
+            background: 'rgba(0, 0, 0, 0.3)',
+          }}
+        />
+      )}
+
+      {/* Add to Home Screen Splash */}
+      {currentUser?.id && <AddToHomeScreenSplash userId={currentUser.id} />}
+
+      {/* Push Notification Prompt (shows when running as PWA) */}
+      {currentUser?.id && <PushNotificationPrompt userId={currentUser.id} />}
 
       {/* Migration Banner for old domain users */}
       <MigrationBanner />
@@ -609,10 +661,10 @@ export default function Dashboard() {
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
         zIndex: 100,
-        padding: '12px 15px'
+        padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 15px 12px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-          <a href="/settings" style={{
+          <a href="/settings" aria-label="Settings" style={{
             width: '46px',
             height: '46px',
             borderRadius: '50%',
@@ -658,22 +710,23 @@ export default function Dashboard() {
             {searchedLocation && (
               <button
                 onClick={clearLocationSearch}
+                aria-label="Clear location search"
                 style={{
                   position: 'absolute',
-                  right: '45px',
+                  right: '40px',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   background: 'rgba(255,107,53,0.3)',
                   border: 'none',
                   borderRadius: '50%',
-                  width: '22px',
-                  height: '22px',
+                  width: '44px',
+                  height: '44px',
                   color: '#ff6b35',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '12px'
+                  fontSize: '14px'
                 }}
               >
                 ✕
@@ -681,16 +734,22 @@ export default function Dashboard() {
             )}
             <button
               onClick={handleLocationSearch}
+              aria-label="Search location"
               style={{
                 position: 'absolute',
-                right: '12px',
+                right: '4px',
                 top: '50%',
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
                 color: searchedLocation ? '#ff6b35' : 'rgba(255,255,255,0.5)',
                 cursor: 'pointer',
-                padding: '4px'
+                padding: '12px',
+                minWidth: '44px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <IconSearch size={18} />
@@ -1433,15 +1492,16 @@ export default function Dashboard() {
 
           <button
             onClick={() => setShowAd(false)}
+            aria-label="Close promotion"
             style={{
               position: 'absolute',
-              top: '10px',
-              right: '10px',
+              top: '4px',
+              right: '4px',
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '50%',
-              width: '26px',
-              height: '26px',
+              width: '44px',
+              height: '44px',
               color: '#fff',
               cursor: 'pointer',
               display: 'flex',
@@ -1450,7 +1510,7 @@ export default function Dashboard() {
               zIndex: 2,
             }}
           >
-            <IconClose size={12} />
+            <IconClose size={14} />
           </button>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
@@ -1468,7 +1528,7 @@ export default function Dashboard() {
                 <IconCrown size={24} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff' }}>Upgrade to SLTR+</h3>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff' }}>Upgrade to Primal+</h3>
                 <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Unlimited profiles, no ads, see who viewed you</p>
               </div>
             </div>
@@ -1562,8 +1622,8 @@ export default function Dashboard() {
                   animation: 'hostingPulse 2s ease-in-out infinite',
                   boxShadow: '0 0 10px rgba(255, 107, 53, 0.6)'
                 }}>
-                  <span style={{ fontSize: '6px' }}>👥</span>
-                  <span style={{ fontSize: '7px', fontWeight: 700, color: '#fff', letterSpacing: '0.3px' }}>HOSTING</span>
+                  <span style={{ fontSize: '8px' }}>👥</span>
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', letterSpacing: '0.3px' }}>HOSTING</span>
                 </div>
               )}
 
