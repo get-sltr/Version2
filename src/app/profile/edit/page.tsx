@@ -56,11 +56,13 @@ export default function EditProfilePage() {
   const [healthPractices, setHealthPractices] = useState<string[]>([]);
   const [vaccinations, setVaccinations] = useState<string[]>([]);
 
+  // PnP
+  const [pnpVisible, setPnpVisible] = useState(false);
+
   // Social Links
   const [instagram, setInstagram] = useState('');
   const [twitter, setTwitter] = useState('');
   const [facebook, setFacebook] = useState('');
-  const [spotify, setSpotify] = useState('');
   const isDarkMode = colors.background === '#000' || colors.background === '#000000' || colors.background === '#121212' || colors.background.includes('0,0,0');
   const inputStyle = {
     width: '100%',
@@ -190,6 +192,9 @@ export default function EditProfilePage() {
           if (profile.health_practices) setHealthPractices(profile.health_practices);
           if (profile.vaccinations) setVaccinations(profile.vaccinations);
 
+          // PnP
+          if (typeof profile.pnp_visible === 'boolean') setPnpVisible(profile.pnp_visible);
+
           // Social Links
           if (profile.instagram) setInstagram(profile.instagram);
           if (profile.twitter) setTwitter(profile.twitter);
@@ -300,6 +305,8 @@ export default function EditProfilePage() {
         last_tested: lastTested || null,
         health_practices: healthPractices,
         vaccinations: vaccinations,
+        // PnP
+        pnp_visible: pnpVisible,
         // Social Links
         instagram: instagram || null,
         twitter: twitter || null,
@@ -328,6 +335,11 @@ export default function EditProfilePage() {
         alert('Failed to save profile changes: ' + error.message);
         return;
       }
+
+      // Sync pnp_visible to user_settings table
+      await supabase
+        .from('user_settings')
+        .upsert({ user_id: user.id, pnp_visible: pnpVisible }, { onConflict: 'user_id' });
 
       // Clear save button state
       setShowSaveButton(false);
@@ -856,6 +868,12 @@ export default function EditProfilePage() {
           colors={colors}
         />
         <ToggleRow label="Accepts NSFW Pics" value={acceptsNsfw} onChange={(v) => { setAcceptsNsfw(v); markAsChanged(); }} colors={colors} />
+        <ToggleRow label="PnP" value={pnpVisible} onChange={(v) => { setPnpVisible(v); markAsChanged(); }} colors={colors} />
+        {pnpVisible && (
+          <div style={{ padding: '8px 0 14px', fontSize: '13px', color: colors.textSecondary, lineHeight: 1.5 }}>
+            The orbit icon will appear on your profile and grid card.
+          </div>
+        )}
       </Section>
 
       {/* IDENTITY */}
