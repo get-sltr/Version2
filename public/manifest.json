@@ -1,7 +1,7 @@
 {
-  "name": "SLTR - No Rules Apply",
-  "short_name": "SLTR",
-  "description": "Dating app for the LGBTQ+ community",
+  "name": "Primal - Rules Don't Apply",
+  "short_name": "Primal",
+  "description": "Dating app for gay and bisexual men",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
@@ -75,5 +75,6 @@
     }
   ],
   "categories": ["social", "lifestyle"],
+  "iarc_rating_id": "mature-17-plus",
   "prefer_related_applications": false
 }
