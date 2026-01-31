@@ -63,6 +63,7 @@ export default function EditProfilePage() {
   const [instagram, setInstagram] = useState('');
   const [twitter, setTwitter] = useState('');
   const [facebook, setFacebook] = useState('');
+  const [spotify, setSpotify] = useState('');
   const isDarkMode = colors.background === '#000' || colors.background === '#000000' || colors.background === '#121212' || colors.background.includes('0,0,0');
   const inputStyle = {
     width: '100%',
