@@ -5,9 +5,11 @@ const config: CapacitorConfig = {
   appName: 'Primal',
   webDir: 'out',
   server: {
-    hostname: 'localhost',
+    url: 'https://primalgay.com',
+    hostname: 'primalgay.com',
     androidScheme: 'https',
     iosScheme: 'https',
+    allowNavigation: ['primalgay.com', '*.primalgay.com', '*.supabase.co', '*.google.com', 'accounts.google.com'],
   },
   plugins: {
     SplashScreen: {
@@ -35,7 +37,6 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
-    scheme: 'primal',
     backgroundColor: '#050508',
   },
   android: {

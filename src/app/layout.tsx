@@ -7,7 +7,6 @@ import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistrati
 import { LocationPermission } from '../components/LocationPermission';
 import { OneSignalProvider } from '../components/OneSignalProvider';
 import AuthListener from '../components/AuthListener';
-import { AgeGate } from '../components/AgeGate';
 import { PhotoGate } from '../components/PhotoGate';
 
 const dmSans = DM_Sans({
@@ -77,14 +76,12 @@ export default function RootLayout({ children }: { readonly children: React.Reac
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body style={{ margin: 0, WebkitTapHighlightColor: 'transparent', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
+      <body style={{ margin: 0, WebkitTapHighlightColor: 'transparent' }}>
         <ThemeProvider>
-          <AgeGate>
           <PhotoGate>
           <AuthListener />
           {children}
           </PhotoGate>
-          </AgeGate>
           <ServiceWorkerRegistration />
           <LocationPermission />
           <OneSignalProvider />

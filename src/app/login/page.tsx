@@ -24,6 +24,7 @@ function GoogleIcon() {
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
@@ -35,6 +36,12 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!ageConfirmed) {
+      setError('You must confirm you are at least 18 years old');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -542,11 +549,34 @@ export default function LoginPage() {
                     />
                   </div>
 
-                  <div style={{ textAlign: 'right', marginBottom: '24px' }}>
+                  <div style={{ textAlign: 'right', marginBottom: '16px' }}>
                     <Link href="/forgot-password" className="login-forgot">
                       Forgot password?
                     </Link>
                   </div>
+
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    marginBottom: '20px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    color: 'rgba(255,255,255,0.7)',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={ageConfirmed}
+                      onChange={(e) => setAgeConfirmed(e.target.checked)}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        accentColor: '#FF6B35',
+                        flexShrink: 0,
+                      }}
+                    />
+                    I confirm I am at least 18 years old
+                  </label>
 
                   <motion.button
                     type="submit"
