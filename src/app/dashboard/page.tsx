@@ -102,28 +102,12 @@ export default function Dashboard() {
     { id: 'queer', label: 'Queer' }
   ];
 
-  // Fetch users who are hosting active groups
-  const fetchHostingUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('groups')
-        .select('host_id')
-        .eq('is_active', true);
-
-      if (!error && data) {
-        const hostIds = new Set(data.map(g => g.host_id).filter(Boolean) as string[]);
-        setHostingUserIds(hostIds);
-      }
-    } catch (err) {
-      console.error('Error fetching hosting users:', err);
-    }
-  };
+  // hostingUserIds is now populated from user_settings in fetchProfiles
 
   useEffect(() => {
     const init = async () => {
       await checkUser();
       await fetchProfiles();
-      await fetchHostingUsers();
 
       // Subscribe to real-time profile changes for current user
       const { data: { user: authUser } } = await supabase.auth.getUser();
@@ -348,19 +332,23 @@ export default function Dashboard() {
       // Limit to 50 for display
       const displayProfiles = filtered.slice(0, 50);
 
-      // Fetch long_session_visible from user_settings for displayed profiles
+      // Fetch long_session_visible and is_hosting from user_settings for displayed profiles
       const profileIds = displayProfiles.map(p => p.id);
       if (profileIds.length > 0) {
         const { data: settingsData } = await supabase
           .from('user_settings')
-          .select('user_id, long_session_visible')
+          .select('user_id, long_session_visible, is_hosting')
           .in('user_id', profileIds);
 
         if (settingsData) {
-          const longSessionMap = new Map(settingsData.map(s => [s.user_id, s.long_session_visible]));
+          const settingsMap = new Map(settingsData.map(s => [s.user_id, s]));
+          const hostIds = new Set<string>();
           displayProfiles.forEach(p => {
-            p.long_session_visible = longSessionMap.get(p.id) ?? false;
+            const s = settingsMap.get(p.id);
+            p.long_session_visible = s?.long_session_visible ?? false;
+            if (s?.is_hosting) hostIds.add(p.id);
           });
+          setHostingUserIds(hostIds);
         }
       }
 

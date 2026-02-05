@@ -252,7 +252,8 @@ export default function SettingsPage() {
         </a>
         <ToggleMenuItem label="Show Distance" storageKey="showDistance" />
         <ToggleMenuItem label="Show Age" storageKey="showAge" />
-        <ToggleMenuItem label="Long Session" storageKey="long_session" />
+        <DbToggleMenuItem label="Long Session" column="long_session_visible" userId={user?.id} />
+        <DbToggleMenuItem label="Hosting" column="is_hosting" userId={user?.id} />
         <a href="/settings/blocked-users" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Blocked Users" hasArrow />
         </a>
@@ -384,6 +385,74 @@ function ToggleMenuItem({ label, storageKey }: { label: string; storageKey: stri
           transition: 'background 0.3s',
           minWidth: '44px',
           minHeight: '31px',
+        }}
+      >
+        <div style={{
+          width: '27px',
+          height: '27px',
+          background: '#fff',
+          borderRadius: '50%',
+          position: 'absolute',
+          top: '2px',
+          left: enabled ? '22px' : '2px',
+          transition: 'left 0.3s',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+        }} />
+      </button>
+    </div>
+  );
+}
+
+function DbToggleMenuItem({ label, column, userId }: { label: string; column: string; userId?: string }) {
+  const { colors } = useTheme();
+  const [enabled, setEnabled] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    const load = async () => {
+      const { data } = await supabase
+        .from('user_settings')
+        .select(column)
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (data) setEnabled(!!(data as any)[column]);
+      setLoaded(true);
+    };
+    load();
+  }, [userId, column]);
+
+  const handleToggle = async () => {
+    if (!userId) return;
+    const newValue = !enabled;
+    setEnabled(newValue);
+    await supabase
+      .from('user_settings')
+      .upsert({ user_id: userId, [column]: newValue } as any, { onConflict: 'user_id' });
+  };
+
+  const borderStyle = '1px solid rgba(60, 60, 60, 0.6)';
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: borderStyle }}>
+      <span style={{ fontSize: '16px', color: colors.text }}>{label}</span>
+      <button
+        role="switch"
+        aria-checked={enabled}
+        onClick={handleToggle}
+        disabled={!loaded}
+        style={{
+          width: '51px',
+          height: '31px',
+          background: enabled ? colors.accent : '#333',
+          borderRadius: '16px',
+          border: 'none',
+          position: 'relative',
+          cursor: loaded ? 'pointer' : 'default',
+          transition: 'background 0.3s',
+          minWidth: '44px',
+          minHeight: '31px',
+          opacity: loaded ? 1 : 0.5,
         }}
       >
         <div style={{

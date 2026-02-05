@@ -14,7 +14,7 @@ import type {
 async function fetchProfilePreview(userId: string): Promise<ProfilePreview | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, age, position, photo_url, is_online, is_dth')
+    .select('id, display_name, age, position, photo_url, is_online, dth_active_until')
     .eq('id', userId)
     .maybeSingle();
 
@@ -57,7 +57,7 @@ export async function getGroups(limit = 50): Promise<GroupWithHost[]> {
       position: null,
       photo_url: null,
       is_online: false,
-      is_dth: false
+      dth_active_until: null
     }
   }));
 }
@@ -96,7 +96,7 @@ export async function getGroup(groupId: string): Promise<GroupWithHost | null> {
       position: null,
       photo_url: null,
       is_online: false,
-      is_dth: false
+      dth_active_until: null
     }
   };
 }
@@ -165,7 +165,7 @@ export async function getMyJoinedGroups(): Promise<GroupWithHost[]> {
       position: null,
       photo_url: null,
       is_online: false,
-      is_dth: false
+      dth_active_until: null
     }
   }));
 }
@@ -385,7 +385,7 @@ export async function getGroupMembers(
       position: null,
       photo_url: null,
       is_online: false,
-      is_dth: false
+      dth_active_until: null
     }
   }));
 }

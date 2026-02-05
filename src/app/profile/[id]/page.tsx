@@ -165,14 +165,14 @@ export default function ProfileViewPage() {
           console.error('Error loading profile:', profileError);
           setError('Failed to load profile');
         } else if (data) {
-          // Fetch long_session_visible from user_settings
+          // Fetch long_session_visible and is_hosting from user_settings
           const { data: settingsData } = await supabase
             .from('user_settings')
-            .select('long_session_visible')
+            .select('long_session_visible, is_hosting')
             .eq('user_id', profileId)
             .maybeSingle();
 
-          setProfile({ ...data, long_session_visible: settingsData?.long_session_visible ?? false });
+          setProfile({ ...data, long_session_visible: settingsData?.long_session_visible ?? false, is_hosting: settingsData?.is_hosting ?? false });
 
           // Record profile view (only if viewing someone else's profile)
           if (user && profileId !== user.id) {
@@ -522,6 +522,9 @@ export default function ProfileViewPage() {
               {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
             </span>
             {profile.long_session_visible && <OrbitBadge size="md" />}
+            {profile.is_hosting && (
+              <span style={{ background: 'rgba(255,107,53,0.9)', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', fontWeight: 700, color: '#fff', letterSpacing: '0.3px' }}>HOSTING</span>
+            )}
             {profile.is_premium && <ProBadge size="md" />}
             <DTHBadge isActive={profile.dth_active_until && new Date(profile.dth_active_until) > new Date()} size="md" />
           </div>

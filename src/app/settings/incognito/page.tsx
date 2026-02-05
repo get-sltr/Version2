@@ -51,8 +51,21 @@ export default function IncognitoModePage() {
       <div style={{ padding: '20px' }}>
         {/* Icon & Status */}
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div style={{ fontSize: '80px', marginBottom: '20px' }}>
-            {enabled ? '🕶️' : '👁️'}
+          <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
+            {enabled ? (
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#FF6B35" opacity="0.15"/>
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" stroke="#FF6B35" strokeWidth="1.5" fill="none"/>
+                <path d="M9 12l2 2 4-4" stroke="#FF6B35" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="rgba(255,255,255,0.05)"/>
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none"/>
+                <circle cx="12" cy="11" r="3" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none"/>
+                <path d="M4.5 12c1.5-3 4.2-5 7.5-5s6 2 7.5 5" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              </svg>
+            )}
           </div>
           <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '10px' }}>
             {enabled ? 'You\'re Hidden' : 'You\'re Visible'}
