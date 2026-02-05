@@ -43,7 +43,7 @@ export default function Dashboard() {
   const { isPremium, isLoading: premiumLoading } = usePremium();
   const { blockedIds } = useBlockedUsers();
   const [activeFilter, setActiveFilter] = useState('online');
-  const [showAd, setShowAd] = useState(true);
+  const [showAd, setShowAd] = useState(false);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +59,11 @@ export default function Dashboard() {
   const [locationSearch, setLocationSearch] = useState('');
   const [searchedLocation, setSearchedLocation] = useState<{ lat: number; lng: number; name: string } | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Show upgrade banner only for non-premium users
+  useEffect(() => {
+    if (!premiumLoading && !isPremium) setShowAd(true);
+  }, [premiumLoading, isPremium]);
 
   const showToast = (message: string, type: 'success' | 'error' = 'error') => {
     setToast({ message, type });
@@ -581,7 +586,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#000', color: '#fff', fontFamily: "'Orbitron', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", position: 'relative', overflowX: 'hidden', maxWidth: '100vw' }}>
       {/* Toast Notification */}
       {toast && (
         <div className={`toast-notification ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
@@ -651,7 +656,7 @@ export default function Dashboard() {
       <div style={{ position: 'relative', zIndex: 10, paddingBottom: '100px' }}>
       <header style={{
         ...glassHeader,
-        padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 15px 12px',
+        padding: 'env(safe-area-inset-top, 12px) 15px 12px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
           <a href="/settings" aria-label="Settings" style={{
@@ -1458,18 +1463,17 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
-            margin: '12px 15px',
-            background: 'rgba(255, 107, 53, 0.08)',
+            margin: '8px 15px',
+            background: 'linear-gradient(135deg, rgba(255,107,53,0.12) 0%, rgba(255,107,53,0.04) 100%)',
             backdropFilter: 'blur(15px)',
             WebkitBackdropFilter: 'blur(15px)',
-            borderRadius: '16px',
-            padding: '16px',
+            borderRadius: '12px',
+            padding: '10px 12px',
             position: 'relative',
-            border: '1px solid rgba(255, 107, 53, 0.2)',
+            border: '1px solid rgba(255, 107, 53, 0.25)',
             overflow: 'hidden',
           }}
         >
-          {/* Background shine */}
           <div style={{
             position: 'absolute',
             top: 0,
@@ -1480,64 +1484,44 @@ export default function Dashboard() {
             animation: 'buttonShine 4s ease-in-out infinite',
           }} />
 
-          <button
-            onClick={() => setShowAd(false)}
-            aria-label="Close promotion"
-            style={{
-              position: 'absolute',
-              top: '4px',
-              right: '4px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '44px',
-              height: '44px',
-              color: '#fff',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 2,
-            }}
-          >
-            <IconClose size={14} />
-          </button>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.4) 0%, rgba(255, 107, 53, 0.2) 100%)',
-                borderRadius: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
-              }}>
-                <IconCrown size={24} />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff' }}>Upgrade to Primal+</h3>
-                <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Unlimited profiles, no ads, see who viewed you</p>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', zIndex: 1 }}>
+            <IconCrown size={18} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Go Primal+</span>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginLeft: '6px' }}>Unlimited profiles & more</span>
             </div>
             <a
               href="/premium"
               style={{
                 background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a5c 100%)',
                 color: '#fff',
-                padding: '12px 24px',
-                borderRadius: '10px',
-                fontSize: '12px',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                fontSize: '11px',
                 fontWeight: 700,
                 textDecoration: 'none',
-                boxShadow: '0 4px 20px rgba(255, 107, 53, 0.4)',
+                boxShadow: '0 2px 10px rgba(255, 107, 53, 0.4)',
                 fontFamily: 'inherit',
+                whiteSpace: 'nowrap',
               }}
             >
               Upgrade
             </a>
+            <button
+              onClick={() => setShowAd(false)}
+              aria-label="Close"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'rgba(255,255,255,0.3)',
+                cursor: 'pointer',
+                padding: '4px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <IconClose size={12} />
+            </button>
           </div>
         </motion.div>
       )}

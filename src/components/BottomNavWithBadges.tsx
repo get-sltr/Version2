@@ -34,7 +34,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'stretch',
-    padding: '6px 8px calc(env(safe-area-inset-bottom) + 8px) 8px',
+    padding: '6px 8px calc(env(safe-area-inset-bottom, 0px) + 2px) 8px',
     boxShadow: 'none',
   },
   navItem: {
