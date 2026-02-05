@@ -1546,21 +1546,45 @@ export default function Dashboard() {
         {profiles.length === 0 ? (
           <div style={{ gridColumn: 'span 3', padding: '60px 20px', textAlign: 'center' }}>
             <div style={{ marginBottom: '20px', opacity: 0.3, display: 'flex', justifyContent: 'center' }}><IconEye size={48} /></div>
-            <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No profiles yet</h3>
-            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Be the first to complete your profile!</p>
-            <a href="/profile/edit" style={{
-              display: 'inline-block',
-              marginTop: '20px',
-              padding: '12px 24px',
-              background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a5c 100%)',
-              color: '#fff',
-              borderRadius: '10px',
-              textDecoration: 'none',
-              fontWeight: 700,
-              boxShadow: '0 4px 20px rgba(255, 107, 53, 0.4)',
-            }}>
-              Set Up Profile
-            </a>
+            {activeFilter === 'dth' ? (
+              <>
+                <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No DTH profiles right now</h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Check back later or activate DTH on your profile</p>
+              </>
+            ) : activeFilter === 'online' ? (
+              <>
+                <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No one online nearby</h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Check back later</p>
+              </>
+            ) : activeFilter === 'fresh' ? (
+              <>
+                <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No new profiles nearby</h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Check back later</p>
+              </>
+            ) : (selectedPositions.length > 0 || selectedTribes.length > 0 || ageMin || ageMax) ? (
+              <>
+                <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No matches for your filters</h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Try adjusting your filters</p>
+              </>
+            ) : (
+              <>
+                <h3 style={{ fontSize: '18px', marginBottom: '10px', color: '#fff' }}>No profiles yet</h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)' }}>Be the first to complete your profile!</p>
+                <a href="/profile/edit" style={{
+                  display: 'inline-block',
+                  marginTop: '20px',
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a5c 100%)',
+                  color: '#fff',
+                  borderRadius: '10px',
+                  textDecoration: 'none',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 20px rgba(255, 107, 53, 0.4)',
+                }}>
+                  Set Up Profile
+                </a>
+              </>
+            )}
           </div>
         ) : (
           profiles.map((profile, index) => (
