@@ -1,9 +1,13 @@
 // =============================================================================
 // usePremium - Check user's premium subscription status
 // =============================================================================
+// On web: Always returns isPremium: true (free access)
+// On native: Checks RevenueCat for subscription status
+// =============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { checkEntitlement, isNativePlatform, getPlatform } from '@/lib/revenuecat';
 
 interface PremiumStatus {
   isPremium: boolean;
@@ -11,6 +15,7 @@ interface PremiumStatus {
   isLoading: boolean;
   error: string | null;
   messagesRemaining: number;
+  platform: 'web' | 'ios' | 'android';
   // Refresh function
   refresh: () => Promise<void>;
 }
@@ -21,12 +26,36 @@ export function usePremium(): PremiumStatus {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [messagesRemaining, setMessagesRemaining] = useState(Infinity);
+  const [platform, setPlatform] = useState<'web' | 'ios' | 'android'>('web');
 
   const checkPremiumStatus = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
+      const currentPlatform = getPlatform();
+      setPlatform(currentPlatform);
+
+      // Web users get free premium access
+      if (!isNativePlatform()) {
+        console.log('[usePremium] Web platform - granting free access');
+        setIsPremium(true);
+        setPremiumUntil(null);
+        setIsLoading(false);
+        return;
+      }
+
+      // For native platforms, check RevenueCat first
+      const hasRevenueCatPremium = await checkEntitlement('primal_premium');
+
+      if (hasRevenueCatPremium) {
+        console.log('[usePremium] RevenueCat premium active');
+        setIsPremium(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fallback: Check Supabase database for legacy premium status
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsPremium(false);
@@ -58,11 +87,9 @@ export function usePremium(): PremiumStatus {
       const isCurrentlyPremium = profile.is_premium === true &&
         (premiumExpiry === null || premiumExpiry > now);
 
-      console.log('Premium check:', {
+      console.log('[usePremium] Database check:', {
         is_premium: profile.is_premium,
         premium_until: profile.premium_until,
-        premiumExpiry,
-        now,
         isCurrentlyPremium
       });
 
@@ -70,9 +97,10 @@ export function usePremium(): PremiumStatus {
       setPremiumUntil(premiumExpiry);
 
     } catch (err) {
-      console.error('Premium check error:', err);
+      console.error('[usePremium] Error:', err);
       setError('Failed to verify subscription');
-      setIsPremium(false);
+      // On error, default to no premium on native
+      setIsPremium(!isNativePlatform());
     } finally {
       setIsLoading(false);
     }
@@ -88,6 +116,7 @@ export function usePremium(): PremiumStatus {
     isLoading,
     error,
     messagesRemaining,
+    platform,
     refresh: checkPremiumStatus
   };
 }

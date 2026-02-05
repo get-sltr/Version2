@@ -2,40 +2,82 @@
 
 export default function CommunityGuidelines() {
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', color: '#000', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }}>
-      <header style={{ padding: '30px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '32px', fontWeight: 700, letterSpacing: '0.3em', textDecoration: 'none', color: '#000' }}>s l t r</a>
-        <a href="/" style={{ fontSize: '12px', color: '#666', textDecoration: 'none' }}>← Back to Home</a>
+    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#e0e0e0', fontFamily: "var(--font-dm-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }}>
+      <header style={{ padding: '30px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <a href="/" style={{ fontFamily: "var(--font-orbitron), 'Orbitron', sans-serif", fontSize: '28px', fontWeight: 700, letterSpacing: '0.1em', textDecoration: 'none', color: '#FF6B35' }}>PRIMAL</a>
+        <a href="/" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', padding: '10px', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>← Back to Home</a>
       </header>
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 30px' }}>
-        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '48px', fontWeight: 300, marginBottom: '10px' }}>Community Guidelines</h1>
-        <p style={{ color: '#666', marginBottom: '40px', fontSize: '14px' }}>Last updated: January 2025</p>
-        <div style={{ background: '#e3f2fd', padding: '25px', marginBottom: '50px', borderLeft: '4px solid #2196f3' }}>
-          <p style={{ lineHeight: 1.7 }}>SLTR is a safe, inclusive space for the LGBTQ+ community to connect authentically.</p>
+        <h1 style={{ fontFamily: "var(--font-orbitron), 'Orbitron', sans-serif", fontSize: '36px', fontWeight: 600, marginBottom: '10px', color: '#fff' }}>Community Guidelines</h1>
+        <p style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '40px', fontSize: '14px' }}>Last updated: February 2026</p>
+        <div style={{ background: 'rgba(255,107,53,0.08)', padding: '25px', marginBottom: '50px', borderLeft: '4px solid #FF6B35', borderRadius: '0 8px 8px 0' }}>
+          <p style={{ lineHeight: 1.7, color: 'rgba(255,255,255,0.8)' }}>Primal is a safe, inclusive space for the LGBTQ+ community to connect authentically. These guidelines help us maintain a positive environment for everyone.</p>
         </div>
         <Section title="Core Values">
-          <p><strong>Respect:</strong> Treat everyone with kindness and dignity.</p>
-          <p><strong>Consent:</strong> All interactions must be consensual.</p>
-          <p><strong>Inclusivity:</strong> We celebrate diversity in all forms.</p>
-          <p><strong>Safety:</strong> Your wellbeing is our priority.</p>
+          <p><strong>Respect:</strong> Treat everyone with kindness and dignity, regardless of their identity, appearance, or preferences.</p>
+          <p><strong>Consent:</strong> All interactions must be consensual. No means no. Respect boundaries.</p>
+          <p><strong>Inclusivity:</strong> We celebrate diversity in all forms—race, gender identity, body type, HIV status, and more.</p>
+          <p><strong>Safety:</strong> Your wellbeing is our priority. Report anyone who makes you feel unsafe.</p>
         </Section>
         <Section title="Age Requirement">
-          <p><strong>SLTR is strictly 18+ only.</strong> We verify ages and remove underage accounts immediately.</p>
+          <p><strong>Primal is strictly 18+ only.</strong> We verify ages and immediately remove accounts that violate this requirement. If you encounter someone you believe is underage, report them immediately.</p>
         </Section>
-        <Section title="Zero Tolerance">
-          <p>Harassment, stalking, or threatening behavior. Hate speech, homophobia, transphobia, racism. Non-consensual sharing of intimate content. Impersonation or catfishing.</p>
+        <Section title="Zero Tolerance Policy">
+          <p>The following will result in immediate account termination:</p>
+          <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
+            <li>Harassment, stalking, or threatening behavior</li>
+            <li>Hate speech, homophobia, transphobia, racism, or discrimination</li>
+            <li>Non-consensual sharing of intimate content ("revenge porn")</li>
+            <li>Impersonation, catfishing, or using someone else's photos</li>
+            <li>Sexual exploitation of minors in any form</li>
+            <li>Solicitation of illegal drugs or prostitution</li>
+            <li>Scams, fraud, or attempts to deceive users</li>
+          </ul>
+        </Section>
+        <Section title="Profile Guidelines">
+          <p><strong>Photos:</strong> Must be of yourself. No nudity in public profile photos. Private albums may contain NSFW content but must follow consent rules.</p>
+          <p><strong>Bio:</strong> Be authentic. Don't include contact info that bypasses our messaging system.</p>
+          <p><strong>Verification:</strong> Verified profiles help build trust. Consider getting verified.</p>
+        </Section>
+        <Section title="Messaging Etiquette">
+          <p>Start conversations respectfully. Don't send unsolicited explicit content without consent. Accept rejection gracefully. One "no" or no response is a complete answer—don't persist.</p>
+        </Section>
+        <Section title="Meeting Safely">
+          <p>When meeting someone in person:</p>
+          <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
+            <li>Meet in public first</li>
+            <li>Tell a friend where you're going</li>
+            <li>Trust your instincts—if something feels wrong, leave</li>
+            <li>Don't share your exact address until you're comfortable</li>
+          </ul>
+        </Section>
+        <Section title="Reporting & Blocking">
+          <p>If someone violates these guidelines or makes you uncomfortable:</p>
+          <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
+            <li><strong>Block:</strong> Immediately prevents them from contacting you or seeing your profile</li>
+            <li><strong>Report:</strong> Our safety team reviews all reports within 24 hours</li>
+          </ul>
+          <p style={{ marginTop: '15px' }}>Reports are confidential—the reported user won't know who reported them.</p>
         </Section>
         <Section title="Crisis Support">
-          <p><strong>Trevor Project:</strong> 1-866-488-7386</p>
+          <p>If you or someone you know is in crisis:</p>
+          <p><strong>Trevor Project:</strong> 1-866-488-7386 (LGBTQ+ youth)</p>
           <p><strong>Trans Lifeline:</strong> 1-877-565-8860</p>
           <p><strong>Crisis Text Line:</strong> Text HOME to 741741</p>
+          <p><strong>National Suicide Prevention:</strong> 988</p>
         </Section>
-        <Section title="Contact">
+        <Section title="Contact Us">
+          <p>Questions about these guidelines? Contact us at:</p>
           <p><strong>Email:</strong> support@primalgay.com</p>
+          <p><strong>Report abuse:</strong> safety@primalgay.com</p>
         </Section>
       </main>
-      <footer style={{ padding: '40px 30px', borderTop: '1px solid #eee', textAlign: 'center' }}>
-        <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", fontSize: '11px', opacity: 0.4 }}>© 2025 SLTR Digital LLC. All rights reserved.</p>
+      <footer style={{ padding: '40px 30px', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '20px' }}>
+          <a href="/privacy" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '13px' }}>Privacy Policy</a>
+          <a href="/terms" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '13px' }}>Terms of Service</a>
+        </div>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)' }}>© 2025–2026 Primal. All rights reserved.</p>
       </footer>
     </div>
   );
@@ -44,35 +86,8 @@ export default function CommunityGuidelines() {
 function Section({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
   return (
     <section style={{ marginBottom: '40px' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>{title}</h2>
-      <div style={{ lineHeight: 1.8, color: '#333' }}>{children}</div>
+      <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>{title}</h2>
+      <div style={{ lineHeight: 1.8, color: 'rgba(255,255,255,0.7)' }}>{children}</div>
     </section>
-  );
-}
-
-function Page() {
-  return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 30px' }}>
-      <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '30px' }}>Community Guidelines</h1>
-      <Section title="Respect & Kindness">
-        Be respectful to all members of our community. Treat others how you'd like to be treated.
-      </Section>
-      <Section title="Safety First">
-        Never share personal information like your home address or phone number. Report suspicious behavior.
-      </Section>
-      <Section title="No Harassment">
-        Harassment, bullying, or hate speech is strictly prohibited. Violators will be removed.
-      </Section>
-      <Section title="Authenticity">
-        Be yourself. Use a real photo and honest information in your profile.
-      </Section>
-      <footer style={{ borderTop: '1px solid #eee', padding: '40px 30px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', gap: '30px', justifyContent: 'center', fontSize: '14px' }}>
-          <a href="/terms" style={{ color: '#666', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="/privacy" style={{ color: '#666', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="/" style={{ color: '#666', textDecoration: 'none' }}>Home</a>
-        </div>
-      </footer>
-    </div>
   );
 }

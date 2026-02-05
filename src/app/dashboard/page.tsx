@@ -9,10 +9,12 @@ import { IconSearch, IconMap, IconMenu, IconStar, IconUser, IconCheck, IconEye, 
 import BottomNavWithBadges from '@/components/BottomNavWithBadges';
 import ProBadge from '@/components/ProBadge';
 import OrbitBadge from '@/components/OrbitBadge';
-import { DTFNBadge } from '@/components/dtfn';
-import { useDTFN } from '@/hooks/useDTFN';
+import { DTHBadge } from '@/components/dth';
+import { useDTH } from '@/hooks/useDTH';
 import { usePremium } from '@/hooks/usePremium';
 import MigrationBanner from '@/components/MigrationBanner';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
+import { glassHeader } from '@/styles/design-tokens';
 import { AddToHomeScreenSplash } from '@/components/AddToHomeScreenSplash';
 import { PushNotificationPrompt } from '@/components/PushNotificationPrompt';
 
@@ -39,6 +41,7 @@ export default function Dashboard() {
   const router = useRouter();
   const { colors } = useTheme();
   const { isPremium, isLoading: premiumLoading } = usePremium();
+  const { blockedIds } = useBlockedUsers();
   const [activeFilter, setActiveFilter] = useState('online');
   const [showAd, setShowAd] = useState(true);
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -64,7 +67,7 @@ export default function Dashboard() {
 
   const filters = [
     { id: 'online', label: 'Online' },
-    { id: 'dtfn', label: 'DTFN', icon: '💦' },
+    { id: 'dth', label: 'DTH', icon: '💦' },
     { id: 'age', label: 'Age', hasDropdown: true },
     { id: 'position', label: 'Position', hasDropdown: true },
     { id: 'tribes', label: 'Tribes', hasDropdown: true },
@@ -224,9 +227,9 @@ export default function Dashboard() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       query = query.gte('created_at', sevenDaysAgo.toISOString());
-    } else if (activeFilter === 'dtfn') {
-      // Show only DTFN users with active DTFN (dtfn_active_until > now)
-      query = query.gt('dtfn_active_until', new Date().toISOString());
+    } else if (activeFilter === 'dth') {
+      // Show only DTH users with active DTH (dth_active_until > now)
+      query = query.gt('dth_active_until', new Date().toISOString());
     }
 
     // Apply position filter if selected
@@ -288,6 +291,11 @@ export default function Dashboard() {
     if (data) {
       let filtered = data;
 
+      // Filter out blocked users
+      if (blockedIds.size > 0) {
+        filtered = filtered.filter(p => !blockedIds.has(p.id));
+      }
+
       // Apply tribe filter in JavaScript (since Supabase client doesn't support JSONB contains easily)
       if (selectedTribes.length > 0) {
         filtered = filtered.filter(profile => {
@@ -340,18 +348,18 @@ export default function Dashboard() {
       // Limit to 50 for display
       const displayProfiles = filtered.slice(0, 50);
 
-      // Fetch pnp_visible from user_settings for displayed profiles
+      // Fetch long_session_visible from user_settings for displayed profiles
       const profileIds = displayProfiles.map(p => p.id);
       if (profileIds.length > 0) {
         const { data: settingsData } = await supabase
           .from('user_settings')
-          .select('user_id, pnp_visible')
+          .select('user_id, long_session_visible')
           .in('user_id', profileIds);
 
         if (settingsData) {
-          const pnpMap = new Map(settingsData.map(s => [s.user_id, s.pnp_visible]));
+          const longSessionMap = new Map(settingsData.map(s => [s.user_id, s.long_session_visible]));
           displayProfiles.forEach(p => {
-            p.pnp_visible = pnpMap.get(p.id) ?? false;
+            p.long_session_visible = longSessionMap.get(p.id) ?? false;
           });
         }
       }
@@ -361,7 +369,7 @@ export default function Dashboard() {
       setProfiles([]);
     }
     setLoading(false);
-  }, [activeFilter, selectedPositions, selectedTribes, ageMin, ageMax, currentUser]);
+  }, [activeFilter, selectedPositions, selectedTribes, ageMin, ageMax, currentUser, blockedIds]);
 
   // Re-fetch when filter changes or current user updates
   useEffect(() => {
@@ -487,9 +495,9 @@ export default function Dashboard() {
       setShowTribesDropdown(!showTribesDropdown);
       setShowPositionDropdown(false);
       setShowAgeDropdown(false);
-    } else if (filter.id === 'dtfn') {
-      // DTFN filter - toggle on/off (premium feature)
-      if (activeFilter === 'dtfn') {
+    } else if (filter.id === 'dth') {
+      // DTH filter - toggle on/off (premium feature)
+      if (activeFilter === 'dth') {
         // Already selected, deselect and go back to 'online'
         setActiveFilter('online');
       } else {
@@ -499,7 +507,7 @@ export default function Dashboard() {
           return;
         }
         // If still loading, allow access (will validate on next interaction)
-        setActiveFilter('dtfn');
+        setActiveFilter('dth');
       }
       setShowPositionDropdown(false);
       setShowAgeDropdown(false);
@@ -556,17 +564,17 @@ export default function Dashboard() {
     return filter.label;
   };
 
-  // DTFN hook for floating button
-  const { isActive: dtfnActive, timeRemaining: dtfnTimeRemaining, toggle: toggleDTFN, loading: dtfnLoading } = useDTFN();
+  // DTH hook for floating button
+  const { isActive: dthActive, timeRemaining: dthTimeRemaining, toggle: toggleDTH, loading: dthLoading } = useDTH();
 
-  // Format DTFN time
-  const formatDTFNTime = () => {
-    if (!dtfnTimeRemaining) return '';
-    const hours = Math.floor(dtfnTimeRemaining / 3600);
-    const minutes = Math.floor((dtfnTimeRemaining % 3600) / 60);
-    const seconds = dtfnTimeRemaining % 60;
-    if (dtfnTimeRemaining <= 60) return `${seconds}s`;
-    if (dtfnTimeRemaining <= 3600) return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  // Format DTH time
+  const formatDTHTime = () => {
+    if (!dthTimeRemaining) return '';
+    const hours = Math.floor(dthTimeRemaining / 3600);
+    const minutes = Math.floor((dthTimeRemaining % 3600) / 60);
+    const seconds = dthTimeRemaining % 60;
+    if (dthTimeRemaining <= 60) return `${seconds}s`;
+    if (dthTimeRemaining <= 3600) return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
@@ -654,13 +662,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <div style={{ position: 'relative', zIndex: 10, paddingBottom: '100px' }}>
       <header style={{
-        position: 'sticky',
-        top: 0,
-        background: 'rgba(10, 10, 15, 0.7)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        zIndex: 100,
+        ...glassHeader,
         padding: 'calc(env(safe-area-inset-top, 0px) + 12px) 15px 12px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
@@ -853,8 +855,8 @@ export default function Dashboard() {
                                    (filter.id === 'position' && showPositionDropdown) ||
                                    (filter.id === 'tribes' && showTribesDropdown);
 
-            // Special DTFN button with droplets - Glass style
-            if (filter.id === 'dtfn') {
+            // Special DTH button with droplets - Glass style
+            if (filter.id === 'dth') {
               return (
                 <button
                   key={filter.id}
@@ -894,7 +896,7 @@ export default function Dashboard() {
                     }} />
                   )}
                   <span style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center' }}>
-                    DTFN
+                    DTH
                     <span style={{ display: 'inline-flex', alignItems: 'flex-end', marginLeft: '4px', gap: 0 }}>
                       <svg style={{ width: '14px', height: '14px', fill: isFilterActive ? '#FF6B35' : 'rgba(255,255,255,0.7)' }} viewBox="0 0 24 24">
                         <path d="M12 2C12 2 5 10 5 15C5 18.866 8.134 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
@@ -1599,8 +1601,8 @@ export default function Dashboard() {
                 backgroundPosition: 'center'
               }} />
 
-              {/* PnP Orbit badge - top left */}
-              {profile.pnp_visible && (
+              {/* Long Session badge - top left */}
+              {profile.long_session_visible && (
                 <div style={{ position: 'absolute', top: '6px', left: '6px', zIndex: 2 }}>
                   <OrbitBadge size="sm" />
                 </div>
@@ -1610,7 +1612,7 @@ export default function Dashboard() {
               {hostingUserIds.has(profile.id) && (
                 <div style={{
                   position: 'absolute',
-                  top: profile.pnp_visible ? '32px' : '6px',
+                  top: profile.long_session_visible ? '32px' : '6px',
                   left: '6px',
                   zIndex: 2,
                   background: 'rgba(255, 107, 53, 0.9)',
@@ -1629,8 +1631,8 @@ export default function Dashboard() {
 
               {/* Badges container - top right */}
               <div style={{ position: 'absolute', top: '6px', right: '6px', zIndex: 2, display: 'flex', gap: '4px', alignItems: 'center' }}>
-                {profile.dtfn_active_until && new Date(profile.dtfn_active_until) > new Date() && (
-                  <DTFNBadge isActive={true} size="sm" />
+                {profile.dth_active_until && new Date(profile.dth_active_until) > new Date() && (
+                  <DTHBadge isActive={true} size="sm" />
                 )}
                 {profile.is_premium && (
                   <ProBadge size="sm" />
@@ -1662,10 +1664,10 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Custom DTFN Floating Button with text and flame icon */}
+      {/* Custom DTH Floating Button with text and flame icon */}
       <motion.button
-        onClick={toggleDTFN}
-        disabled={dtfnLoading}
+        onClick={toggleDTH}
+        disabled={dthLoading}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         style={{
@@ -1679,8 +1681,8 @@ export default function Dashboard() {
           gap: '6px',
           background: 'none',
           border: 'none',
-          cursor: dtfnLoading ? 'not-allowed' : 'pointer',
-          opacity: dtfnLoading ? 0.5 : 1,
+          cursor: dthLoading ? 'not-allowed' : 'pointer',
+          opacity: dthLoading ? 0.5 : 1,
         }}
       >
         {/* Main button */}
@@ -1690,11 +1692,11 @@ export default function Dashboard() {
           gap: '4px',
           padding: '10px 14px',
           borderRadius: '24px',
-          background: dtfnActive
+          background: dthActive
             ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.9) 0%, rgba(255, 140, 90, 0.9) 100%)'
             : 'rgba(30, 30, 35, 0.9)',
-          border: dtfnActive ? '2px solid rgba(255, 255, 255, 0.3)' : '2px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: dtfnActive
+          border: dthActive ? '2px solid rgba(255, 255, 255, 0.3)' : '2px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: dthActive
             ? '0 6px 30px rgba(255, 107, 53, 0.5), inset 0 2px 0 rgba(255,255,255,0.3)'
             : '0 4px 20px rgba(0, 0, 0, 0.4)',
           backdropFilter: 'blur(10px)',
@@ -1703,7 +1705,7 @@ export default function Dashboard() {
           overflow: 'hidden',
         }}>
           {/* Shine animation when active */}
-          {dtfnActive && (
+          {dthActive && (
             <div style={{
               position: 'absolute',
               top: 0,
@@ -1719,11 +1721,11 @@ export default function Dashboard() {
             fontSize: '11px',
             fontWeight: 700,
             letterSpacing: '0.5px',
-            color: dtfnActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+            color: dthActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
             position: 'relative',
             zIndex: 1,
           }}>
-            DTFN
+            DTH
           </span>
 
           {/* Flame/Drip icon */}
@@ -1731,10 +1733,10 @@ export default function Dashboard() {
             style={{
               width: '14px',
               height: '14px',
-              fill: dtfnActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+              fill: dthActive ? '#fff' : 'rgba(255, 255, 255, 0.6)',
               position: 'relative',
               zIndex: 1,
-              filter: dtfnActive ? 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' : 'none',
+              filter: dthActive ? 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' : 'none',
             }}
             viewBox="0 0 24 24"
           >
@@ -1747,10 +1749,10 @@ export default function Dashboard() {
         <span style={{
           fontSize: '9px',
           fontWeight: 600,
-          color: dtfnActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.4)',
-          textShadow: dtfnActive ? '0 0 8px rgba(255, 107, 53, 0.5)' : 'none',
+          color: dthActive ? '#FF6B35' : 'rgba(255, 255, 255, 0.4)',
+          textShadow: dthActive ? '0 0 8px rgba(255, 107, 53, 0.5)' : 'none',
         }}>
-          {dtfnActive ? `${formatDTFNTime()} left` : 'Tap to activate'}
+          {dthActive ? `${formatDTHTime()} left` : 'Tap to activate'}
         </span>
       </motion.button>
 

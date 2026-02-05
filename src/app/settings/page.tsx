@@ -252,7 +252,7 @@ export default function SettingsPage() {
         </a>
         <ToggleMenuItem label="Show Distance" storageKey="showDistance" />
         <ToggleMenuItem label="Show Age" storageKey="showAge" />
-        <ToggleMenuItem label="PnP" storageKey="pnp" />
+        <ToggleMenuItem label="Long Session" storageKey="long_session" />
         <a href="/settings/blocked-users" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Blocked Users" hasArrow />
         </a>
@@ -284,23 +284,26 @@ export default function SettingsPage() {
           <MenuItem label="Priority Support" value={profile?.is_premium ? '⭐ Active' : ''} hasArrow />
         </a>
         <a href="/settings/rate" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Rate SLTR" hasArrow />
+          <MenuItem label="Rate Primal" hasArrow />
         </a>
       </Section>
 
       {/* Company Info */}
       <div style={{ padding: '30px 20px', textAlign: 'center', color: colors.textSecondary, fontSize: '12px', lineHeight: 1.6 }}>
-        <div style={{ fontWeight: 600, marginBottom: '8px' }}>SLTR DIGITAL LLC</div>
-        <div style={{ marginBottom: '8px' }}>INNOVATIVE | INTELLIGENCE | INTUITIVE</div>
+        <div style={{ fontWeight: 600, marginBottom: '8px' }}>PRIMAL</div>
+        <div style={{ marginBottom: '8px' }}>INTELLIGENT | INNOVATIVE | INTUITIVE</div>
         <div style={{ marginBottom: '8px' }}>Los Angeles, California</div>
-        <div>© 2025 SLTR Digital LLC. All Rights Reserved.</div>
+        <div>© 2025–2026 Primal. All Rights Reserved.</div>
       </div>
 
       {/* Logout */}
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <button onClick={handleLogout} style={{ width: '100%', background: 'transparent', border: `1px solid ${colors.accent}`, color: colors.accent, padding: '15px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer' }}>
           Log Out
         </button>
+        <a href="/settings/account" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(244,67,54,0.5)', color: '#f44336', padding: '15px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', display: 'block' }}>
+          Delete Account
+        </a>
       </div>
     </div>
   );
@@ -364,8 +367,11 @@ function ToggleMenuItem({ label, storageKey }: { label: string; storageKey: stri
 
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: borderStyle }}>
-      <span style={{ fontSize: '16px', color: colors.text }}>{label}</span>
+      <span id={`toggle-label-${storageKey}`} style={{ fontSize: '16px', color: colors.text }}>{label}</span>
       <button
+        role="switch"
+        aria-checked={enabled}
+        aria-labelledby={`toggle-label-${storageKey}`}
         onClick={handleToggle}
         style={{
           width: '51px',
@@ -375,7 +381,9 @@ function ToggleMenuItem({ label, storageKey }: { label: string; storageKey: stri
           border: 'none',
           position: 'relative',
           cursor: 'pointer',
-          transition: 'background 0.3s'
+          transition: 'background 0.3s',
+          minWidth: '44px',
+          minHeight: '31px',
         }}
       >
         <div style={{

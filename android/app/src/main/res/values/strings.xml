@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Primal</string>
+    <string name="title_activity_main">Primal</string>
+    <string name="package_name">com.sltrdigital.primal</string>
+    <string name="custom_url_scheme">com.sltrdigital.primal</string>
+</resources>

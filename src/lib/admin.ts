@@ -1,7 +1,7 @@
 /**
  * Admin Authorization System
  *
- * Handles admin roles and permissions for the SLTR platform.
+ * Handles admin roles and permissions for the Primal platform.
  * Founder has ultimate authority over all platform operations.
  */
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import SltrNotificationEmail from '@/emails/SltrNotificationEmail';
+import PrimalNotificationEmail from '@/emails/PrimalNotificationEmail';
 import { sendTransactionalEmail } from '@/lib/email';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import {
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
   }
 
   // Authentication: Service token OR authenticated user with restrictions
-  const serviceToken = request.headers.get('x-sltr-email-key');
+  const serviceToken = request.headers.get('x-primal-email-key');
   let isServiceAuth = false;
   let authenticatedUser: { id: string; email?: string } | null = null;
 
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
     : [];
 
   try {
-    const reactEmail = SltrNotificationEmail({
+    const reactEmail = PrimalNotificationEmail({
       headline: payload.headline || subject,
       messageLines: lines,
       ctaLabel: payload.ctaLabel,

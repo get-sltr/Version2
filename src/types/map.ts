@@ -126,4 +126,4 @@ export interface BottomNavProps {
   tapCount?: number;
 }
 
-export type NavTab = 'explore' | 'taps' | 'sltr' | 'messages' | 'views';
+export type NavTab = 'explore' | 'taps' | 'pro' | 'messages' | 'views';

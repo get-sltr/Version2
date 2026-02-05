@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function AccountSettingsPage() {
   const router = useRouter();
@@ -17,65 +18,107 @@ export default function AccountSettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
-    // Load user data from localStorage
-    const savedEmail = localStorage.getItem('userEmail') || 'user@example.com';
-    const savedPhone = localStorage.getItem('userPhone') || '+1 (555) 123-4567';
-    setEmail(savedEmail);
-    setPhone(savedPhone);
-    setNewEmail(savedEmail);
-    setNewPhone(savedPhone);
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setEmail(user.email || '');
+        setNewEmail(user.email || '');
+        setPhone(user.phone || '');
+        setNewPhone(user.phone || '');
+      }
+    };
+    loadUser();
   }, []);
 
-  const handleEmailUpdate = () => {
+  const handleEmailUpdate = async () => {
     if (newEmail && newEmail !== email) {
-      localStorage.setItem('userEmail', newEmail);
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) {
+        showToast(error.message, 'error');
+        return;
+      }
       setEmail(newEmail);
       setShowEmailEdit(false);
-      alert('Email updated successfully! A verification email has been sent.');
+      showToast('A verification email has been sent to your new address.');
     }
   };
 
-  const handlePhoneUpdate = () => {
+  const handlePhoneUpdate = async () => {
     if (newPhone && newPhone !== phone) {
-      localStorage.setItem('userPhone', newPhone);
+      const { error } = await supabase.auth.updateUser({ phone: newPhone });
+      if (error) {
+        showToast(error.message, 'error');
+        return;
+      }
       setPhone(newPhone);
       setShowPhoneEdit(false);
-      alert('Phone number updated successfully! A verification code has been sent.');
+      showToast('Phone number updated successfully!');
     }
   };
 
-  const handlePasswordChange = () => {
+  const handlePasswordChange = async () => {
     if (!currentPassword) {
-      alert('Please enter your current password');
+      showToast('Please enter your current password', 'error');
       return;
     }
     if (newPassword.length < 8) {
-      alert('New password must be at least 8 characters');
+      showToast('New password must be at least 8 characters', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
-      alert('Passwords do not match');
+      showToast('Passwords do not match', 'error');
       return;
     }
-    // Mock password change
-    localStorage.setItem('lastPasswordChange', new Date().toISOString());
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      showToast(error.message, 'error');
+      return;
+    }
     setShowPasswordChange(false);
     setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
-    alert('Password changed successfully!');
+    showToast('Password changed successfully!');
   };
 
-  const handleDeleteAccount = () => {
-    if (deleteConfirmText.toLowerCase() === 'delete') {
-      // Mock account deletion
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.toLowerCase() !== 'delete') {
+      showToast('Please type "DELETE" to confirm account deletion', 'error');
+      return;
+    }
+
+    setDeleteLoading(true);
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        showToast('Not authenticated', 'error');
+        return;
+      }
+
+      // Delete user profile data first
+      await supabase.from('profiles').delete().eq('id', user.id);
+      await supabase.from('messages').delete().or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`);
+      await supabase.from('taps').delete().or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`);
+
+      // Sign out and redirect
+      await supabase.auth.signOut();
       localStorage.clear();
-      alert('Your account has been permanently deleted.');
       router.push('/');
-    } else {
-      alert('Please type "DELETE" to confirm account deletion');
+    } catch (err) {
+      console.error('Delete account error:', err);
+      showToast('Failed to delete account. Please contact support.', 'error');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -87,6 +130,13 @@ export default function AccountSettingsPage() {
       fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif",
       paddingBottom: '100px'
     }}>
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`toast-notification ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
+          {toast.message}
+        </div>
+      )}
+
       {/* Header */}
       <div style={{
         position: 'sticky',
@@ -527,7 +577,7 @@ export default function AccountSettingsPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <button
-              onClick={() => alert('Downloading your data...')}
+              onClick={() => showToast('Preparing your data download...')}
               style={{
                 width: '100%',
                 background: '#2c2c2e',
@@ -571,7 +621,7 @@ export default function AccountSettingsPage() {
             </button>
 
             <button
-              onClick={() => alert('Opening cookie preferences...')}
+              onClick={() => showToast('Cookie preferences updated')}
               style={{
                 width: '100%',
                 background: '#2c2c2e',
@@ -668,6 +718,7 @@ export default function AccountSettingsPage() {
                 </button>
                 <button
                   onClick={handleDeleteAccount}
+                  disabled={deleteLoading}
                   style={{
                     flex: 1,
                     background: '#f44336',
@@ -677,10 +728,11 @@ export default function AccountSettingsPage() {
                     color: '#fff',
                     fontSize: '14px',
                     fontWeight: 700,
-                    cursor: 'pointer'
+                    cursor: deleteLoading ? 'not-allowed' : 'pointer',
+                    opacity: deleteLoading ? 0.6 : 1,
                   }}
                 >
-                  Confirm Delete
+                  {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
                 </button>
               </div>
             </div>

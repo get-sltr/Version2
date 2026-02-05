@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SLTRStarSplash } from '@/components/SLTRStarSplash';
+import { PrimalStarSplash } from '@/components/PrimalStarSplash';
 
 export default function SplashTestPage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -9,7 +9,7 @@ export default function SplashTestPage() {
   return (
     <>
       {showSplash && (
-        <SLTRStarSplash onComplete={() => setShowSplash(false)} />
+        <PrimalStarSplash onComplete={() => setShowSplash(false)} />
       )}
 
       {!showSplash && (

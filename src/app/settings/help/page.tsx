@@ -143,12 +143,12 @@ export default function HelpAndSupportPage() {
         {/* App Support */}
         <Section title="APP SUPPORT">
           <div style={{ background: '#1c1c1e', borderRadius: '12px', padding: '20px', marginBottom: '15px' }}>
-            <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Contact SLTR Support</div>
+            <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px' }}>Contact Primal Support</div>
             <div style={{ fontSize: '14px', color: '#888', lineHeight: 1.6, marginBottom: '15px' }}>
               For account issues, bug reports, or feedback
             </div>
-            <a href="mailto:support@sltr.app" style={{ color: '#FF6B35', textDecoration: 'none', fontSize: '15px' }}>
-              support@sltr.app
+            <a href="mailto:support@primalgay.com" style={{ color: '#FF6B35', textDecoration: 'none', fontSize: '15px' }}>
+              support@primalgay.com
             </a>
           </div>
         </Section>

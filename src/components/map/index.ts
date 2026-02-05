@@ -1,5 +1,5 @@
 // =============================================================================
-// SLTR Map Components - Liquid Glass Design System
+// Primal Map Components - Liquid Glass Design System
 // =============================================================================
 
 // Main page component

@@ -12,6 +12,7 @@ import { useMapProfiles } from '@/hooks/useMapProfiles';
 import { useMapGroups } from '@/hooks/useMapGroups';
 import { useMapVenues } from '@/hooks/useMapVenues';
 import { useNavBadgeCounts } from '@/hooks/useNavBadgeCounts';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import MigrationBanner from '@/components/MigrationBanner';
 import MapboxMap from '@/components/Mapbox/MapboxMap';
@@ -60,8 +61,11 @@ export default function MapViewPage() {
     onLocationLoaded: handleCenterUpdate,
   });
 
+  const { blockedIds } = useBlockedUsers();
+
   const { profiles, refetch: refetchProfiles } = useMapProfiles({
     mapCenter,
+    blockedIds,
   });
 
   const { groups } = useMapGroups();
@@ -117,7 +121,7 @@ export default function MapViewPage() {
       case 'taps':
         router.push('/taps');
         break;
-      case 'sltr':
+      case 'pro':
         router.push('/premium');
         break;
       case 'messages':

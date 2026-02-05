@@ -24,7 +24,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>1. Promotion Overview</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              SLTR Digital LLC ("SLTR," "we," "us," or "our") is offering a limited-time promotional subscription rate of $4.99 per month (the "Promotional Rate") for new subscribers who sign up between January 1, 2026, and January 31, 2026, 11:59 PM PST (the "Promotion Period").
+              Primal ("Primal," "we," "us," or "our") is offering a limited-time promotional subscription rate of $4.99 per month (the "Promotional Rate") for new subscribers who sign up between January 1, 2026, and January 31, 2026, 11:59 PM PST (the "Promotion Period").
             </p>
           </section>
 
@@ -33,11 +33,11 @@ export default function PromoTerms() {
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>2. Eligibility</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>To be eligible for this promotion, you must:</p>
             <ul style={{ paddingLeft: '24px', color: 'rgba(255,255,255,0.7)' }}>
-              <li style={{ marginBottom: '8px' }}>Be a new SLTR subscriber who has never previously held a paid subscription</li>
+              <li style={{ marginBottom: '8px' }}>Be a new Primal subscriber who has never previously held a paid subscription</li>
               <li style={{ marginBottom: '8px' }}>Sign up for a monthly subscription during the Promotion Period</li>
               <li style={{ marginBottom: '8px' }}>Enable automatic recurring billing at the time of signup</li>
               <li style={{ marginBottom: '8px' }}>Provide a valid payment method and maintain it in good standing</li>
-              <li style={{ marginBottom: '8px' }}>Agree to SLTR's Terms of Service and Privacy Policy</li>
+              <li style={{ marginBottom: '8px' }}>Agree to Primal's Terms of Service and Privacy Policy</li>
             </ul>
           </section>
 
@@ -50,11 +50,11 @@ export default function PromoTerms() {
             <ul style={{ paddingLeft: '24px', color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
               <li style={{ marginBottom: '8px' }}>The subscription remains active and is not cancelled</li>
               <li style={{ marginBottom: '8px' }}>Payments are processed successfully each billing cycle</li>
-              <li style={{ marginBottom: '8px' }}>The account remains in good standing and complies with SLTR's Terms of Service</li>
+              <li style={{ marginBottom: '8px' }}>The account remains in good standing and complies with Primal's Terms of Service</li>
               <li style={{ marginBottom: '8px' }}>Automatic recurring billing remains enabled</li>
             </ul>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              This rate is guaranteed to remain at $4.99/month regardless of future price increases to SLTR's standard subscription rates.
+              This rate is guaranteed to remain at $4.99/month regardless of future price increases to Primal's standard subscription rates.
             </p>
           </section>
 
@@ -62,7 +62,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>4. Cancellation Policy</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
-              <strong style={{ color: '#fff' }}>Loss of Promotional Rate:</strong> If you cancel your subscription at any time, you will permanently lose access to the $4.99/month Promotional Rate. Resubscribing after cancellation will be at SLTR's then-current standard subscription rate, which may be higher than the Promotional Rate.
+              <strong style={{ color: '#fff' }}>Loss of Promotional Rate:</strong> If you cancel your subscription at any time, you will permanently lose access to the $4.99/month Promotional Rate. Resubscribing after cancellation will be at Primal's then-current standard subscription rate, which may be higher than the Promotional Rate.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
               <strong style={{ color: '#fff' }}>No Refunds:</strong> Cancellations are effective at the end of the current billing period. You will retain access to premium features until the end of your paid period. No partial refunds will be issued for unused portions of the billing period.
@@ -105,7 +105,7 @@ export default function PromoTerms() {
               The Promotional Rate may be voided and your account may be suspended or terminated if you:
             </p>
             <ul style={{ paddingLeft: '24px', color: 'rgba(255,255,255,0.7)' }}>
-              <li style={{ marginBottom: '8px' }}>Violate SLTR's Terms of Service</li>
+              <li style={{ marginBottom: '8px' }}>Violate Primal's Terms of Service</li>
               <li style={{ marginBottom: '8px' }}>Engage in fraudulent activity or payment chargebacks</li>
               <li style={{ marginBottom: '8px' }}>Create multiple accounts to abuse the promotion</li>
               <li style={{ marginBottom: '8px' }}>Use the service for illegal, abusive, or harmful purposes</li>
@@ -119,7 +119,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>7. Recurring Billing</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>
-              By subscribing to this promotion, you authorize SLTR to automatically charge your payment method $4.99 plus any applicable taxes on a monthly basis until you cancel your subscription. Billing will occur on the same day each month as your initial subscription date.
+              By subscribing to this promotion, you authorize Primal to automatically charge your payment method $4.99 plus any applicable taxes on a monthly basis until you cancel your subscription. Billing will occur on the same day each month as your initial subscription date.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
               You acknowledge that the amount may vary slightly due to changes in applicable sales tax, VAT, or other government-imposed fees.
@@ -130,7 +130,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>8. Changes to Service</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              While your Promotional Rate of $4.99/month is locked in for life (subject to these terms), SLTR reserves the right to modify, update, or discontinue features of the service at any time. However, your pricing will remain at $4.99/month as long as your subscription remains active and in good standing.
+              While your Promotional Rate of $4.99/month is locked in for life (subject to these terms), Primal reserves the right to modify, update, or discontinue features of the service at any time. However, your pricing will remain at $4.99/month as long as your subscription remains active and in good standing.
             </p>
           </section>
 
@@ -146,7 +146,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>10. Geographic Restrictions</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              This promotion is available to users worldwide where SLTR services are offered. Pricing is in USD. International transactions may be subject to currency conversion fees imposed by your financial institution.
+              This promotion is available to users worldwide where Primal services are offered. Pricing is in USD. International transactions may be subject to currency conversion fees imposed by your financial institution.
             </p>
           </section>
 
@@ -154,7 +154,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>11. Right to Modify or Terminate Promotion</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              SLTR reserves the right to modify, suspend, or terminate this promotion at any time without prior notice. However, users who have already enrolled at the Promotional Rate will retain their $4.99/month rate according to these terms, even if the promotion is terminated early.
+              Primal reserves the right to modify, suspend, or terminate this promotion at any time without prior notice. However, users who have already enrolled at the Promotional Rate will retain their $4.99/month rate according to these terms, even if the promotion is terminated early.
             </p>
           </section>
 
@@ -171,7 +171,7 @@ export default function PromoTerms() {
               padding: '24px',
               marginTop: '16px'
             }}>
-              <p style={{ fontWeight: 600, marginBottom: '8px' }}>SLTR Digital LLC</p>
+              <p style={{ fontWeight: 600, marginBottom: '8px' }}>Primal</p>
               <p style={{ color: 'rgba(255,255,255,0.7)' }}>Email: support@primalgay.com</p>
               <p style={{ color: 'rgba(255,255,255,0.7)' }}>Website: https://primalgay.com</p>
             </div>
@@ -181,7 +181,7 @@ export default function PromoTerms() {
           <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '16px' }}>13. Acceptance of Terms</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)' }}>
-              By subscribing to SLTR at the Promotional Rate, you acknowledge that you have read, understood, and agree to be bound by these Promotion Terms & Conditions, as well as SLTR's general Terms of Service and Privacy Policy.
+              By subscribing to Primal at the Promotional Rate, you acknowledge that you have read, understood, and agree to be bound by these Promotion Terms & Conditions, as well as Primal's general Terms of Service and Privacy Policy.
             </p>
           </section>
 
@@ -203,7 +203,7 @@ export default function PromoTerms() {
               Last Updated: January 1, 2026
             </p>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>
-              © 2026 SLTR Digital LLC. All rights reserved.
+              © 2026 Primal. All rights reserved.
             </p>
           </section>
 

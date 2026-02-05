@@ -5,8 +5,10 @@ import { useState, useId } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
+import { isValidPhone } from '../../lib/validation';
 import posthog from 'posthog-js';
 import { AnimatedLogo } from '../../components/AnimatedLogo';
+import { PhoneOTPInput, ResendCodeButton } from '../../components/PhoneOTPInput';
 
 // OAuth Icons
 function GoogleIcon() {
@@ -20,28 +22,17 @@ function GoogleIcon() {
   );
 }
 
-function TwitterIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
-      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-    </svg>
-  );
-}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<'google' | 'twitter' | 'facebook' | null>(null);
+  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
+  const [authMode, setAuthMode] = useState<'email' | 'phone'>('email');
+  const [phone, setPhone] = useState('');
+  const [phoneStep, setPhoneStep] = useState<'input' | 'verify'>('input');
+  const [otpError, setOtpError] = useState('');
 
   const emailId = useId();
   const passwordId = useId();
@@ -79,7 +70,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'twitter' | 'facebook') => {
+  const handleOAuthLogin = async (provider: 'google') => {
     setError('');
     setOauthLoading(provider);
 
@@ -97,6 +88,61 @@ export default function LoginPage() {
       setError(errorMessage);
       setOauthLoading(null);
     }
+  };
+
+  const formatPhoneInput = (text: string) => {
+    const cleaned = text.replace(/\D/g, '');
+    if (cleaned.length <= 3) return cleaned;
+    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+  };
+
+  const handleSendOTP = async () => {
+    setError('');
+    const digits = phone.replace(/\D/g, '');
+    if (!isValidPhone(digits)) {
+      setError('Please enter a valid phone number');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
+      if (error) throw error;
+      setPhoneStep('verify');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send verification code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (code: string) => {
+    setOtpError('');
+    setLoading(true);
+    const digits = phone.replace(/\D/g, '');
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: `+1${digits}`,
+        token: code,
+        type: 'sms',
+      });
+      if (error) throw error;
+      if (data.user) {
+        posthog.identify(data.user.id, { phone: `+1${digits}` });
+        posthog.capture('user_logged_in', { source: 'phone_otp' });
+      }
+      window.location.href = '/dashboard';
+    } catch (err: unknown) {
+      setOtpError(err instanceof Error ? err.message : 'Invalid code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    const digits = phone.replace(/\D/g, '');
+    const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
+    if (error) throw new Error(error.message);
   };
 
   return (
@@ -225,7 +271,7 @@ export default function LoginPage() {
 
         .login-label {
           display: block;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
           margin-bottom: 8px;
           color: rgba(255, 255, 255, 0.5);
@@ -359,6 +405,7 @@ export default function LoginPage() {
           justify-content: center;
           gap: 8px;
           padding: 14px 16px;
+          min-height: 44px;
           font-size: 13px;
           font-weight: 500;
           background: rgba(255, 255, 255, 0.02);
@@ -442,6 +489,90 @@ export default function LoginPage() {
         .field-group {
           margin-bottom: 20px;
         }
+
+        .auth-mode-toggle {
+          display: flex;
+          margin-bottom: 24px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          overflow: hidden;
+        }
+
+        .auth-mode-btn {
+          flex: 1;
+          padding: 12px;
+          min-height: 44px;
+          font-size: 13px;
+          font-weight: 500;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.4);
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-family: inherit;
+        }
+
+        .auth-mode-btn-active {
+          background: rgba(255, 107, 53, 0.15);
+          color: #FF6B35;
+          font-weight: 600;
+        }
+
+        .phone-input-group {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 20px;
+        }
+
+        .phone-prefix {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 14px;
+          min-height: 44px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .otp-section {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+
+        .otp-section p {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-bottom: 20px;
+        }
+
+        .otp-actions {
+          display: flex;
+          justify-content: center;
+          gap: 16px;
+          margin-top: 16px;
+          font-size: 13px;
+        }
+
+        .otp-change-number {
+          background: none;
+          border: none;
+          color: rgba(255, 255, 255, 0.4);
+          cursor: pointer;
+          font-size: 13px;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          font-family: inherit;
+        }
+
+        .otp-change-number:hover {
+          color: #FF6B35;
+        }
       `}</style>
 
       <div className="login-container">
@@ -487,54 +618,121 @@ export default function LoginPage() {
                 </motion.div>
               )}
 
-              <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
-                <div className="field-group">
-                  <label htmlFor={emailId} className="login-label">
-                    Email address
-                  </label>
-                  <input
-                    id={emailId}
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                    className="login-input"
-                  />
-                </div>
-
-                <div className="field-group" style={{ marginBottom: '8px' }}>
-                  <label htmlFor={passwordId} className="login-label">
-                    Password
-                  </label>
-                  <input
-                    id={passwordId}
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                    className="login-input"
-                  />
-                </div>
-
-                <div style={{ textAlign: 'right', marginBottom: '24px' }}>
-                  <Link href="/forgot-password" className="login-forgot">
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <motion.button
-                  type="submit"
-                  disabled={loading || oauthLoading !== null}
-                  className="login-submit"
-                  whileTap={{ scale: 0.98 }}
+              {/* Auth Mode Toggle */}
+              <div className="auth-mode-toggle">
+                <button
+                  type="button"
+                  className={`auth-mode-btn${authMode === 'email' ? ' auth-mode-btn-active' : ''}`}
+                  onClick={() => { setAuthMode('email'); setError(''); setPhoneStep('input'); }}
                 >
-                  {loading ? 'Logging in...' : 'Log In'}
-                </motion.button>
-              </form>
+                  Email
+                </button>
+                <button
+                  type="button"
+                  className={`auth-mode-btn${authMode === 'phone' ? ' auth-mode-btn-active' : ''}`}
+                  onClick={() => { setAuthMode('phone'); setError(''); }}
+                >
+                  Phone
+                </button>
+              </div>
+
+              {authMode === 'email' ? (
+                <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
+                  <div className="field-group">
+                    <label htmlFor={emailId} className="login-label">
+                      Email address
+                    </label>
+                    <input
+                      id={emailId}
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      className="login-input"
+                    />
+                  </div>
+
+                  <div className="field-group" style={{ marginBottom: '8px' }}>
+                    <label htmlFor={passwordId} className="login-label">
+                      Password
+                    </label>
+                    <input
+                      id={passwordId}
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                      className="login-input"
+                    />
+                  </div>
+
+                  <div style={{ textAlign: 'right', marginBottom: '24px' }}>
+                    <Link href="/forgot-password" className="login-forgot">
+                      Forgot password?
+                    </Link>
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    disabled={loading || oauthLoading !== null}
+                    className="login-submit"
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? 'Logging in...' : 'Log In'}
+                  </motion.button>
+                </form>
+              ) : phoneStep === 'input' ? (
+                <div>
+                  <div className="field-group">
+                    <label className="login-label">Phone number</label>
+                    <div className="phone-input-group">
+                      <span className="phone-prefix">+1</span>
+                      <input
+                        type="tel"
+                        placeholder="(555) 555-5555"
+                        value={phone}
+                        onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
+                        className="login-input"
+                        maxLength={14}
+                        autoComplete="tel"
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                  </div>
+                  <motion.button
+                    type="button"
+                    onClick={handleSendOTP}
+                    disabled={loading}
+                    className="login-submit"
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? 'Sending code...' : 'Send Verification Code'}
+                  </motion.button>
+                </div>
+              ) : (
+                <div className="otp-section">
+                  <p>Enter the 6-digit code sent to +1 {phone}</p>
+                  <PhoneOTPInput
+                    onComplete={handleVerifyOTP}
+                    disabled={loading}
+                    error={otpError}
+                  />
+                  <div className="otp-actions">
+                    <button
+                      type="button"
+                      className="otp-change-number"
+                      onClick={() => { setPhoneStep('input'); setOtpError(''); }}
+                    >
+                      Change number
+                    </button>
+                    <ResendCodeButton onResend={handleResendOTP} />
+                  </div>
+                </div>
+              )}
 
               <div className="login-divider">
                 <div className="login-divider-line" />
@@ -552,24 +750,6 @@ export default function LoginPage() {
                   <GoogleIcon />
                   {oauthLoading === 'google' ? '...' : 'Google'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleOAuthLogin('twitter')}
-                  disabled={loading || oauthLoading !== null}
-                  className="login-oauth-btn"
-                >
-                  <TwitterIcon />
-                  {oauthLoading === 'twitter' ? '...' : 'X'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOAuthLogin('facebook')}
-                  disabled={loading || oauthLoading !== null}
-                  className="login-oauth-btn"
-                >
-                  <FacebookIcon />
-                  {oauthLoading === 'facebook' ? '...' : 'Facebook'}
-                </button>
               </div>
 
               <p className="login-signup-link">
@@ -579,7 +759,7 @@ export default function LoginPage() {
           </main>
 
           <footer className="login-footer">
-            <span className="login-footer-company">© 2025 SLTR DIGITAL LLC</span>
+            <span className="login-footer-company">© 2025–2026 Primal</span>
             <span className="login-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
           </footer>
         </div>

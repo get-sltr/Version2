@@ -1,5 +1,5 @@
 /**
- * TypeScript interfaces for SLTR database models
+ * TypeScript interfaces for Primal database models
  * These types match the Supabase database schema
  * Generated: 2025-12-15
  */
@@ -136,7 +136,7 @@ export interface Profile {
   // Status flags
   is_online: boolean;
   is_incognito: boolean;
-  is_dtfn: boolean;
+  is_dth: boolean;
   is_verified: boolean;
   is_premium: boolean;
   premium_until: string | null;
@@ -158,7 +158,7 @@ export interface ProfilePreview {
   position: Position | null;
   photo_url: string | null;
   is_online: boolean;
-  is_dtfn: boolean;
+  is_dth: boolean;
   lat?: number | null;
   lng?: number | null;
   distance?: number | null; // Calculated in meters or feet
@@ -213,7 +213,7 @@ export interface UserSettings {
 
   // Content preferences
   show_nsfw: boolean;
-  pnp_visible: boolean;
+  long_session_visible: boolean;
 
   created_at: string;
   updated_at: string;
@@ -540,7 +540,7 @@ export interface PaginatedResponse<T> {
 
 export interface ProfileFilters {
   online?: boolean;
-  dtfn?: boolean;
+  dth?: boolean;
   minAge?: number;
   maxAge?: number;
   positions?: Position[];

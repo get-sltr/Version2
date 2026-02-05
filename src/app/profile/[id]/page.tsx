@@ -6,10 +6,12 @@ import { supabase } from '../../../lib/supabase';
 import { IconFlame, IconWave, IconWink, IconEye, IconStar, IconChat, IconClose, IconBack } from '@/components/Icons';
 import ProBadge from '@/components/ProBadge';
 import OrbitBadge from '@/components/OrbitBadge';
-import { DTFNBadge } from '@/components/dtfn';
+import { DTHBadge } from '@/components/dth';
 import { recordProfileView } from '@/lib/api/views';
 import { listUserAlbums, listPhotosInAlbum } from '@/lib/api/albumMedia';
 import posthog from 'posthog-js';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
+import { glassHeader, glassBottomNav, glassModal } from '@/styles/design-tokens';
 
 type Album = {
   id: string;
@@ -101,6 +103,18 @@ export default function ProfileViewPage() {
   const [loadingAlbumPhotos, setLoadingAlbumPhotos] = useState(false);
   const [albumPhotoIndex, setAlbumPhotoIndex] = useState<number | null>(null);
 
+  // Block / Report state
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const { blockUser } = useBlockedUsers();
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   // Validate and extract profile ID
   const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
 
@@ -151,14 +165,14 @@ export default function ProfileViewPage() {
           console.error('Error loading profile:', profileError);
           setError('Failed to load profile');
         } else if (data) {
-          // Fetch pnp_visible from user_settings
+          // Fetch long_session_visible from user_settings
           const { data: settingsData } = await supabase
             .from('user_settings')
-            .select('pnp_visible')
+            .select('long_session_visible')
             .eq('user_id', profileId)
             .maybeSingle();
 
-          setProfile({ ...data, pnp_visible: settingsData?.pnp_visible ?? false });
+          setProfile({ ...data, long_session_visible: settingsData?.long_session_visible ?? false });
 
           // Record profile view (only if viewing someone else's profile)
           if (user && profileId !== user.id) {
@@ -372,16 +386,11 @@ export default function ProfileViewPage() {
     }}>
       {/* Header */}
       <header style={{
-        position: 'sticky',
-        top: 0,
-        background: 'rgba(0,0,0,0.95)',
-        backdropFilter: 'blur(10px)',
+        ...glassHeader,
         padding: '12px 15px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 100,
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
       }}>
         <button
           onClick={() => router.back()}
@@ -398,16 +407,83 @@ export default function ProfileViewPage() {
           <IconBack size={24} />
         </button>
         <span style={{ fontSize: '16px', fontWeight: 600 }}>Profile</span>
-        <button style={{
-          background: 'none',
-          border: 'none',
-          color: 'rgba(255,255,255,0.6)',
-          fontSize: '20px',
-          cursor: 'pointer',
-          padding: '5px'
-        }}>
-          ...
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowMoreMenu(!showMoreMenu)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: '20px',
+              cursor: 'pointer',
+              padding: '5px'
+            }}
+          >
+            ...
+          </button>
+
+          {/* Dropdown Menu */}
+          {showMoreMenu && (
+            <>
+              <div
+                onClick={() => setShowMoreMenu(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 199 }}
+              />
+              <div style={{
+                position: 'absolute',
+                top: '40px',
+                right: 0,
+                background: 'rgba(30,30,35,0.98)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '12px',
+                padding: '6px 0',
+                minWidth: '180px',
+                zIndex: 200,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+              }}>
+                <button
+                  onClick={() => { setShowMoreMenu(false); setShowBlockConfirm(true); }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: 'none',
+                    border: 'none',
+                    color: '#ff4444',
+                    fontSize: '15px',
+                    fontWeight: 500,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Block User
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMoreMenu(false);
+                    router.push(`/report?id=${profileId}&user=${encodeURIComponent(profile?.display_name || 'User')}`);
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: 'none',
+                    border: 'none',
+                    color: 'rgba(255,255,255,0.8)',
+                    fontSize: '15px',
+                    fontWeight: 500,
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Report User
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </header>
 
       {/* Main Photo - clean, just the image */}
@@ -445,9 +521,9 @@ export default function ProfileViewPage() {
             <span style={{ fontSize: '28px', fontWeight: 600 }}>
               {profile.display_name || 'New User'}{profile.age ? `, ${profile.age}` : ''}
             </span>
-            {profile.pnp_visible && <OrbitBadge size="md" />}
+            {profile.long_session_visible && <OrbitBadge size="md" />}
             {profile.is_premium && <ProBadge size="md" />}
-            <DTFNBadge isActive={profile.dtfn_active_until && new Date(profile.dtfn_active_until) > new Date()} size="md" />
+            <DTHBadge isActive={profile.dth_active_until && new Date(profile.dth_active_until) > new Date()} size="md" />
           </div>
           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginTop: '4px' }}>
             Nearby
@@ -1170,8 +1246,101 @@ export default function ProfileViewPage() {
         );
       })()}
 
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`toast-notification ${toast.type === 'error' ? 'toast-error' : 'toast-success'}`}>
+          {toast.message}
+        </div>
+      )}
+
+      {/* Block Confirmation Modal */}
+      {showBlockConfirm && (
+        <div
+          onClick={() => setShowBlockConfirm(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 500,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              ...glassModal,
+              padding: '28px 24px',
+              maxWidth: '340px',
+              width: '100%',
+            }}
+          >
+            <h3 style={{ fontSize: '20px', fontWeight: 700, margin: '0 0 12px', textAlign: 'center' }}>
+              Block {profile?.display_name || 'this user'}?
+            </h3>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', margin: '0 0 24px', lineHeight: 1.6 }}>
+              They won&apos;t be able to see your profile, message you, or appear in your grid or map. You can&apos;t undo this.
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setShowBlockConfirm(false)}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!profileId || blockLoading) return;
+                  setBlockLoading(true);
+                  try {
+                    await blockUser(profileId);
+                    posthog.capture('user_blocked', { blocked_user_id: profileId });
+                    showToast('User blocked', 'success');
+                    setShowBlockConfirm(false);
+                    setTimeout(() => router.back(), 600);
+                  } catch (err: any) {
+                    console.error('Block failed:', err);
+                    showToast(err.message || 'Failed to block user', 'error');
+                  } finally {
+                    setBlockLoading(false);
+                  }
+                }}
+                disabled={blockLoading}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  background: 'rgba(255,68,68,0.2)',
+                  border: '1px solid rgba(255,68,68,0.5)',
+                  borderRadius: '12px',
+                  color: '#ff4444',
+                  fontSize: '15px',
+                  fontWeight: 700,
+                  cursor: blockLoading ? 'not-allowed' : 'pointer',
+                  opacity: blockLoading ? 0.6 : 1,
+                }}
+              >
+                {blockLoading ? 'Blocking...' : 'Block'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Fixed Action Buttons at Bottom */}
       <div style={{
+        ...glassBottomNav,
         position: 'fixed',
         bottom: 0,
         left: 0,
@@ -1180,9 +1349,6 @@ export default function ProfileViewPage() {
         gridTemplateColumns: 'repeat(4, 1fr)',
         gap: '8px',
         padding: '12px 15px',
-        background: 'rgba(0,0,0,0.95)',
-        backdropFilter: 'blur(10px)',
-        borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
         {/* Tap Button */}
         <button

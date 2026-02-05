@@ -69,14 +69,14 @@ const Icons = {
 };
 
 const ROOM_ICONS: Record<string, React.FC> = {
-  'club-sltr': Icons.Vinyl,
+  'club-primal': Icons.Vinyl,
   'the-orbit': Icons.Star,
   'the-den': Icons.Square,
   'after-hours': Icons.Moon,
 };
 
 const ROOM_META: Record<string, { badge: string; isPrimary: boolean }> = {
-  'club-sltr': { badge: 'Main', isPrimary: true },
+  'club-primal': { badge: 'Main', isPrimary: true },
   'the-orbit': { badge: 'Featured', isPrimary: false },
   'the-den': { badge: 'Featured', isPrimary: false },
   'after-hours': { badge: 'Featured', isPrimary: false },
@@ -277,7 +277,7 @@ export default function PulseLobbyPage() {
       setRooms(data.rooms || []);
     } catch {
       setRooms([
-        { id: 'club-sltr', name: 'Club SLTR', description: 'Main community hangout', theme: 'default', participantCount: 0, maxParticipants: 400, isLive: false },
+        { id: 'club-primal', name: 'Club Primal', description: 'Main community hangout', theme: 'default', participantCount: 0, maxParticipants: 400, isLive: false },
         { id: 'the-orbit', name: 'The Orbit', description: 'Celebrate & connect', theme: 'neon', participantCount: 0, maxParticipants: 400, isLive: false },
         { id: 'the-den', name: 'The Den', description: 'Chill vibes only', theme: 'dark', participantCount: 0, maxParticipants: 400, isLive: false },
         { id: 'after-hours', name: 'After Hours', description: 'When the night calls', theme: 'purple', participantCount: 0, maxParticipants: 400, isLive: false },

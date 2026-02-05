@@ -38,7 +38,7 @@ export default function AboutPage() {
           textDecoration: 'none',
           color: colors.text
         }}>
-          s l t r
+          P R I M A L
         </Link>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <Link href="/login" style={{
@@ -112,7 +112,7 @@ export default function AboutPage() {
           marginBottom: '32px',
           color: colors.text
         }}>
-          About <span style={{ color: colors.accent }}>SLTR</span>
+          About <span style={{ color: colors.accent }}>Primal</span>
         </h1>
 
         <p style={{
@@ -214,7 +214,7 @@ export default function AboutPage() {
             lineHeight: 1.4,
             fontStyle: 'italic'
           }}>
-            "SLTR exists because that didn't sit right with me."
+            "Primal exists because that didn't sit right with me."
           </p>
         </div>
       </section>
@@ -260,7 +260,7 @@ export default function AboutPage() {
             </p>
 
             <p style={{ marginBottom: '28px' }}>
-              Everything in SLTR is built from that mindset. If something doesn't create a real connection, it doesn't belong here.
+              Everything in Primal is built from that mindset. If something doesn't create a real connection, it doesn't belong here.
             </p>
 
             <p>
@@ -290,7 +290,7 @@ export default function AboutPage() {
               color: colors.accent,
               fontFamily: "'Space Mono', monospace"
             }}>
-              What SLTR Is
+              What Primal Is
             </span>
           </div>
 
@@ -431,7 +431,7 @@ export default function AboutPage() {
                 Your Privacy
               </h3>
               <p style={{ color: colors.textSecondary, lineHeight: 1.7, fontSize: '14px' }}>
-                No invasive ID checks or facial recognition. SLTR gives you the tools to do your own due diligence, on your own terms.
+                No invasive ID checks or facial recognition. Primal gives you the tools to do your own due diligence, on your own terms.
               </p>
             </div>
           </div>
@@ -472,7 +472,7 @@ export default function AboutPage() {
             </p>
 
             <p style={{ marginBottom: '40px' }}>
-              SLTR was built to remove those barriers. One place. No excuses.
+              Primal was built to remove those barriers. One place. No excuses.
             </p>
 
             <div style={{
@@ -534,7 +534,7 @@ export default function AboutPage() {
             marginBottom: '40px',
             fontFamily: "'Space Mono', monospace"
           }}>
-            Join SLTR and experience what connection should feel like.
+            Join Primal and experience what connection should feel like.
           </p>
           <Link
             href="/signup"
@@ -552,7 +552,7 @@ export default function AboutPage() {
               fontFamily: "'Space Mono', monospace"
             }}
           >
-            Join SLTR
+            Join Primal
           </Link>
         </div>
       </section>
@@ -565,7 +565,7 @@ export default function AboutPage() {
         background: colors.background
       }}>
         <p style={{ fontSize: '11px', color: colors.textMuted }}>
-          © 2025 SLTR Digital LLC
+          © 2025 Primal
         </p>
       </footer>
 

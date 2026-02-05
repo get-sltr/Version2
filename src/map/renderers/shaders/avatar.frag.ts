@@ -2,7 +2,7 @@ export default `precision highp float;
 
 uniform sampler2D u_texture;
 
-uniform vec3 u_rimColor;       // SLTR orange
+uniform vec3 u_rimColor;       // Primal orange
 uniform vec3 u_borderColor;    // black
 uniform float u_rimThickness;  // 2px
 uniform float u_avatarSize;
@@ -27,7 +27,7 @@ void main() {
         return;
     }
 
-    // outer rim (SLTR orange)
+    // outer rim (Primal orange)
     float rimEdge = 1.0 - (u_rimThickness / u_avatarSize);
     if (dist > rimEdge) {
         gl_FragColor = vec4(u_rimColor, 1.0);

@@ -894,7 +894,7 @@ export default function ConversationPage() {
     if (!confirm(`Block ${otherUser?.display_name || 'this user'}? They won't be able to message you.`)) return;
 
     try {
-      await supabase.from('blocks').insert({
+      await supabase.from('blocked_users').insert({
         blocker_id: currentUserId,
         blocked_id: otherUserId,
       });

@@ -19,8 +19,8 @@ export interface IconButtonProps {
 }
 
 const sizeMap = {
-  sm: { dimension: 32, fontSize: 16 },
-  md: { dimension: 40, fontSize: 20 },
+  sm: { dimension: 44, fontSize: 16 },
+  md: { dimension: 44, fontSize: 20 },
   lg: { dimension: 48, fontSize: 24 },
 };
 

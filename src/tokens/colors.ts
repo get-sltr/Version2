@@ -50,6 +50,20 @@ export const colors = {
     elevated: '#1C1C1E',
     overlay: 'rgba(0, 0, 0, 0.8)',
   },
+  /** Glass morphism fills, borders, and surfaces */
+  glass: {
+    fill05: 'rgba(255, 255, 255, 0.05)',
+    fill08: 'rgba(255, 255, 255, 0.08)',
+    fill10: 'rgba(255, 255, 255, 0.10)',
+    fill15: 'rgba(255, 255, 255, 0.15)',
+    border: 'rgba(255, 255, 255, 0.08)',
+    borderLight: 'rgba(255, 255, 255, 0.10)',
+    borderMedium: 'rgba(255, 255, 255, 0.15)',
+    borderBright: 'rgba(255, 255, 255, 0.20)',
+    surface: 'rgba(10, 10, 15, 0.6)',
+    headerBg: 'rgba(10, 10, 15, 0.7)',
+    modalBg: 'rgba(30, 30, 35, 0.98)',
+  },
   /** Text colors with WCAG compliance notes */
   text: {
     /** Primary text on dark bg - 21:1 contrast ratio */

@@ -74,51 +74,24 @@ export default function PremiumPage() {
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    // Check if running on native (Capacitor) or web
+    const isNative = typeof window !== 'undefined' &&
+      (window as any).Capacitor?.isNativePlatform?.();
 
-    try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ plan: selectedPlan }),
-      });
-
-      const data = await response.json();
-
-      if (response.status === 401) {
-        router.push('/login?redirect=/premium');
-        return;
-      }
-
-      if (response.status === 429) {
-        setError('Too many requests. Please wait a moment and try again.');
-        return;
-      }
-
-      if (!response.ok) {
-        setError(data.error || 'Something went wrong. Please try again.');
-        return;
-      }
-
-      if (data.url) {
-        posthog.capture('premium_plan_selected', {
-          plan: selectedPlan,
-          price: plans[selectedPlan].total,
-          price_per_month: plans[selectedPlan].price,
-          discount: plans[selectedPlan].discount,
-        });
-        window.location.href = data.url;
-      } else {
-        setError('Unable to start checkout. Please try again.');
-      }
-    } catch (err) {
-      console.error('Checkout error:', err);
-      setError('Connection error. Please check your internet and try again.');
-    } finally {
-      setLoading(false);
+    if (isNative) {
+      // RevenueCat will handle purchases on native
+      // This will be implemented in Phase 2
+      setError('Subscription coming soon to the app!');
+      return;
     }
+
+    // On web, show message about free access
+    posthog.capture('premium_page_viewed_web', {
+      plan: selectedPlan,
+    });
+
+    // Web users get free access - redirect to dashboard
+    router.push('/dashboard');
   };
 
   // Highlighted features with icons

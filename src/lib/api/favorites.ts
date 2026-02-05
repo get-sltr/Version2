@@ -19,7 +19,7 @@ export async function getMyFavorites(): Promise<FavoriteWithProfile[]> {
         position,
         photo_url,
         is_online,
-        is_dtfn,
+        is_dth,
         lat,
         lng
       )

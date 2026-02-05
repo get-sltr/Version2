@@ -1,5 +1,5 @@
 // =============================================================================
-// SLTR Icons — Final v7
+// Primal Icons — Final v7
 // Style: Fragmented, angular, integrated labels
 // Theme: Letters in orange (#FF6B35), drawings use currentColor (adapts to theme)
 // Dark mode: currentColor = white, Light mode: currentColor = black
@@ -396,7 +396,7 @@ export const IconTaps = ({ size = 140, className }: IconProps) => (
   </svg>
 );
 
-export const IconDTFN = ({ size = 140, className }: IconProps) => (
+export const IconDTH = ({ size = 140, className }: IconProps) => (
   <svg
     width={size}
     height={size * 0.57}
@@ -408,11 +408,11 @@ export const IconDTFN = ({ size = 140, className }: IconProps) => (
     <path d="M22 40 L10 64" stroke="currentColor" strokeWidth="1"/>
     <path d="M32 28 L40 20" stroke="#FF6B35" strokeWidth="0.5"/>
     <path d="M36 38 L44 30" stroke="#FF6B35" strokeWidth="0.5"/>
-    <text x="56" y="38" fontFamily="system-ui, sans-serif" fontSize="9" fontWeight="500" letterSpacing="3" fill="#FF6B35">DTFN</text>
+    <text x="56" y="38" fontFamily="system-ui, sans-serif" fontSize="9" fontWeight="500" letterSpacing="3" fill="#FF6B35">DTH</text>
   </svg>
 );
 
-// Orbit Icon - Glowing planet with rings (for PnP indicator)
+// Orbit Icon - Glowing planet with rings (for Long Session indicator)
 export const IconOrbit = ({ size = 24, className, animated = false }: IconProps & { animated?: boolean }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -625,6 +625,21 @@ export const IconUnlock = ({ size = 24, className }: IconProps) => (
   </svg>
 );
 
+export const IconDownload = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <path d="M12 4V16" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M8 12L12 16L16 12" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M4 18H20" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
+export const IconClock = ({ size = 24, className }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M12 7V12L15 14" stroke="currentColor" strokeWidth="1.5"/>
+  </svg>
+);
+
 // =============================================================================
 // Export All
 // =============================================================================
@@ -669,7 +684,7 @@ export const Icons = {
   // Features
   Star: IconStar,
   Taps: IconTaps,
-  DTFN: IconDTFN,
+  DTH: IconDTH,
   Orbit: IconOrbit,
   // Premium
   Infinity: IconInfinity,
@@ -691,6 +706,8 @@ export const Icons = {
   Headset: IconHeadset,
   Airplane: IconAirplane,
   Unlock: IconUnlock,
+  Download: IconDownload,
+  Clock: IconClock,
 };
 
 export default Icons;

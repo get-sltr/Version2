@@ -23,7 +23,7 @@ interface MatrixRainProps {
   targetText?: string;
 }
 
-export function MatrixRain({ onRevealComplete, targetText = 'sltr' }: MatrixRainProps) {
+export function MatrixRain({ onRevealComplete, targetText = 'primal' }: MatrixRainProps) {
   const [drops, setDrops] = useState<RainDrop[]>([]);
   const [splashes, setSplashes] = useState<Splash[]>([]);
   const [revealedLetters, setRevealedLetters] = useState<string[]>([]);

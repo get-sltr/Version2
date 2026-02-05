@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import { AnimatedLogo } from '@/components/AnimatedLogo';
 
 // Particle configuration
 const PARTICLE_COUNT = 80;
@@ -111,48 +112,14 @@ export default function LandingPage() {
 
         {/* Logo silhouette that fades in */}
         <div className="forming-logo">
-          <img src="/icons/primallogo.png" alt="PrimalGay" />
+          <AnimatedLogo size="large" href={undefined} showText={false} />
         </div>
       </div>
 
       {/* Main Content */}
       <main className={`main-content ${phase === 'reveal' ? 'visible' : ''}`}>
         <div className="logo-composition">
-          <div className="logo-section">
-            <div className="beam-container">
-              <div className="beam beam-1" />
-              <div className="beam beam-2" />
-              <div className="beam beam-3" />
-              <div className="beam beam-4" />
-              <div className="beam beam-5" />
-              <div className="beam beam-6" />
-            </div>
-            <div className="glow-ring ring-1" />
-            <div className="glow-ring ring-2" />
-            <div className="glow-ring ring-3" />
-            <div className="logo-crystalline">
-              <div className="orange-glow" />
-              <div className="black-base" />
-              <div className="inner-glow" />
-              <div className="glass-shine" />
-              <img src="/icons/primallogo.png" alt="PrimalGay Logo" className="primal-logo-img" />
-            </div>
-          </div>
-          <div className="connector" />
-          <div className="text-section">
-            <h1 className="logo-text">
-              <span className="glass-letter">P</span>
-              <span className="glass-letter">R</span>
-              <span className="glass-letter">I</span>
-              <span className="glass-letter">M</span>
-              <span className="glass-letter">A</span>
-              <span className="glass-letter">L</span>
-              <span className="glass-letter">G</span>
-              <span className="glass-letter">A</span>
-              <span className="glass-letter">Y</span>
-            </h1>
-            <p className="tagline">Release Your Inner Desire</p>
-          </div>
+          <AnimatedLogo size="large" href={undefined} showText={true} />
         </div>
         <div className="cta-container">
           <Link href="/signup" className="cta-btn cta-btn-primary">
@@ -174,7 +141,7 @@ export default function LandingPage() {
           <Link href="/about">About</Link>
         </div>
         <div className="footer-brand">
-          <span className="company-name">SLTR DIGITAL LLC</span>
+          <span className="company-name">PRIMAL</span>
           <span className="company-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
         </div>
       </footer>
@@ -414,257 +381,9 @@ export default function LandingPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 20px;
           position: relative;
+          transform: scale(1.5);
         }
-
-        .logo-section {
-          position: relative;
-          width: 140px;
-          height: 140px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .beam-container {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 100%;
-          height: 100%;
-          transform: translate(-50%, -50%);
-          animation: beam-rotate 12s linear infinite;
-          opacity: 0;
-          transition: opacity 1s ease 0.5s;
-        }
-
-        .main-content.visible .beam-container { opacity: 1; }
-
-        .beam {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 2px;
-          background: linear-gradient(to bottom, rgba(200, 220, 255, 0.9), transparent 100%);
-          transform-origin: top center;
-        }
-
-        .beam-1 { height: 90px; transform: translate(-50%, 0) rotate(0deg); }
-        .beam-2 { height: 75px; transform: translate(-50%, 0) rotate(60deg); }
-        .beam-3 { height: 85px; transform: translate(-50%, 0) rotate(120deg); }
-        .beam-4 { height: 70px; transform: translate(-50%, 0) rotate(180deg); }
-        .beam-5 { height: 88px; transform: translate(-50%, 0) rotate(240deg); }
-        .beam-6 { height: 78px; transform: translate(-50%, 0) rotate(300deg); }
-
-        @keyframes beam-rotate {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .glow-ring {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          border: 1px solid rgba(200, 220, 255, 0.2);
-          border-radius: 50%;
-          animation: ring-expand 1.8s ease-in-out infinite;
-          opacity: 0;
-          transition: opacity 1s ease 0.8s;
-        }
-
-        .main-content.visible .glow-ring { opacity: 1; }
-
-        .ring-1 { width: 60px; height: 60px; }
-        .ring-2 { width: 85px; height: 85px; animation-delay: 0.2s; }
-        .ring-3 { width: 110px; height: 110px; animation-delay: 0.4s; }
-
-        @keyframes ring-expand {
-          0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.15); }
-        }
-
-        .logo-crystalline {
-          position: relative;
-          width: 120px;
-          height: 120px;
-          z-index: 10;
-        }
-
-        .primal-logo-img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          animation: crystalline-pulse 1.8s ease-in-out infinite;
-          filter: drop-shadow(0 0 25px rgba(200, 220, 255, 0.6));
-          position: relative;
-          z-index: 15;
-        }
-
-        .glass-shine {
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 150%;
-          height: 100%;
-          background: linear-gradient(
-            105deg,
-            transparent 20%,
-            rgba(255, 255, 255, 0.15) 35%,
-            rgba(255, 255, 255, 0.4) 40%,
-            rgba(255, 255, 255, 0.15) 45%,
-            transparent 60%
-          );
-          animation: glass-sweep 3s ease-in-out infinite;
-          pointer-events: none;
-          z-index: 20;
-        }
-
-        @keyframes glass-sweep {
-          0% { left: -100%; }
-          50%, 100% { left: 150%; }
-        }
-
-        .orange-glow {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 70px;
-          height: 70px;
-          background: radial-gradient(circle, rgba(255, 107, 53, 0.5) 0%, rgba(255, 107, 53, 0.15) 50%, transparent 70%);
-          filter: blur(15px);
-          z-index: -1;
-          animation: orange-pulse 1.8s ease-in-out infinite;
-        }
-
-        .black-base {
-          position: absolute;
-          bottom: 10px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 50px;
-          height: 12px;
-          background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
-          filter: blur(6px);
-        }
-
-        .inner-glow {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 30px;
-          height: 30px;
-          background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(200, 220, 255, 0.6) 40%, transparent 70%);
-          animation: inner-beat 1.8s ease-in-out infinite;
-          z-index: 5;
-        }
-
-        @keyframes crystalline-pulse {
-          0%, 100% { filter: drop-shadow(0 0 25px rgba(200, 220, 255, 0.5)); }
-          50% {
-            filter: drop-shadow(0 0 40px rgba(200, 220, 255, 0.9))
-                   drop-shadow(0 0 60px rgba(180, 200, 255, 0.5))
-                   drop-shadow(0 0 90px rgba(160, 180, 255, 0.3));
-          }
-        }
-
-        @keyframes orange-pulse {
-          0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); }
-        }
-
-        @keyframes inner-beat {
-          0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
-        }
-
-        .connector {
-          width: 40px;
-          height: 2px;
-          background: linear-gradient(to right, rgba(200, 220, 255, 0.8), rgba(200, 220, 255, 0.4));
-          animation: connector-glow 1.8s ease-in-out infinite;
-          opacity: 0;
-          transform: scaleX(0);
-          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
-          margin-bottom: 0;
-        }
-
-        .main-content.visible .connector {
-          opacity: 1;
-          transform: scaleX(1);
-        }
-
-        @keyframes connector-glow {
-          0%, 100% { opacity: 0.6; box-shadow: 0 0 10px rgba(200, 220, 255, 0.3); }
-          50% { opacity: 1; box-shadow: 0 0 25px rgba(200, 220, 255, 0.7); }
-        }
-
-        .text-section {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          margin-bottom: 0;
-        }
-
-        .logo-text {
-          display: flex;
-          gap: 4px;
-          font-size: clamp(2rem, 8vw, 3rem);
-          font-weight: 400;
-          letter-spacing: 0.1em;
-          margin: 0;
-        }
-
-        .glass-letter {
-          position: relative;
-          color: transparent;
-          background: linear-gradient(
-            180deg,
-            #ffffff 0%,
-            #c8dcff 40%,
-            #ffffff 50%,
-            #a8c4ff 60%,
-            #ffffff 100%
-          );
-          -webkit-background-clip: text;
-          background-clip: text;
-          filter: drop-shadow(0 0 20px rgba(200, 220, 255, 0.5));
-          animation: letter-glow 1.8s ease-in-out infinite;
-        }
-
-        .glass-letter:nth-child(1) { animation-delay: 0s; }
-        .glass-letter:nth-child(2) { animation-delay: 0.1s; }
-        .glass-letter:nth-child(3) { animation-delay: 0.2s; }
-        .glass-letter:nth-child(4) { animation-delay: 0.3s; }
-        .glass-letter:nth-child(5) { animation-delay: 0.4s; }
-        .glass-letter:nth-child(6) { animation-delay: 0.5s; }
-        .glass-letter:nth-child(7) { animation-delay: 0.6s; }
-        .glass-letter:nth-child(8) { animation-delay: 0.7s; }
-        .glass-letter:nth-child(9) { animation-delay: 0.8s; }
-
-        @keyframes letter-glow {
-          0%, 100% { filter: drop-shadow(0 0 15px rgba(200, 220, 255, 0.4)); }
-          50% {
-            filter: drop-shadow(0 0 30px rgba(200, 220, 255, 0.8))
-                   drop-shadow(0 0 50px rgba(200, 220, 255, 0.4));
-          }
-        }
-
-        .tagline {
-          font-size: 0.6rem;
-          letter-spacing: 0.25em;
-          color: #FF6B35;
-          text-transform: uppercase;
-          margin-top: 8px;
-          text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
-          opacity: 0;
-          transition: opacity 0.8s ease 0.6s;
-        }
-
-        .main-content.visible .tagline { opacity: 1; }
 
         /* ===========================================
            CTA BUTTONS
@@ -830,10 +549,14 @@ export default function LandingPage() {
         }
 
         .footer-links a {
-          font-size: 11px;
+          font-size: 13px;
           color: rgba(255, 255, 255, 0.35);
           text-decoration: none;
           transition: all 0.3s ease;
+          padding: 12px 8px;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
         }
 
         .footer-links a:hover {
@@ -885,39 +608,7 @@ export default function LandingPage() {
            =========================================== */
         @media (max-width: 700px) {
           .logo-composition {
-            flex-direction: column;
-            gap: 10px;
-          }
-
-          .connector {
-            width: 2px;
-            height: 30px;
-            margin-bottom: 0;
-            background: linear-gradient(to bottom, rgba(200, 220, 255, 0.8), rgba(200, 220, 255, 0.4));
-          }
-
-          .text-section {
-            align-items: center;
-            margin-bottom: 0;
-          }
-
-          .logo-section {
-            width: 120px;
-            height: 120px;
-          }
-
-          .logo-crystalline {
-            width: 100px;
-            height: 100px;
-          }
-
-          .logo-text {
-            font-size: 1.8rem;
-          }
-
-          .tagline {
-            text-align: center;
-            font-size: 0.5rem;
+            transform: scale(1.2);
           }
 
           .cta-container {
@@ -930,20 +621,8 @@ export default function LandingPage() {
             width: 100%;
           }
 
-          .beam-1 { height: 70px; }
-          .beam-2 { height: 58px; }
-          .beam-3 { height: 65px; }
-          .beam-4 { height: 55px; }
-          .beam-5 { height: 68px; }
-          .beam-6 { height: 60px; }
-
-          .ring-1 { width: 45px; height: 45px; }
-          .ring-2 { width: 65px; height: 65px; }
-          .ring-3 { width: 85px; height: 85px; }
-
           .forming-logo {
-            width: 100px;
-            height: 100px;
+            transform: translate(-50%, -50%) scale(0.8);
           }
         }
 
@@ -952,14 +631,7 @@ export default function LandingPage() {
           .sparkle,
           .center-glow,
           .forming-logo,
-          .beam-container,
-          .primal-logo-img,
-          .orange-glow,
-          .inner-glow,
-          .glow-ring,
-          .glass-shine,
-          .btn-shine,
-          .glass-letter {
+          .btn-shine {
             animation: none;
           }
 

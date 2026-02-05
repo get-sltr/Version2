@@ -1,5 +1,5 @@
 /**
- * Validation utilities for SLTR
+ * Validation utilities for Primal
  * Contains shared validation logic for both client and server-side use
  */
 
@@ -40,6 +40,23 @@ export function isValidAge(dob: string | Date, minimumAge: number = 18): boolean
   // Check minimum age
   const age = calculateAge(birthDate);
   return age >= minimumAge;
+}
+
+/**
+ * Validate phone number in E.164 format
+ * Accepts: +1XXXXXXXXXX, 1XXXXXXXXXX, XXXXXXXXXX (assumes US +1)
+ */
+export function isValidPhone(phone: string): boolean {
+  // Strip all non-digit characters except leading +
+  const cleaned = phone.replace(/[^\d+]/g, '');
+  // E.164: starts with +, followed by 1-15 digits
+  const e164Regex = /^\+[1-9]\d{6,14}$/;
+  if (e164Regex.test(cleaned)) return true;
+  // US number without +: 10 digits or 11 digits starting with 1
+  const digitsOnly = cleaned.replace(/\D/g, '');
+  if (digitsOnly.length === 10) return true;
+  if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) return true;
+  return false;
 }
 
 /**

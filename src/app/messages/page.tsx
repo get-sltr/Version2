@@ -6,6 +6,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { IconClose, IconMenu, IconChat } from '@/components/Icons';
 import BottomNavWithBadges from '@/components/BottomNavWithBadges';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
+import { glassHeader } from '@/styles/design-tokens';
 import ProBadge from '@/components/ProBadge';
 
 type ProfilePreview = {
@@ -54,6 +56,7 @@ export default function MessagesPage() {
   const [typingMap, setTypingMap] = useState<Record<string, boolean>>({});
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [longPressId, setLongPressId] = useState<string | null>(null);
+  const { blockedIds } = useBlockedUsers();
 
   // Load pinned conversations from localStorage
   useEffect(() => {
@@ -194,6 +197,9 @@ export default function MessagesPage() {
         }
       });
 
+      // Remove blocked users from conversations
+      blockedIds.forEach(id => conversationMap.delete(id));
+
       if (isMounted) {
         setConversations(Array.from(conversationMap.values()));
         setLoading(false);
@@ -228,22 +234,16 @@ export default function MessagesPage() {
   return (
     <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif", paddingBottom: '80px' }}>
       {/* Header */}
-        <header style={{ 
-          padding: '15px 20px', 
-          borderBottom: `1px solid ${colors.border}`, 
-          position: 'sticky', 
-          top: 0, 
-          background: colors.background, 
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          zIndex: 100 
+        <header style={{
+          ...glassHeader,
+          padding: 'calc(env(safe-area-inset-top, 0px) + 15px) 20px 15px',
         }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-          <Link href="/dashboard" style={{ color: colors.text, textDecoration: 'none' }}>
+          <Link href="/dashboard" aria-label="Back to dashboard" style={{ color: colors.text, textDecoration: 'none', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconClose size={24} />
           </Link>
           <h1 style={{ fontSize: '28px', fontWeight: 700, margin: 0 }}>Messages</h1>
-          <Link href="/settings" style={{ color: colors.text, textDecoration: 'none' }}>
+          <Link href="/settings" aria-label="Settings" style={{ color: colors.text, textDecoration: 'none', minWidth: '44px', minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconMenu size={24} />
           </Link>
         </div>

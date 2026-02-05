@@ -28,7 +28,7 @@ export default function ProBadge({ size = 'sm', showText = false }: ProBadgeProp
         justifyContent: 'center',
         boxShadow: '0 2px 8px rgba(255, 165, 0, 0.4)',
       }}
-      title="SLTR Pro Member"
+      title="Primal+ Member"
     >
       <svg
         width={s.icon}

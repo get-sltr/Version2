@@ -111,7 +111,7 @@ export default function HideChatPhotosPage() {
               Premium Feature
             </h4>
             <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px', lineHeight: 1.6 }}>
-              Hide Message Photos is available with SLTR Premium
+              Hide Message Photos is available with Primal Premium
             </p>
             <a
               href="/premium"

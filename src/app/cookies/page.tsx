@@ -2,7 +2,7 @@ export default function CookiePolicy() {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', color: '#000', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }}>
       <header style={{ padding: '30px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '32px', fontWeight: 700, letterSpacing: '0.3em', textDecoration: 'none', color: '#000' }}>s l t r</a>
+        <a href="/" style={{ fontFamily: "'Audiowide', sans-serif", fontSize: '28px', fontWeight: 700, letterSpacing: '0.1em', textDecoration: 'none', color: '#000' }}>PRIMAL</a>
         <a href="/" style={{ fontSize: '12px', color: '#666', textDecoration: 'none' }}>← Back to Home</a>
       </header>
       <main style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 30px' }}>
@@ -31,7 +31,7 @@ export default function CookiePolicy() {
         </Section>
       </main>
       <footer style={{ padding: '40px 30px', borderTop: '1px solid #eee', textAlign: 'center' }}>
-        <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", fontSize: '11px', opacity: 0.4 }}>© 2025 SLTR Digital LLC. All rights reserved.</p>
+        <p style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", fontSize: '11px', opacity: 0.4 }}>© 2025 Primal. All rights reserved.</p>
       </footer>
     </div>
   );

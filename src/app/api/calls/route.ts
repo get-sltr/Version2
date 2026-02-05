@@ -81,7 +81,7 @@ export async function POST(request: Request) {
   }
 
   const sortedParticipants = [user.id, participantId].sort().join('-');
-  const roomName = `sltr-${sortedParticipants}-${Date.now()}`;
+  const roomName = `primal-${sortedParticipants}-${Date.now()}`;
 
   const response = await fetch('https://api.daily.co/v1/rooms', {
     method: 'POST',

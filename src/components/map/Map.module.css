@@ -376,15 +376,22 @@
   right: 16px;
   bottom: 16px;
   width: 280px;
-  background: var(--color-glass);
+  background:
+    radial-gradient(ellipse at 30% 10%, rgba(255, 107, 53, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 90%, rgba(255, 107, 53, 0.06) 0%, transparent 50%),
+    rgba(20, 20, 30, 0.85);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-  border: 1px solid var(--color-glass-border);
+  border: 1px solid rgba(255, 107, 53, 0.12);
   border-radius: var(--radius-xl);
   padding: 20px;
   z-index: 1000;
   transform: translateX(calc(100% + 32px));
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(255, 107, 53, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .menuPanel.open {
@@ -408,8 +415,8 @@
 }
 
 .menuClose {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -418,6 +425,7 @@
   color: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   transition: var(--transition-fast);
+  border-radius: 50%;
 }
 
 .menuClose:hover {
@@ -435,10 +443,11 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  background: var(--color-glass-light);
-  border: 1px solid var(--color-glass-border-light);
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
   transition: var(--transition-smooth);
   text-decoration: none;
@@ -448,9 +457,10 @@
 }
 
 .menuItem:hover {
-  background: rgba(255, 107, 53, 0.08);
-  border-color: rgba(255, 107, 53, 0.2);
+  background: rgba(255, 107, 53, 0.12);
+  border-color: rgba(255, 107, 53, 0.25);
   color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.1);
 }
 
 .menuItemIcon {

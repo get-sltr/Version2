@@ -16,9 +16,9 @@ export const Button: React.FC<ButtonProps> = ({
   const [isHovered, setIsHovered] = useState(false);
 
   const sizeStyles: Record<string, React.CSSProperties> = {
-    sm: { padding: '8px 12px', fontSize: typography.fontSize.sm },
-    md: { padding: '12px 16px', fontSize: typography.fontSize.base },
-    lg: { padding: '16px 24px', fontSize: typography.fontSize.lg },
+    sm: { padding: '10px 16px', fontSize: typography.fontSize.sm, minHeight: '44px' },
+    md: { padding: '12px 16px', fontSize: typography.fontSize.base, minHeight: '44px' },
+    lg: { padding: '16px 24px', fontSize: typography.fontSize.lg, minHeight: '44px' },
   };
 
   const variantStyles: Record<string, React.CSSProperties> = {

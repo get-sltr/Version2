@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconCheck, IconCrown } from '@/components/Icons';
+import { AnimatedLogo } from '@/components/AnimatedLogo';
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -11,7 +12,6 @@ export default function WelcomePage() {
   const promoFeatures = [
     'Unlimited profile views',
     'See who viewed your profile',
-    'No ads ever',
     'Advanced filters',
     'Priority in search results',
     'Read receipts on messages',
@@ -56,18 +56,8 @@ export default function WelcomePage() {
         }}
       >
         {/* Header */}
-        <header style={{ textAlign: 'center', paddingTop: '20px' }}>
-          <span
-            style={{
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: '24px',
-              fontWeight: 700,
-              letterSpacing: '0.15em',
-              color: '#FFFFFF',
-            }}
-          >
-            sltr
-          </span>
+        <header style={{ textAlign: 'center', paddingTop: '20px', display: 'flex', justifyContent: 'center' }}>
+          <AnimatedLogo size="small" href={undefined} showText={false} />
         </header>
 
         {/* Main Content */}
@@ -96,9 +86,10 @@ export default function WelcomePage() {
                 fontSize: '28px',
                 fontWeight: 700,
                 marginBottom: '8px',
+                fontFamily: "'Audiowide', sans-serif",
               }}
             >
-              Welcome to SLTR!
+              Welcome to Primal!
             </h1>
             <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '15px' }}>
               Your account is ready. Before you go...
@@ -163,9 +154,10 @@ export default function WelcomePage() {
                 fontSize: '24px',
                 fontWeight: 700,
                 marginBottom: '8px',
+                fontFamily: "'Audiowide', sans-serif",
               }}
             >
-              Upgrade to SLTR+
+              Upgrade to Primal+
             </h2>
 
             {/* Price */}
@@ -246,7 +238,7 @@ export default function WelcomePage() {
 
             {/* CTA Button */}
             <motion.a
-              href="https://checkout.stripe.com/c/pay/cs_live_b1unIQSp5E4DRHvjoF7AJB0oONGs5dF94XM2a2BrTxan5FcHeyFvnTQRBL#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSd2cGd2ZndsdXFsamtQa2x0cGBrYHZ2QGtkZ2lgYSc%2FY2RpdmApJ2R1bE5gfCc%2FJ3VuWmlsc2BaMDRXfFNgSDZEcDAxUj1mdD1CNnxUSHNpT10yMVRvTHVGT0RrdjN2Qj1zNF1nRlB1Un9ccEhfdWNxfU9IcmZ%2FUGx2a1RoUD08dWtASEZybnJPZ11zVnxtYWc1NWxyMF1KVVFBJyknY3dqaFZgd3Ngdyc%2FcXdwYCknZ2RmbmJ3anBrYUZqaWp3Jz8nJmE8MDU1NScpJ2lkfGpwcVF8dWAnPydocGlxbFpscWBoJyknYGtkZ2lgVWlkZmBtamlhYHd2Jz9xd3BgeCUl"
+              href="/premium"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               style={{
@@ -267,7 +259,7 @@ export default function WelcomePage() {
                 boxShadow: '0 0 40px rgba(255, 107, 53, 0.5)',
               }}
             >
-              Claim Your 50% Off
+              Upgrade to Pro
             </motion.a>
 
             {/* Guarantee */}

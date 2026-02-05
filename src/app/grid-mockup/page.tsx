@@ -6,20 +6,20 @@ import { IconSearch, IconMap, IconUser, IconCheck, IconCrown, IconClose, IconSta
 
 // Sample mock data for preview
 const mockProfiles = [
-  { id: 1, name: 'Alex', age: 28, distance: '0.3 mi', online: true, isPremium: true, dtfn: true },
-  { id: 2, name: 'Jordan', age: 32, distance: '0.5 mi', online: true, isPremium: false, dtfn: false },
-  { id: 3, name: 'Sam', age: 25, distance: '0.8 mi', online: false, isPremium: true, dtfn: true },
-  { id: 4, name: 'Riley', age: 30, distance: '1.2 mi', online: true, isPremium: false, dtfn: false },
-  { id: 5, name: 'Casey', age: 27, distance: '1.5 mi', online: true, isPremium: true, dtfn: false },
-  { id: 6, name: 'Morgan', age: 34, distance: '2.1 mi', online: false, isPremium: false, dtfn: true },
-  { id: 7, name: 'Taylor', age: 29, distance: '2.4 mi', online: true, isPremium: false, dtfn: false },
-  { id: 8, name: 'Drew', age: 31, distance: '3.0 mi', online: true, isPremium: true, dtfn: false },
-  { id: 9, name: 'Quinn', age: 26, distance: '3.5 mi', online: false, isPremium: false, dtfn: true },
+  { id: 1, name: 'Alex', age: 28, distance: '0.3 mi', online: true, isPremium: true, dth: true },
+  { id: 2, name: 'Jordan', age: 32, distance: '0.5 mi', online: true, isPremium: false, dth: false },
+  { id: 3, name: 'Sam', age: 25, distance: '0.8 mi', online: false, isPremium: true, dth: true },
+  { id: 4, name: 'Riley', age: 30, distance: '1.2 mi', online: true, isPremium: false, dth: false },
+  { id: 5, name: 'Casey', age: 27, distance: '1.5 mi', online: true, isPremium: true, dth: false },
+  { id: 6, name: 'Morgan', age: 34, distance: '2.1 mi', online: false, isPremium: false, dth: true },
+  { id: 7, name: 'Taylor', age: 29, distance: '2.4 mi', online: true, isPremium: false, dth: false },
+  { id: 8, name: 'Drew', age: 31, distance: '3.0 mi', online: true, isPremium: true, dth: false },
+  { id: 9, name: 'Quinn', age: 26, distance: '3.5 mi', online: false, isPremium: false, dth: true },
 ];
 
 const filters = [
   { id: 'online', label: 'Online', icon: 'dot' },
-  { id: 'dtfn', label: 'DTFN', icon: 'droplet' },
+  { id: 'dth', label: 'DTH', icon: 'droplet' },
   { id: 'age', label: 'Age' },
   { id: 'position', label: 'Position' },
   { id: 'tribes', label: 'Tribes' },
@@ -385,7 +385,7 @@ export default function GridMockup() {
                   <IconCrown size={24} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff' }}>Upgrade to SLTR+</h3>
+                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#fff' }}>Upgrade to Primal+</h3>
                   <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Unlimited profiles, no ads, see who viewed you</p>
                 </div>
               </div>
@@ -471,8 +471,8 @@ export default function GridMockup() {
                 </div>
               )}
 
-              {/* DTFN Badge */}
-              {profile.dtfn && (
+              {/* DTH Badge */}
+              {profile.dth && (
                 <div style={{
                   position: 'absolute',
                   top: profile.isPremium ? '28px' : '6px',
@@ -483,7 +483,7 @@ export default function GridMockup() {
                   backdropFilter: 'blur(5px)',
                   WebkitBackdropFilter: 'blur(5px)',
                 }}>
-                  <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.5px' }}>DTFN</span>
+                  <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.5px' }}>DTH</span>
                 </div>
               )}
 
@@ -529,7 +529,7 @@ export default function GridMockup() {
           ))}
         </main>
 
-        {/* DTFN Floating Button - Glass Style */}
+        {/* DTH Floating Button - Glass Style */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}

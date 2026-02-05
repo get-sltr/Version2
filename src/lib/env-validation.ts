@@ -23,14 +23,9 @@ const DATABASE_VARS: EnvVar[] = [
   { name: 'DATABASE_URL', required: true, description: 'PostgreSQL connection string for vector tiles' },
 ];
 
-// Stripe payment configuration
-const STRIPE_VARS: EnvVar[] = [
-  { name: 'STRIPE_SECRET_KEY', required: true, description: 'Stripe secret API key' },
-  { name: 'STRIPE_WEBHOOK_SECRET', required: true, description: 'Stripe webhook signing secret' },
-  { name: 'STRIPE_PRICE_WEEK', required: false, description: 'Stripe price ID for weekly plan' },
-  { name: 'STRIPE_PRICE_1MONTH', required: false, description: 'Stripe price ID for 1-month plan' },
-  { name: 'STRIPE_PRICE_3MONTHS', required: false, description: 'Stripe price ID for 3-month plan' },
-  { name: 'STRIPE_PRICE_6MONTHS', required: false, description: 'Stripe price ID for 6-month plan' },
+// RevenueCat payment configuration (for native apps)
+const REVENUECAT_VARS: EnvVar[] = [
+  { name: 'NEXT_PUBLIC_REVENUECAT_API_KEY', required: false, description: 'RevenueCat public API key for subscriptions' },
 ];
 
 // LiveKit video/audio configuration
@@ -72,7 +67,7 @@ const APP_VARS: EnvVar[] = [
 const ALL_ENV_VARS = {
   supabase: SUPABASE_VARS,
   database: DATABASE_VARS,
-  stripe: STRIPE_VARS,
+  revenuecat: REVENUECAT_VARS,
   livekit: LIVEKIT_VARS,
   daily: DAILY_VARS,
   email: EMAIL_VARS,
@@ -203,7 +198,7 @@ export function getEnvVar(name: string, fallback?: string): string {
  */
 export function generateEnvTemplate(): string {
   const lines: string[] = [
-    '# SLTR Environment Configuration',
+    '# Primal Environment Configuration',
     '# Copy this to .env.local and fill in your values',
     '# DO NOT commit .env.local to version control',
     '',

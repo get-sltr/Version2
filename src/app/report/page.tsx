@@ -1,17 +1,30 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
+import { supabase } from '@/lib/supabase';
 
 function ReportPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const reportedUser = searchParams.get('user') || 'User';
-  
+  const reportedUserId = searchParams.get('id') || '';
+  const reportedUserName = searchParams.get('user') || 'User';
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [additionalInfo, setAdditionalInfo] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setCurrentUserId(user.id);
+    };
+    getUser();
+  }, []);
 
   const reasons = [
     { id: 'fake', label: 'Fake Profile or Impersonation', icon: '🎭' },
@@ -34,25 +47,58 @@ function ReportPageContent() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedReasons.length === 0) {
       alert('Please select at least one reason');
       return;
     }
 
-    // Capture user_reported event in PostHog
-    posthog.capture('user_reported', {
-      reported_user: reportedUser,
-      reasons: selectedReasons,
-      has_additional_info: !!additionalInfo.trim(),
-    });
+    if (!currentUserId) {
+      setError('You must be logged in to submit a report');
+      return;
+    }
 
-    // In production, send report to backend
-    setSubmitted(true);
+    if (!reportedUserId) {
+      setError('Invalid user to report');
+      return;
+    }
 
-    setTimeout(() => {
-      router.back();
-    }, 2000);
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Save report to database
+      const { error: insertError } = await supabase.from('reports').insert({
+        reporter_id: currentUserId,
+        reported_user_id: reportedUserId,
+        reason: selectedReasons.join(','),
+        details: additionalInfo.trim() || null,
+        status: 'pending',
+      });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      // Capture user_reported event in PostHog
+      posthog.capture('user_reported', {
+        reported_user_id: reportedUserId,
+        reported_user_name: reportedUserName,
+        reasons: selectedReasons,
+        has_additional_info: !!additionalInfo.trim(),
+      });
+
+      setSubmitted(true);
+
+      setTimeout(() => {
+        router.back();
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to submit report:', err);
+      setError('Failed to submit report. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -62,7 +108,7 @@ function ReportPageContent() {
           <div style={{ fontSize: '64px', marginBottom: '20px' }}>✅</div>
           <h2 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '12px' }}>Report Submitted</h2>
           <p style={{ fontSize: '15px', color: '#888', lineHeight: 1.6 }}>
-            Thank you for helping keep SLTR safe. We'll review this report and take appropriate action.
+            Thank you for helping keep Primal safe. We'll review this report and take appropriate action.
           </p>
         </div>
       </div>
@@ -101,23 +147,38 @@ function ReportPageContent() {
         <h1 style={{ fontSize: '17px', fontWeight: 600, margin: 0 }}>Report User</h1>
         <button
           onClick={handleSubmit}
-          disabled={selectedReasons.length === 0}
+          disabled={selectedReasons.length === 0 || loading}
           style={{
             background: 'none',
             border: 'none',
-            color: selectedReasons.length > 0 ? '#FF6B35' : '#333',
+            color: selectedReasons.length > 0 && !loading ? '#FF6B35' : '#333',
             fontSize: '16px',
             fontWeight: 600,
-            cursor: selectedReasons.length > 0 ? 'pointer' : 'not-allowed',
+            cursor: selectedReasons.length > 0 && !loading ? 'pointer' : 'not-allowed',
             padding: 0
           }}
         >
-          Submit
+          {loading ? 'Submitting...' : 'Submit'}
         </button>
       </header>
 
       {/* Content */}
       <div style={{ padding: '20px' }}>
+        {/* Error Banner */}
+        {error && (
+          <div style={{
+            background: 'rgba(255,59,48,0.2)',
+            border: '1px solid #ff3b30',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '20px',
+            color: '#ff3b30',
+            fontSize: '14px',
+          }}>
+            {error}
+          </div>
+        )}
+
         {/* Warning Banner */}
         <div style={{
           background: 'rgba(255,59,48,0.15)',
@@ -127,7 +188,7 @@ function ReportPageContent() {
           marginBottom: '30px'
         }}>
           <div style={{ fontSize: '15px', lineHeight: 1.6 }}>
-            <strong>Reporting {reportedUser}</strong>
+            <strong>Reporting {reportedUserName}</strong>
             <br />
             False reports may result in your account being suspended. Only report genuine violations of our Community Guidelines.
           </div>

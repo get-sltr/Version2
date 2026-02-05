@@ -112,7 +112,7 @@ export default function LandingPage() {
 
         {/* Logo silhouette that fades in */}
         <div className="forming-logo">
-          <img src="/icons/primallogo.png" alt="PrimalGay" />
+          <img src="/icons/primallogo.png" alt="Primal" />
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export default function LandingPage() {
               <div className="glass-shine" />
               <img
                 src="/icons/primallogo.png"
-                alt="PrimalGay Logo"
+                alt="Primal Logo"
                 className="primal-logo-img"
               />
             </div>
@@ -152,9 +152,6 @@ export default function LandingPage() {
               <span className="glass-letter">M</span>
               <span className="glass-letter">A</span>
               <span className="glass-letter">L</span>
-              <span className="glass-letter">G</span>
-              <span className="glass-letter">A</span>
-              <span className="glass-letter">Y</span>
             </h1>
             <p className="tagline">Release Your Inner Desire</p>
           </div>

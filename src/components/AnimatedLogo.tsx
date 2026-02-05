@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface AnimatedLogoProps {
   size?: 'small' | 'medium' | 'large';
@@ -11,9 +10,9 @@ interface AnimatedLogoProps {
 
 export function AnimatedLogo({ size = 'small', href = '/', showText = true }: AnimatedLogoProps) {
   const scales = {
-    small: { logo: 48, text: '18px', gap: '10px' },
-    medium: { logo: 72, text: '24px', gap: '14px' },
-    large: { logo: 100, text: '32px', gap: '18px' },
+    small: { stripeW: 8, stripeH: 28, gap: 4, text: '18px', containerGap: '10px', tagline: '8px' },
+    medium: { stripeW: 12, stripeH: 38, gap: 5, text: '24px', containerGap: '14px', tagline: '10px' },
+    large: { stripeW: 16, stripeH: 50, gap: 6, text: '32px', containerGap: '18px', tagline: '12px' },
   };
 
   const s = scales[size];
@@ -23,21 +22,19 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: s.gap,
+        gap: s.containerGap,
         textDecoration: 'none',
         color: '#FFFFFF',
       }}
     >
-      {/* Logo Container with Glow Effect */}
+      {/* Logo Mark - 3 Tilted Stripes */}
       <div
-        className="logo-container"
         style={{
           position: 'relative',
-          width: `${s.logo}px`,
-          height: `${s.logo}px`,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          gap: `${s.gap}px`,
+          height: `${s.stripeH}px`,
         }}
       >
         {/* Ambient Glow */}
@@ -45,74 +42,128 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
           className="logo-glow"
           style={{
             position: 'absolute',
-            inset: '-20%',
+            inset: '-40%',
             background: 'radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%)',
             animation: 'glowPulse 2.5s ease-in-out infinite',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Primal Logo PNG */}
-        <Image
-          src="/icons/primallogo.png"
-          alt="Primal"
-          width={s.logo}
-          height={s.logo}
+        {/* Stripe 1 - Orange */}
+        <div
           style={{
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.4))',
-            animation: 'logoPulse 2.5s ease-in-out infinite',
+            width: `${s.stripeW}px`,
+            height: '100%',
+            borderRadius: '3px',
+            transform: 'skewX(-15deg)',
+            background: 'linear-gradient(180deg, #ff9f5a 0%, #ff7b3d 100%)',
+            boxShadow: '0 0 12px rgba(255, 123, 61, 0.5)',
             position: 'relative',
+            overflow: 'hidden',
             zIndex: 2,
           }}
-          priority
-        />
-      </div>
-
-      {/* PRIMALGAY Text */}
-      {showText && (
-        <>
-          {/* Connector Line */}
+        >
           <div
-            className="connector"
+            className="shine-white"
             style={{
-              width: size === 'small' ? '20px' : size === 'medium' ? '30px' : '40px',
-              height: '2px',
-              background: 'linear-gradient(to right, rgba(255, 107, 53, 0.8), rgba(255, 107, 53, 0.2))',
-              animation: 'connectorGlow 2.5s ease-in-out infinite',
+              position: 'absolute',
+              top: '-100%',
+              left: '-50%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%)',
             }}
           />
+        </div>
 
-          {/* Brand Text */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span
-              className="brand-text"
-              style={{
-                fontFamily: "'Audiowide', 'Orbitron', sans-serif",
-                fontSize: s.text,
-                fontWeight: 400,
-                letterSpacing: '0.15em',
-                color: '#C8DCFF',
-                textShadow: '0 0 20px rgba(200, 220, 255, 0.4)',
-                animation: 'textGlow 2.5s ease-in-out infinite',
-              }}
-            >
-              PRIMALGAY
-            </span>
-            <span
-              style={{
-                fontFamily: "'Audiowide', 'Orbitron', sans-serif",
-                fontSize: size === 'small' ? '8px' : size === 'medium' ? '10px' : '12px',
-                fontWeight: 400,
-                letterSpacing: '0.2em',
-                color: '#FF6B35',
-                textShadow: '0 0 10px rgba(255, 107, 53, 0.5)',
-              }}
-            >
-              RELEASE YOUR INNER DESIRE
-            </span>
-          </div>
-        </>
+        {/* Stripe 2 - White with Orange Shine */}
+        <div
+          style={{
+            width: `${s.stripeW}px`,
+            height: '100%',
+            borderRadius: '3px',
+            transform: 'skewX(-15deg)',
+            background: '#ffffff',
+            boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
+            position: 'relative',
+            overflow: 'hidden',
+            zIndex: 2,
+          }}
+        >
+          <div
+            className="shine-orange-1"
+            style={{
+              position: 'absolute',
+              top: '-100%',
+              left: '-50%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 123, 61, 0.9) 50%, transparent 100%)',
+            }}
+          />
+        </div>
+
+        {/* Stripe 3 - White with Orange Shine */}
+        <div
+          style={{
+            width: `${s.stripeW}px`,
+            height: '100%',
+            borderRadius: '3px',
+            transform: 'skewX(-15deg)',
+            background: '#ffffff',
+            boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
+            position: 'relative',
+            overflow: 'hidden',
+            zIndex: 2,
+          }}
+        >
+          <div
+            className="shine-orange-2"
+            style={{
+              position: 'absolute',
+              top: '-100%',
+              left: '-50%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 123, 61, 0.9) 50%, transparent 100%)',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* PRIMAL Text */}
+      {showText && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span
+            className="brand-text"
+            style={{
+              fontFamily: "'Audiowide', 'Orbitron', sans-serif",
+              fontSize: s.text,
+              fontWeight: 700,
+              letterSpacing: '0.15em',
+              background: 'linear-gradient(90deg, #a8b5c9 0%, #e8edf5 25%, #ffffff 50%, #e8edf5 75%, #a8b5c9 100%)',
+              backgroundSize: '200% 100%',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))',
+            }}
+          >
+            PRIMAL
+          </span>
+          <span
+            style={{
+              fontFamily: "'Audiowide', 'Orbitron', sans-serif",
+              fontSize: s.tagline,
+              fontWeight: 400,
+              letterSpacing: '0.2em',
+              color: '#FF6B35',
+              textShadow: '0 0 10px rgba(255, 107, 53, 0.5)',
+            }}
+          >
+            RELEASE YOUR INNER DESIRE
+          </span>
+        </div>
       )}
 
       {/* CSS Animations */}
@@ -127,33 +178,31 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
             transform: scale(1.1); 
           }
         }
-        @keyframes logoPulse {
+        @keyframes shineStripe {
+          0% { top: -100%; }
+          50%, 100% { top: 200%; }
+        }
+        @keyframes steelShine {
           0%, 100% { 
-            filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.4));
-            transform: scale(1);
+            background-position: -200% center;
           }
           50% { 
-            filter: drop-shadow(0 0 16px rgba(255, 107, 53, 0.6)) drop-shadow(0 0 30px rgba(255, 107, 53, 0.3));
-            transform: scale(1.02);
+            background-position: 200% center;
           }
         }
-        @keyframes connectorGlow {
-          0%, 100% { 
-            opacity: 0.6; 
-            box-shadow: 0 0 8px rgba(255, 107, 53, 0.3); 
-          }
-          50% { 
-            opacity: 1; 
-            box-shadow: 0 0 15px rgba(255, 107, 53, 0.6); 
-          }
+        .shine-white {
+          animation: shineStripe 2s ease-in-out infinite;
         }
-        @keyframes textGlow {
-          0%, 100% { 
-            text-shadow: 0 0 20px rgba(200, 220, 255, 0.3); 
-          }
-          50% { 
-            text-shadow: 0 0 35px rgba(200, 220, 255, 0.6), 0 0 50px rgba(200, 220, 255, 0.3); 
-          }
+        .shine-orange-1 {
+          animation: shineStripe 2s ease-in-out infinite;
+          animation-delay: 0.15s;
+        }
+        .shine-orange-2 {
+          animation: shineStripe 2s ease-in-out infinite;
+          animation-delay: 0.3s;
+        }
+        .brand-text {
+          animation: steelShine 3s ease-in-out infinite;
         }
       `}</style>
     </div>

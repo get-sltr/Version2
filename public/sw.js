@@ -1,8 +1,8 @@
 // Import OneSignal Service Worker
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
-// SLTR Service Worker
-const CACHE_NAME = 'sltr-v1';
+// Primal Service Worker
+const CACHE_NAME = 'primal-v1';
 const STATIC_ASSETS = [
   '/',
   '/login',

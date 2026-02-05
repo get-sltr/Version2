@@ -24,9 +24,9 @@ export const Input: React.FC<InputProps> = ({
   const helperId = `${id}-helper`;
 
   const sizeStyles: Record<string, React.CSSProperties> = {
-    sm: { padding: '10px 14px', fontSize: typography.fontSize.sm },
-    md: { padding: '14px 16px', fontSize: typography.fontSize.base },
-    lg: { padding: '18px 20px', fontSize: typography.fontSize.lg },
+    sm: { padding: '10px 14px', fontSize: typography.fontSize.sm, minHeight: '44px' },
+    md: { padding: '14px 16px', fontSize: typography.fontSize.base, minHeight: '44px' },
+    lg: { padding: '18px 20px', fontSize: typography.fontSize.lg, minHeight: '44px' },
   };
 
   const labelSizeStyles: Record<string, React.CSSProperties> = {

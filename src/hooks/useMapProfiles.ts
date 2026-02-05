@@ -17,6 +17,7 @@ const DEFAULT_FILTERS: MapFilterSettings = {
 interface UseMapProfilesOptions {
   mapCenter: Coordinates | null;
   enabled?: boolean;
+  blockedIds?: Set<string>;
 }
 
 interface UseMapProfilesReturn {
@@ -55,7 +56,7 @@ function getFilterSettings(): MapFilterSettings {
 }
 
 export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesReturn {
-  const { mapCenter, enabled = true } = options;
+  const { mapCenter, enabled = true, blockedIds } = options;
 
   const [rawProfiles, setRawProfiles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -233,6 +234,11 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
       })
       .filter((profile): profile is MapProfile => profile !== null)
       .filter((profile) => {
+        // Filter out blocked users
+        if (blockedIds && blockedIds.has(profile.id)) return false;
+        return true;
+      })
+      .filter((profile) => {
         // Age filter
         if (profile.age !== null) {
           if (profile.age < filters.minAge || profile.age > filters.maxAge) {
@@ -258,7 +264,7 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
 
         return true;
       });
-  }, [rawProfiles, mapCenter]);
+  }, [rawProfiles, mapCenter, blockedIds]);
 
   return {
     profiles,

@@ -1,8 +1,8 @@
 // ============================================
-// BOTTOM NAVIGATION - SLTR
+// BOTTOM NAVIGATION - PRIMAL
 // ============================================
-// 5 Buttons: Explore | Taps | SLTR+ | Messages | Views
-// - SLTR+ always lit orange (center)
+// 5 Buttons: Explore | Taps | PRO | Messages | Views
+// - PRO always lit orange (center)
 // - Views uses cascading double flames
 // - Real-time badge counts from Supabase
 // ============================================
@@ -18,8 +18,8 @@ import { supabase } from '@/lib/supabase';
 // STYLES
 // ============================================
 
-const ICON_SIZE = 18; // Compact size
-const FONT_SIZE = 9; // Compact size
+const ICON_SIZE = 24; // HIG minimum for tab bar icons
+const FONT_SIZE = 10; // HIG minimum label size
 
 const styles = {
   nav: {
@@ -34,7 +34,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'stretch',
-    padding: '6px 8px 18px 8px',
+    padding: '6px 8px calc(env(safe-area-inset-bottom) + 8px) 8px',
     boxShadow: 'none',
   },
   navItem: {
@@ -49,7 +49,8 @@ const styles = {
     textDecoration: 'none',
     borderRadius: 10,
     minWidth: 48,
-    height: 42,
+    minHeight: 44,
+    height: 44,
     outline: 'none',
     WebkitTapHighlightColor: 'transparent',
     background: 'transparent',
@@ -97,7 +98,7 @@ const styles = {
     borderRadius: 7,
     boxShadow: '0 0 6px rgba(255,107,53,0.6)',
   },
-  sltrText: {
+  proText: {
     fontSize: 12,
     fontWeight: 800,
     color: '#ff6b35',
@@ -168,6 +169,9 @@ function NavItem({ href, label, icon, isActive, badge }: NavItemProps) {
   return (
     <Link
       href={href}
+      role="tab"
+      aria-selected={isActive}
+      aria-label={`${label}${badge && badge > 0 ? `, ${badge} new` : ''}`}
       style={{
         ...styles.navItem,
         ...(isActive ? styles.navItemActive : {}),
@@ -186,10 +190,10 @@ function NavItem({ href, label, icon, isActive, badge }: NavItemProps) {
 }
 
 // ============================================
-// SLTR+ BUTTON
+// PRO BUTTON
 // ============================================
 
-function SltrPlus({ onClick, isActive }: { onClick: () => void; isActive: boolean }) {
+function PrimalPlus({ onClick, isActive }: { onClick: () => void; isActive: boolean }) {
   return (
     <button
       onClick={onClick}
@@ -202,9 +206,9 @@ function SltrPlus({ onClick, isActive }: { onClick: () => void; isActive: boolea
       }}
     >
       <div style={styles.iconWrapper}>
-        <span style={styles.sltrText}>SLTR+</span>
+        <span style={styles.proText}>PRO</span>
       </div>
-      <span style={{ ...styles.label, opacity: 0 }}>SLTR+</span>
+      <span style={{ ...styles.label, opacity: 0 }}>PRO</span>
     </button>
   );
 }
@@ -214,10 +218,10 @@ function SltrPlus({ onClick, isActive }: { onClick: () => void; isActive: boolea
 // ============================================
 
 interface BottomNavWithBadgesProps {
-  onSltrPlusClick?: () => void;
+  onPrimalPlusClick?: () => void;
 }
 
-export function BottomNavWithBadges({ onSltrPlusClick }: BottomNavWithBadgesProps) {
+export function BottomNavWithBadges({ onPrimalPlusClick }: BottomNavWithBadgesProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [badges, setBadges] = useState({ taps: 0, messages: 0, views: 0 });
@@ -287,9 +291,9 @@ export function BottomNavWithBadges({ onSltrPlusClick }: BottomNavWithBadgesProp
     return pathname.startsWith(href);
   };
 
-  const handleSltrPlus = () => {
-    if (onSltrPlusClick) {
-      onSltrPlusClick();
+  const handlePrimalPlus = () => {
+    if (onPrimalPlusClick) {
+      onPrimalPlusClick();
     } else {
       // Default: go to premium page
       router.push('/premium');
@@ -297,7 +301,7 @@ export function BottomNavWithBadges({ onSltrPlusClick }: BottomNavWithBadgesProp
   };
 
   return (
-    <nav style={styles.nav}>
+    <nav role="tablist" aria-label="Main navigation" style={styles.nav}>
       <NavItem
         href="/dashboard"
         label="Explore"
@@ -311,7 +315,7 @@ export function BottomNavWithBadges({ onSltrPlusClick }: BottomNavWithBadgesProp
         isActive={isActive('/taps')}
         badge={badges.taps}
       />
-      <SltrPlus onClick={handleSltrPlus} isActive={isActive('/premium')} />
+      <PrimalPlus onClick={handlePrimalPlus} isActive={isActive('/premium')} />
       <NavItem
         href="/messages"
         label="Messages"

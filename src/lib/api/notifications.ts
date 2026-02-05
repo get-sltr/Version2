@@ -23,7 +23,7 @@ export async function getNotifications(
         position,
         photo_url,
         is_online,
-        is_dtfn,
+        is_dth,
         lat,
         lng
       )
@@ -64,7 +64,7 @@ export async function getUnreadNotifications(): Promise<NotificationWithUser[]> 
         position,
         photo_url,
         is_online,
-        is_dtfn,
+        is_dth,
         lat,
         lng
       )
@@ -205,7 +205,7 @@ export function subscribeToNotifications(
         if (notification.from_user_id) {
           const { data } = await supabase
             .from('profiles')
-            .select('id, display_name, age, position, photo_url, is_online, is_dtfn, lat, lng')
+            .select('id, display_name, age, position, photo_url, is_online, is_dth, lat, lng')
             .eq('id', notification.from_user_id)
             .single();
 

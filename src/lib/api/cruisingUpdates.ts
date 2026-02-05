@@ -53,7 +53,7 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 async function fetchProfilePreview(userId: string): Promise<ProfilePreview | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, display_name, age, position, photo_url, is_online, is_dtfn, height, weight, body_type')
+    .select('id, display_name, age, position, photo_url, is_online, is_dth, height, weight, body_type')
     .eq('id', userId)
     .maybeSingle();
 

@@ -536,10 +536,10 @@ export default function PrioritySupportPage() {
             You can also reach us directly at
           </p>
           <a
-            href="mailto:support@sltr.app"
+            href="mailto:support@primalgay.com"
             style={{ color: '#FF6B35', fontSize: '16px', textDecoration: 'none', fontWeight: 600 }}
           >
-            support@sltr.app
+            support@primalgay.com
           </a>
         </div>
       </div>

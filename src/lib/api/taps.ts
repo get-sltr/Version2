@@ -19,7 +19,7 @@ export async function getReceivedTaps(): Promise<TapWithUser[]> {
         position,
         photo_url,
         is_online,
-        is_dtfn,
+        is_dth,
         lat,
         lng
       )
@@ -54,7 +54,7 @@ export async function getSentTaps(): Promise<TapWithUser[]> {
         position,
         photo_url,
         is_online,
-        is_dtfn,
+        is_dth,
         lat,
         lng
       )

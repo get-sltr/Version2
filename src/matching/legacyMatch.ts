@@ -4,7 +4,7 @@ export async function legacyMatch(
   user: DbUser,
   candidates: DbUser[]
 ) {
-  // EXISTING SLTR LOGIC GOES HERE
+  // EXISTING PRIMAL LOGIC GOES HERE
   // distance, recency, manual ranking, etc.
 
   return candidates.map(c => ({

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { uploadAvatar } from '../../../lib/api/profileMedia';
+import { compressImage } from '@/lib/imageUtils';
 
 type ThemeColors = {
   background: string;
@@ -56,8 +57,8 @@ export default function EditProfilePage() {
   const [healthPractices, setHealthPractices] = useState<string[]>([]);
   const [vaccinations, setVaccinations] = useState<string[]>([]);
 
-  // PnP
-  const [pnpVisible, setPnpVisible] = useState(false);
+  // Long Session Preferred
+  const [longSessionVisible, setLongSessionVisible] = useState(false);
 
   // Social Links
   const [instagram, setInstagram] = useState('');
@@ -193,13 +194,13 @@ export default function EditProfilePage() {
           if (profile.health_practices) setHealthPractices(profile.health_practices);
           if (profile.vaccinations) setVaccinations(profile.vaccinations);
 
-          // PnP - load from user_settings table
-          const { data: pnpSettings } = await supabase
+          // Long Session - load from user_settings table
+          const { data: longSessionSettings } = await supabase
             .from('user_settings')
-            .select('pnp_visible')
+            .select('long_session_visible')
             .eq('user_id', user.id)
             .maybeSingle();
-          if (pnpSettings) setPnpVisible(pnpSettings.pnp_visible ?? false);
+          if (longSessionSettings) setLongSessionVisible(longSessionSettings.long_session_visible ?? false);
 
           // Social Links
           if (profile.instagram) setInstagram(profile.instagram);
@@ -340,10 +341,10 @@ export default function EditProfilePage() {
         return;
       }
 
-      // Sync pnp_visible to user_settings table
+      // Sync long_session_visible to user_settings table
       await supabase
         .from('user_settings')
-        .upsert({ user_id: user.id, pnp_visible: pnpVisible }, { onConflict: 'user_id' });
+        .upsert({ user_id: user.id, long_session_visible: longSessionVisible }, { onConflict: 'user_id' });
 
       // Clear save button state
       setShowSaveButton(false);
@@ -379,7 +380,8 @@ export default function EditProfilePage() {
     setUploading(true);
 
     try {
-      const url = await uploadAvatar(file);
+      const compressed = await compressImage(file);
+      const url = await uploadAvatar(compressed);
       setProfilePhoto(url);
       markAsChanged();
     } catch (error: any) {
@@ -409,17 +411,20 @@ export default function EditProfilePage() {
     setUploadingIndex(index);
 
     try {
+      // Compress before uploading
+      const compressed = await compressImage(file);
+
       // Upload additional photo to profile-media bucket
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const ext = file.name.split('.').pop() || 'jpg';
+      const ext = 'jpg';
       const path = `${user.id}/photo-${Date.now()}.${ext}`;
 
       const { error: uploadError } = await supabase
         .storage
         .from('profile-media')
-        .upload(path, file, {
+        .upload(path, compressed, {
           cacheControl: '3600',
           upsert: true
         });
@@ -467,9 +472,10 @@ export default function EditProfilePage() {
       {/* Photo Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gridTemplateRows: 'repeat(2, 1fr)', gap: '2px', aspectRatio: '3/2' }}>
         <label style={{ gridRow: 'span 2', background: '#1c1c1e', backgroundImage: profilePhoto ? `url(${profilePhoto})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <input 
-            type="file" 
-            accept="image/*" 
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
             onChange={handlePhotoUpload}
             disabled={uploading}
             style={{ display: 'none' }}
@@ -490,9 +496,10 @@ export default function EditProfilePage() {
         </label>
         {[0, 1, 2, 3].map((index) => (
           <label key={index} style={{ background: '#1c1c1e', backgroundImage: additionalPhotos[index] ? `url(${additionalPhotos[index]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: 'none', cursor: uploadingIndex === index ? 'not-allowed' : 'pointer', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <input 
-              type="file" 
-              accept="image/*" 
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
               onChange={(e) => handleAdditionalPhotoUpload(e, index)}
               disabled={uploadingIndex === index}
               style={{ display: 'none' }}
@@ -872,8 +879,8 @@ export default function EditProfilePage() {
           colors={colors}
         />
         <ToggleRow label="Accepts NSFW Pics" value={acceptsNsfw} onChange={(v) => { setAcceptsNsfw(v); markAsChanged(); }} colors={colors} />
-        <ToggleRow label="PnP" value={pnpVisible} onChange={(v) => { setPnpVisible(v); markAsChanged(); }} colors={colors} />
-        {pnpVisible && (
+        <ToggleRow label="Long Session" value={longSessionVisible} onChange={(v) => { setLongSessionVisible(v); markAsChanged(); }} colors={colors} />
+        {longSessionVisible && (
           <div style={{ padding: '8px 0 14px', fontSize: '13px', color: colors.textSecondary, lineHeight: 1.5 }}>
             The orbit icon will appear on your profile and grid card.
           </div>

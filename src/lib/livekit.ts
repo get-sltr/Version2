@@ -341,8 +341,8 @@ export async function sendRoomMessage(
  * Predefined Pulse room names (persistent community rooms)
  */
 export const PULSE_ROOMS = {
-  'club-sltr': {
-    name: 'Club SLTR',
+  'club-primal': {
+    name: 'Club Primal',
     description: 'Main community hangout',
     theme: 'default',
   },

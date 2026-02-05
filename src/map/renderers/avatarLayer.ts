@@ -6,7 +6,7 @@ export function createAvatarLayer(avatars: any[]) {
   let renderer: WebGLAvatarRenderer;
 
   return {
-    id: "sltr-avatars",
+    id: "primal-avatars",
     type: "custom",
     renderingMode: "3d",
 

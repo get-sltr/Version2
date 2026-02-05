@@ -28,7 +28,7 @@ export async function getProfileViews(): Promise<ProfileViewWithViewer[]> {
         position,
         photo_url,
         is_online,
-        is_dtfn,
+        is_dth,
         lat,
         lng
       )

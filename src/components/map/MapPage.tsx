@@ -89,8 +89,8 @@ export function MapPage({ children }: MapPageProps) {
       case 'taps':
         // Navigate to taps
         break;
-      case 'sltr':
-        // Open SLTR+ modal or navigate
+      case 'pro':
+        // Open Pro modal or navigate
         break;
       case 'messages':
         // Navigate to messages

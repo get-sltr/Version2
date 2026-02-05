@@ -1,5 +1,5 @@
 // =============================================================================
-// BottomNav - Explore | Taps | SLTR+ | Messages | Views
+// BottomNav - Explore | Taps | PRO | Messages | Views
 // =============================================================================
 
 'use client';
@@ -75,15 +75,15 @@ interface NavItemProps {
 }
 
 function NavItem({ tab, label, icon, isActive, onClick, badgeCount, showBadge }: NavItemProps) {
-  const isSLTR = tab === 'sltr';
+  const isPro = tab === 'pro';
 
   return (
     <button
       className={`${styles.navItem} ${isActive ? styles.active : ''}`}
       onClick={onClick}
     >
-      {isSLTR ? (
-        <span className={styles.navItemSltr}>SLTR+</span>
+      {isPro ? (
+        <span className={styles.navItemPro}>PRO</span>
       ) : (
         <>
           <span className={styles.navItemIcon}>
@@ -125,10 +125,10 @@ export function BottomNav({
         badgeCount={tapCount}
       />
       <NavItem
-        tab="sltr"
-        label="SLTR+"
-        isActive={activeTab === 'sltr'}
-        onClick={() => onTabChange('sltr')}
+        tab="pro"
+        label="PRO"
+        isActive={activeTab === 'pro'}
+        onClick={() => onTabChange('pro')}
       />
       <NavItem
         tab="messages"

@@ -1,44 +1,157 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { useTheme } from '@/contexts/ThemeContext';
+
+interface BlockedUserWithProfile {
+  id: string;
+  blocked_id: string;
+  reason: string | null;
+  created_at: string;
+  blocked_user: {
+    id: string;
+    display_name: string | null;
+    photo_url: string | null;
+  } | null;
+}
 
 export default function BlockedUsersPage() {
+  const router = useRouter();
   const { colors, darkMode } = useTheme();
-  const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUserWithProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [unblockingId, setUnblockingId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Load blocked users from localStorage
-    const saved = localStorage.getItem('blockedUsers');
-    if (saved) {
-      setBlockedUsers(JSON.parse(saved));
-    }
+    loadBlockedUsers();
   }, []);
 
-  const unblockUser = (userId: number) => {
-    const updated = blockedUsers.filter(user => user.id !== userId);
-    setBlockedUsers(updated);
-    localStorage.setItem('blockedUsers', JSON.stringify(updated));
+  const loadBlockedUsers = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from('blocked_users')
+        .select(`
+          id,
+          blocked_id,
+          reason,
+          created_at,
+          blocked_user:profiles!blocked_id(id, display_name, photo_url)
+        `)
+        .eq('blocker_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+
+      // Supabase returns joined relations as arrays; extract the first element
+      const normalized = (data || []).map((row: Record<string, unknown>) => ({
+        ...row,
+        blocked_user: Array.isArray(row.blocked_user)
+          ? row.blocked_user[0] ?? null
+          : row.blocked_user ?? null,
+      })) as BlockedUserWithProfile[];
+
+      setBlockedUsers(normalized);
+    } catch (err) {
+      console.error('Failed to load blocked users:', err);
+      setError('Failed to load blocked users');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const unblockAll = () => {
-    if (confirm(`Are you sure you want to unblock all ${blockedUsers.length} ${blockedUsers.length === 1 ? 'user' : 'users'}?`)) {
-      setBlockedUsers([]);
-      localStorage.setItem('blockedUsers', JSON.stringify([]));
+  const unblockUser = async (blockId: string, blockedUserId: string) => {
+    setUnblockingId(blockId);
+    try {
+      const { error: deleteError } = await supabase
+        .from('blocked_users')
+        .delete()
+        .eq('id', blockId);
+
+      if (deleteError) throw deleteError;
+
+      setBlockedUsers(prev => prev.filter(u => u.id !== blockId));
+    } catch (err) {
+      console.error('Failed to unblock user:', err);
+      alert('Failed to unblock user. Please try again.');
+    } finally {
+      setUnblockingId(null);
     }
+  };
+
+  const unblockAll = async () => {
+    if (!confirm(`Are you sure you want to unblock all ${blockedUsers.length} ${blockedUsers.length === 1 ? 'user' : 'users'}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error: deleteError } = await supabase
+        .from('blocked_users')
+        .delete()
+        .eq('blocker_id', user.id);
+
+      if (deleteError) throw deleteError;
+
+      setBlockedUsers([]);
+    } catch (err) {
+      console.error('Failed to unblock all users:', err);
+      alert('Failed to unblock users. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif" }}>
+    <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
       {/* Header */}
       <header style={{ padding: '15px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${colors.border}`, position: 'sticky', top: 0, background: darkMode ? 'rgba(0,0,0,0.95)' : 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', zIndex: 100 }}>
-        <a href="/settings" style={{ color: colors.text, textDecoration: 'none', fontSize: '24px' }}>‹</a>
+        <button
+          onClick={() => router.back()}
+          style={{ background: 'none', border: 'none', color: colors.text, fontSize: '24px', cursor: 'pointer', padding: '8px' }}
+        >
+          ‹
+        </button>
         <span style={{ fontSize: '17px', fontWeight: 600 }}>Blocked Users</span>
-        <span style={{ width: '24px' }}></span>
+        <span style={{ width: '40px' }}></span>
       </header>
 
       <div style={{ padding: '20px' }}>
-        {blockedUsers.length === 0 ? (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: colors.textSecondary }}>
+            Loading...
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <p style={{ color: '#ff3b30', marginBottom: '16px' }}>{error}</p>
+            <button
+              onClick={loadBlockedUsers}
+              style={{ background: '#FF6B35', border: 'none', borderRadius: '8px', padding: '12px 24px', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Retry
+            </button>
+          </div>
+        ) : blockedUsers.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
             <div style={{ fontSize: '64px', marginBottom: '20px', opacity: 0.3 }}>🚫</div>
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '10px' }}>No Blocked Users</h3>
@@ -55,25 +168,58 @@ export default function BlockedUsersPage() {
               <button
                 type="button"
                 onClick={unblockAll}
-                style={{ background: '#ff3b30', border: 'none', borderRadius: '8px', padding: '10px 16px', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                disabled={loading}
+                style={{ background: '#ff3b30', border: 'none', borderRadius: '8px', padding: '10px 16px', color: '#fff', fontSize: '14px', fontWeight: 600, cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.5 : 1 }}
               >
                 Unblock All
               </button>
             </div>
 
-            {blockedUsers.map(user => (
-              <div key={user.id} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 0', borderBottom: `1px solid ${colors.border}` }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: darkMode ? '#333' : '#ddd', backgroundImage: `url(${user.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+            {blockedUsers.map(block => (
+              <div key={block.id} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '15px 0', borderBottom: `1px solid ${colors.border}` }}>
+                <div
+                  style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '50%',
+                    background: darkMode ? '#333' : '#ddd',
+                    backgroundImage: block.blocked_user?.photo_url ? `url(${block.blocked_user.photo_url})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    color: colors.textSecondary,
+                  }}
+                >
+                  {!block.blocked_user?.photo_url && '👤'}
+                </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>{user.name}</div>
-                  <div style={{ fontSize: '13px', color: colors.textSecondary }}>Blocked on {user.blockedDate}</div>
+                  <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>
+                    {block.blocked_user?.display_name || 'Deleted User'}
+                  </div>
+                  <div style={{ fontSize: '13px', color: colors.textSecondary }}>
+                    Blocked on {formatDate(block.created_at)}
+                  </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => unblockUser(user.id)}
-                  style={{ background: darkMode ? '#1c1c1e' : '#f5f5f5', border: `1px solid ${colors.border}`, borderRadius: '8px', padding: '10px 16px', color: '#FF6B35', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}
+                  onClick={() => unblockUser(block.id, block.blocked_id)}
+                  disabled={unblockingId === block.id}
+                  style={{
+                    background: darkMode ? '#1c1c1e' : '#f5f5f5',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    color: '#FF6B35',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: unblockingId === block.id ? 'wait' : 'pointer',
+                    opacity: unblockingId === block.id ? 0.5 : 1,
+                  }}
                 >
-                  Unblock
+                  {unblockingId === block.id ? 'Unblocking...' : 'Unblock'}
                 </button>
               </div>
             ))}

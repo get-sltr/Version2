@@ -67,7 +67,7 @@ export default function NewYearPromo() {
           maxWidth: '600px',
           margin: '0 auto 16px'
         }}>
-          Join SLTR during our New Year launch and pay just $4.99/month—locked in for life.
+          Join Primal during our New Year launch and pay just $4.99/month—locked in for life.
         </p>
 
         {/* Urgency */}
@@ -234,7 +234,7 @@ export default function NewYearPromo() {
           color: 'rgba(255,255,255,0.7)'
         }}>
           <p style={{ marginBottom: '16px' }}>
-            <strong style={{ color: '#fff' }}>Lifetime Price Lock Guarantee:</strong> By subscribing to SLTR at $4.99/month during this New Year promotion, you lock in this rate for the lifetime of your subscription, as long as your subscription remains active and in good standing.
+            <strong style={{ color: '#fff' }}>Lifetime Price Lock Guarantee:</strong> By subscribing to Primal at $4.99/month during this New Year promotion, you lock in this rate for the lifetime of your subscription, as long as your subscription remains active and in good standing.
           </p>
 
           <p style={{ marginBottom: '16px' }}>
@@ -246,7 +246,7 @@ export default function NewYearPromo() {
           </p>
 
           <p style={{ marginBottom: '16px' }}>
-            <strong style={{ color: '#fff' }}>Account Violations:</strong> Any violation of SLTR's Terms of Service may result in account suspension or termination, voiding this promotional rate.
+            <strong style={{ color: '#fff' }}>Account Violations:</strong> Any violation of Primal's Terms of Service may result in account suspension or termination, voiding this promotional rate.
           </p>
 
           <Link href="/promo-terms" style={{ color: '#f472b6', textDecoration: 'underline' }}>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-export default function RateSLTRPage() {
+export default function RatePrimalPage() {
   const [rating, setRating] = useState(0);
   const [submitted, setSubmitted] = useState(false);
 
@@ -16,7 +16,7 @@ export default function RateSLTRPage() {
       {/* Header */}
       <header style={{ padding: '15px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1c1c1e', position: 'sticky', top: 0, background: '#000', zIndex: 100 }}>
         <a href="/settings" style={{ color: '#fff', textDecoration: 'none', fontSize: '24px' }}>‹</a>
-        <span style={{ fontSize: '17px', fontWeight: 600 }}>Rate SLTR</span>
+        <span style={{ fontSize: '17px', fontWeight: 600 }}>Rate Primal</span>
         <span style={{ width: '24px' }}></span>
       </header>
 
@@ -24,7 +24,7 @@ export default function RateSLTRPage() {
         {!submitted ? (
           <>
             <div style={{ fontSize: '64px', marginBottom: '20px' }}>⭐</div>
-            <h2 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '12px' }}>Enjoying SLTR?</h2>
+            <h2 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '12px' }}>Enjoying Primal?</h2>
             <p style={{ fontSize: '15px', color: '#888', marginBottom: '40px', lineHeight: 1.6 }}>
               Your feedback helps us create the best experience for the community
             </p>

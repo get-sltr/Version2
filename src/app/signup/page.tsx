@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
-import { isValidAge, validatePassword, isValidEmail, calculateAge } from '../../lib/validation';
+import { isValidAge, validatePassword, isValidEmail, isValidPhone, calculateAge } from '../../lib/validation';
 import posthog from 'posthog-js';
 import { AnimatedLogo } from '../../components/AnimatedLogo';
+import { PhoneOTPInput, ResendCodeButton } from '../../components/PhoneOTPInput';
 
 // OAuth Icons
 function GoogleIcon() {
@@ -22,21 +23,6 @@ function GoogleIcon() {
   );
 }
 
-function TwitterIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-    </svg>
-  );
-}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -47,7 +33,10 @@ export default function SignupPage() {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<'google' | 'twitter' | 'facebook' | null>(null);
+  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneStep, setPhoneStep] = useState<'none' | 'verify'>('none');
+  const [otpError, setOtpError] = useState('');
 
   const emailId = useId();
   const passwordId = useId();
@@ -82,7 +71,7 @@ export default function SignupPage() {
     }
 
     if (!isValidAge(dob, 18)) {
-      setError('You must be at least 18 years old to use SLTR');
+      setError('You must be at least 18 years old to use Primal');
       return;
     }
 
@@ -145,7 +134,7 @@ export default function SignupPage() {
     }
   };
 
-  const handleOAuthSignup = async (provider: 'google' | 'twitter' | 'facebook') => {
+  const handleOAuthSignup = async (provider: 'google') => {
     setError('');
     setOauthLoading(provider);
 
@@ -163,6 +152,61 @@ export default function SignupPage() {
       setError(errorMessage);
       setOauthLoading(null);
     }
+  };
+
+  const formatPhoneInput = (text: string) => {
+    const cleaned = text.replace(/\D/g, '');
+    if (cleaned.length <= 3) return cleaned;
+    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+  };
+
+  const handleSendPhoneOTP = async () => {
+    const digits = phoneNumber.replace(/\D/g, '');
+    if (!isValidPhone(digits)) {
+      setError('Please enter a valid phone number');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
+      if (error) throw error;
+      setPhoneStep('verify');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyPhoneOTP = async (code: string) => {
+    setOtpError('');
+    setLoading(true);
+    const digits = phoneNumber.replace(/\D/g, '');
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: `+1${digits}`,
+        token: code,
+        type: 'sms',
+      });
+      if (error) throw error;
+      if (data.user) {
+        posthog.identify(data.user.id, { phone: `+1${digits}` });
+        posthog.capture('user_signed_up', { source: 'phone_otp' });
+      }
+      router.push('/welcome');
+    } catch (err: unknown) {
+      setOtpError(err instanceof Error ? err.message : 'Invalid code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendPhoneOTP = async () => {
+    const digits = phoneNumber.replace(/\D/g, '');
+    const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
+    if (error) throw new Error(error.message);
   };
 
   return (
@@ -296,7 +340,7 @@ export default function SignupPage() {
 
         .signup-label {
           display: block;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 500;
           margin-bottom: 8px;
           color: rgba(255, 255, 255, 0.5);
@@ -346,16 +390,23 @@ export default function SignupPage() {
           align-items: flex-start;
           gap: 12px;
           cursor: pointer;
-          font-size: 12px;
+          font-size: 13px;
           line-height: 1.6;
         }
 
+        .signup-checkbox-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+          min-height: 44px;
+          flex-shrink: 0;
+        }
+
         .signup-checkbox {
-          margin-top: 3px;
           width: 18px;
           height: 18px;
           accent-color: #FF6B35;
-          flex-shrink: 0;
         }
 
         .signup-checkbox-text {
@@ -530,6 +581,109 @@ export default function SignupPage() {
         .field-group {
           margin-bottom: 16px;
         }
+
+        .signup-phone-divider {
+          display: flex;
+          align-items: center;
+          margin: 20px 0;
+          gap: 16px;
+        }
+
+        .signup-phone-divider-line {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255, 107, 53, 0.2), transparent);
+        }
+
+        .signup-phone-divider-text {
+          font-size: 10px;
+          color: rgba(255, 255, 255, 0.3);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+
+        .phone-signup-section {
+          margin-bottom: 20px;
+        }
+
+        .phone-input-row {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+
+        .phone-prefix {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 14px;
+          min-height: 44px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 15px;
+          font-weight: 500;
+        }
+
+        .phone-send-btn {
+          width: 100%;
+          padding: 14px;
+          min-height: 44px;
+          font-size: 13px;
+          font-weight: 500;
+          background: rgba(255, 107, 53, 0.08);
+          border: 1px solid rgba(255, 107, 53, 0.3);
+          border-radius: 10px;
+          color: #FF6B35;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-family: inherit;
+        }
+
+        .phone-send-btn:hover:not(:disabled) {
+          background: rgba(255, 107, 53, 0.15);
+          border-color: rgba(255, 107, 53, 0.5);
+        }
+
+        .phone-send-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .otp-verify-section {
+          text-align: center;
+          margin-bottom: 16px;
+        }
+
+        .otp-verify-section p {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-bottom: 16px;
+        }
+
+        .otp-actions {
+          display: flex;
+          justify-content: center;
+          gap: 16px;
+          margin-top: 12px;
+        }
+
+        .otp-change-number {
+          background: none;
+          border: none;
+          color: rgba(255, 255, 255, 0.4);
+          cursor: pointer;
+          font-size: 13px;
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
+          font-family: inherit;
+        }
+
+        .otp-change-number:hover {
+          color: #FF6B35;
+        }
       `}</style>
 
       <div className="signup-container">
@@ -645,14 +799,16 @@ export default function SignupPage() {
 
                 <div className="field-group" style={{ marginBottom: '24px' }}>
                   <label htmlFor={termsId} className="signup-checkbox-wrap">
-                    <input
-                      id={termsId}
-                      type="checkbox"
-                      checked={agreed}
-                      onChange={(e) => setAgreed(e.target.checked)}
-                      required
-                      className="signup-checkbox"
-                    />
+                    <span className="signup-checkbox-container">
+                      <input
+                        id={termsId}
+                        type="checkbox"
+                        checked={agreed}
+                        onChange={(e) => setAgreed(e.target.checked)}
+                        required
+                        className="signup-checkbox"
+                      />
+                    </span>
                     <span className="signup-checkbox-text">
                       I am at least 18 years old and agree to the{' '}
                       <Link href="/terms">Terms of Service</Link>,{' '}
@@ -688,25 +844,59 @@ export default function SignupPage() {
                   <GoogleIcon />
                   {oauthLoading === 'google' ? '...' : 'Google'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleOAuthSignup('twitter')}
-                  disabled={loading || oauthLoading !== null}
-                  className="signup-oauth-btn"
-                >
-                  <TwitterIcon />
-                  {oauthLoading === 'twitter' ? '...' : 'X'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOAuthSignup('facebook')}
-                  disabled={loading || oauthLoading !== null}
-                  className="signup-oauth-btn"
-                >
-                  <FacebookIcon />
-                  {oauthLoading === 'facebook' ? '...' : 'Facebook'}
-                </button>
               </div>
+
+              {/* Phone Sign Up */}
+              <div className="signup-phone-divider">
+                <div className="signup-phone-divider-line" />
+                <span className="signup-phone-divider-text">or sign up with phone</span>
+                <div className="signup-phone-divider-line" />
+              </div>
+
+              {phoneStep === 'none' ? (
+                <div className="phone-signup-section">
+                  <div className="phone-input-row">
+                    <span className="phone-prefix">+1</span>
+                    <input
+                      type="tel"
+                      placeholder="(555) 555-5555"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(formatPhoneInput(e.target.value))}
+                      className="signup-input"
+                      maxLength={14}
+                      autoComplete="tel"
+                      style={{ flex: 1 }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSendPhoneOTP}
+                    disabled={loading}
+                    className="phone-send-btn"
+                  >
+                    {loading ? 'Sending...' : 'Send Verification Code'}
+                  </button>
+                </div>
+              ) : (
+                <div className="otp-verify-section">
+                  <p>Enter the 6-digit code sent to +1 {phoneNumber}</p>
+                  <PhoneOTPInput
+                    onComplete={handleVerifyPhoneOTP}
+                    disabled={loading}
+                    error={otpError}
+                  />
+                  <div className="otp-actions">
+                    <button
+                      type="button"
+                      className="otp-change-number"
+                      onClick={() => { setPhoneStep('none'); setOtpError(''); }}
+                    >
+                      Change number
+                    </button>
+                    <ResendCodeButton onResend={handleResendPhoneOTP} />
+                  </div>
+                </div>
+              )}
 
               <p className="signup-footer-note">
                 By signing up, you confirm you are at least 18 years old.
@@ -715,7 +905,7 @@ export default function SignupPage() {
           </main>
 
           <footer className="signup-footer">
-            <span className="signup-footer-company">© 2025 SLTR DIGITAL LLC</span>
+            <span className="signup-footer-company">© 2025–2026 Primal</span>
             <span className="signup-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
           </footer>
         </div>

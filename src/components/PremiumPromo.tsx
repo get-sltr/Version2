@@ -70,7 +70,7 @@ export function PremiumPromo({ feature, onClose, fullPage = false }: PremiumProm
         letterSpacing: '2px',
         marginBottom: '24px'
       }}>
-        SLTR PRO
+        PRIMAL+
       </div>
 
       {/* Lock Icon & Feature */}
@@ -92,7 +92,7 @@ export function PremiumPromo({ feature, onClose, fullPage = false }: PremiumProm
         marginBottom: '32px',
         lineHeight: 1.5
       }}>
-        Upgrade to SLTR Pro for unlimited access to all premium features
+        Upgrade to Primal+ for unlimited access to all premium features
       </p>
 
       {/* Benefits Grid */}

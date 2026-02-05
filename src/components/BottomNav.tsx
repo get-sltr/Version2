@@ -114,20 +114,23 @@ export function BottomNav({ active }: BottomNavProps) {
   };
 
   return (
-    <nav style={{
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      background: colors.surface,
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderTop: `1px solid ${colors.border}`,
-      display: 'flex',
-      justifyContent: 'space-around',
-      padding: '6px 0 18px',
-      zIndex: 100
-    }}>
+    <nav
+      role="tablist"
+      aria-label="Main navigation"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        background: colors.surface,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: `1px solid ${colors.border}`,
+        display: 'flex',
+        justifyContent: 'space-around',
+        padding: '6px 0 calc(env(safe-area-inset-bottom) + 8px)',
+        zIndex: 100
+      }}>
       {navItems.map(({ key, href, icon: Icon, label }) => {
         const isActive = currentActive === key;
         const badgeCount = getBadgeCount(key);
@@ -135,6 +138,9 @@ export function BottomNav({ active }: BottomNavProps) {
           <Link
             key={key}
             href={href}
+            role="tab"
+            aria-selected={isActive}
+            aria-label={`${label}${badgeCount > 0 ? `, ${badgeCount} new` : ''}`}
             style={{
               textAlign: 'center',
               color: isActive ? colors.accent : colors.textSecondary,
@@ -143,15 +149,18 @@ export function BottomNav({ active }: BottomNavProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '2px',
-              position: 'relative'
+              position: 'relative',
+              minHeight: '44px',
+              minWidth: '44px'
             }}
           >
             <div style={{
               position: 'relative',
               display: 'inline-flex'
             }}>
-              <Icon size={18} />
+              <Icon size={24} />
               {badgeCount > 0 && (
                 <div style={{
                   position: 'absolute',
@@ -174,7 +183,7 @@ export function BottomNav({ active }: BottomNavProps) {
               )}
             </div>
             <span style={{
-              fontSize: '9px',
+              fontSize: '10px',
               fontWeight: isActive ? 600 : 400
             }}>
               {label}

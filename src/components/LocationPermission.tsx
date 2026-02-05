@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
-const STORAGE_KEY = 'sltr_location_state';
+const STORAGE_KEY = 'primal_location_state';
 
 interface LocationState {
   granted: boolean;
@@ -211,7 +211,7 @@ export function LocationPermission() {
         </h2>
 
         <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '28px' }}>
-          SLTR uses your location to show you nearby profiles on the grid and map.
+          Primal uses your location to show you nearby profiles on the grid and map.
           Your exact location is never shared with other users.
         </p>
 

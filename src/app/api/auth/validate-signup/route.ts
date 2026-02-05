@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       } else if (birthDate > new Date()) {
         errors.dob = 'Date of birth cannot be in the future';
       } else if (!isValidAge(dob, 18)) {
-        errors.dob = 'You must be at least 18 years old to use SLTR';
+        errors.dob = 'You must be at least 18 years old to use Primal';
       }
     }
 

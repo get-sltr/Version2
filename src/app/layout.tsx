@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { DM_Sans, Orbitron, Cormorant_Garamond, Space_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import './globals.css';
@@ -6,15 +7,45 @@ import { ServiceWorkerRegistration } from '../components/ServiceWorkerRegistrati
 import { LocationPermission } from '../components/LocationPermission';
 import { OneSignalProvider } from '../components/OneSignalProvider';
 import AuthListener from '../components/AuthListener';
+import { AgeGate } from '../components/AgeGate';
+import { PhotoGate } from '../components/PhotoGate';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+});
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-orbitron',
+  display: 'swap',
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '700'],
+  variable: '--font-cormorant',
+  display: 'swap',
+});
+
+const spaceMono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'SLTR - No Rules Apply',
-  description: 'Dating app for the LGBTQ+ community',
+  title: 'Primal - Rules Don\'t Apply',
+  description: 'Dating app for gay and bisexual men',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SLTR',
+    title: 'Primal',
   },
   icons: {
     icon: [
@@ -31,27 +62,29 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   themeColor: '#000000',
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { readonly children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${dmSans.variable} ${orbitron.variable} ${cormorantGaramond.variable} ${spaceMono.variable}`}>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body style={{ margin: 0, WebkitTapHighlightColor: 'transparent' }}>
+      <body style={{ margin: 0, WebkitTapHighlightColor: 'transparent', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
         <ThemeProvider>
+          <AgeGate>
+          <PhotoGate>
           <AuthListener />
           {children}
+          </PhotoGate>
+          </AgeGate>
           <ServiceWorkerRegistration />
           <LocationPermission />
           <OneSignalProvider />
