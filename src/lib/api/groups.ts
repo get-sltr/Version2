@@ -280,12 +280,21 @@ export async function cancelGroup(groupId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
 
+  // Remove related data first (foreign key constraints)
+  await supabase
+    .from('group_messages')
+    .delete()
+    .eq('group_id', groupId);
+
+  await supabase
+    .from('group_members')
+    .delete()
+    .eq('group_id', groupId);
+
+  // Delete the group itself
   const { error } = await supabase
     .from('groups')
-    .update({
-      is_active: false,
-      cancelled_at: new Date().toISOString()
-    })
+    .delete()
     .eq('id', groupId)
     .eq('host_id', user.id);
 
