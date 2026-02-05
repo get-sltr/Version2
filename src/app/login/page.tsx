@@ -5,10 +5,8 @@ import { useState, useId } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
-import { isValidPhone } from '../../lib/validation';
 import posthog from 'posthog-js';
 import { AnimatedLogo } from '../../components/AnimatedLogo';
-import { PhoneOTPInput, ResendCodeButton } from '../../components/PhoneOTPInput';
 
 // OAuth Icons
 function GoogleIcon() {
@@ -29,10 +27,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
-  const [authMode, setAuthMode] = useState<'email' | 'phone'>('email');
-  const [phone, setPhone] = useState('');
-  const [phoneStep, setPhoneStep] = useState<'input' | 'verify'>('input');
-  const [otpError, setOtpError] = useState('');
 
   const emailId = useId();
   const passwordId = useId();
@@ -88,61 +82,6 @@ export default function LoginPage() {
       setError(errorMessage);
       setOauthLoading(null);
     }
-  };
-
-  const formatPhoneInput = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    if (cleaned.length <= 3) return cleaned;
-    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-  };
-
-  const handleSendOTP = async () => {
-    setError('');
-    const digits = phone.replace(/\D/g, '');
-    if (!isValidPhone(digits)) {
-      setError('Please enter a valid phone number');
-      return;
-    }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
-      if (error) throw error;
-      setPhoneStep('verify');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to send verification code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (code: string) => {
-    setOtpError('');
-    setLoading(true);
-    const digits = phone.replace(/\D/g, '');
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        phone: `+1${digits}`,
-        token: code,
-        type: 'sms',
-      });
-      if (error) throw error;
-      if (data.user) {
-        posthog.identify(data.user.id, { phone: `+1${digits}` });
-        posthog.capture('user_logged_in', { source: 'phone_otp' });
-      }
-      window.location.href = '/dashboard';
-    } catch (err: unknown) {
-      setOtpError(err instanceof Error ? err.message : 'Invalid code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOTP = async () => {
-    const digits = phone.replace(/\D/g, '');
-    const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
-    if (error) throw new Error(error.message);
   };
 
   return (
@@ -490,54 +429,6 @@ export default function LoginPage() {
           margin-bottom: 20px;
         }
 
-        .auth-mode-toggle {
-          display: flex;
-          margin-bottom: 24px;
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 10px;
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          overflow: hidden;
-        }
-
-        .auth-mode-btn {
-          flex: 1;
-          padding: 12px;
-          min-height: 44px;
-          font-size: 13px;
-          font-weight: 500;
-          background: transparent;
-          color: rgba(255, 255, 255, 0.4);
-          border: none;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-family: inherit;
-        }
-
-        .auth-mode-btn-active {
-          background: rgba(255, 107, 53, 0.15);
-          color: #FF6B35;
-          font-weight: 600;
-        }
-
-        .phone-input-group {
-          display: flex;
-          gap: 8px;
-          margin-bottom: 20px;
-        }
-
-        .phone-prefix {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 14px;
-          min-height: 44px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
-          color: rgba(255, 255, 255, 0.5);
-          font-size: 15px;
-          font-weight: 500;
-        }
 
         .otp-section {
           text-align: center;
@@ -618,26 +509,7 @@ export default function LoginPage() {
                 </motion.div>
               )}
 
-              {/* Auth Mode Toggle */}
-              <div className="auth-mode-toggle">
-                <button
-                  type="button"
-                  className={`auth-mode-btn${authMode === 'email' ? ' auth-mode-btn-active' : ''}`}
-                  onClick={() => { setAuthMode('email'); setError(''); setPhoneStep('input'); }}
-                >
-                  Email
-                </button>
-                <button
-                  type="button"
-                  className={`auth-mode-btn${authMode === 'phone' ? ' auth-mode-btn-active' : ''}`}
-                  onClick={() => { setAuthMode('phone'); setError(''); }}
-                >
-                  Phone
-                </button>
-              </div>
-
-              {authMode === 'email' ? (
-                <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
+              <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
                   <div className="field-group">
                     <label htmlFor={emailId} className="login-label">
                       Email address
@@ -685,54 +557,6 @@ export default function LoginPage() {
                     {loading ? 'Logging in...' : 'Log In'}
                   </motion.button>
                 </form>
-              ) : phoneStep === 'input' ? (
-                <div>
-                  <div className="field-group">
-                    <label className="login-label">Phone number</label>
-                    <div className="phone-input-group">
-                      <span className="phone-prefix">+1</span>
-                      <input
-                        type="tel"
-                        placeholder="(555) 555-5555"
-                        value={phone}
-                        onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
-                        className="login-input"
-                        maxLength={14}
-                        autoComplete="tel"
-                        style={{ flex: 1 }}
-                      />
-                    </div>
-                  </div>
-                  <motion.button
-                    type="button"
-                    onClick={handleSendOTP}
-                    disabled={loading}
-                    className="login-submit"
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {loading ? 'Sending code...' : 'Send Verification Code'}
-                  </motion.button>
-                </div>
-              ) : (
-                <div className="otp-section">
-                  <p>Enter the 6-digit code sent to +1 {phone}</p>
-                  <PhoneOTPInput
-                    onComplete={handleVerifyOTP}
-                    disabled={loading}
-                    error={otpError}
-                  />
-                  <div className="otp-actions">
-                    <button
-                      type="button"
-                      className="otp-change-number"
-                      onClick={() => { setPhoneStep('input'); setOtpError(''); }}
-                    >
-                      Change number
-                    </button>
-                    <ResendCodeButton onResend={handleResendOTP} />
-                  </div>
-                </div>
-              )}
 
               <div className="login-divider">
                 <div className="login-divider-line" />

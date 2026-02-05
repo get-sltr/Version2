@@ -6,10 +6,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
-import { isValidAge, validatePassword, isValidEmail, isValidPhone, calculateAge } from '../../lib/validation';
+import { isValidAge, validatePassword, isValidEmail, calculateAge } from '../../lib/validation';
 import posthog from 'posthog-js';
 import { AnimatedLogo } from '../../components/AnimatedLogo';
-import { PhoneOTPInput, ResendCodeButton } from '../../components/PhoneOTPInput';
 
 // OAuth Icons
 function GoogleIcon() {
@@ -34,9 +33,6 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [phoneStep, setPhoneStep] = useState<'none' | 'verify'>('none');
-  const [otpError, setOtpError] = useState('');
 
   const emailId = useId();
   const passwordId = useId();
@@ -152,61 +148,6 @@ export default function SignupPage() {
       setError(errorMessage);
       setOauthLoading(null);
     }
-  };
-
-  const formatPhoneInput = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    if (cleaned.length <= 3) return cleaned;
-    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-  };
-
-  const handleSendPhoneOTP = async () => {
-    const digits = phoneNumber.replace(/\D/g, '');
-    if (!isValidPhone(digits)) {
-      setError('Please enter a valid phone number');
-      return;
-    }
-    setError('');
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
-      if (error) throw error;
-      setPhoneStep('verify');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to send code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyPhoneOTP = async (code: string) => {
-    setOtpError('');
-    setLoading(true);
-    const digits = phoneNumber.replace(/\D/g, '');
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        phone: `+1${digits}`,
-        token: code,
-        type: 'sms',
-      });
-      if (error) throw error;
-      if (data.user) {
-        posthog.identify(data.user.id, { phone: `+1${digits}` });
-        posthog.capture('user_signed_up', { source: 'phone_otp' });
-      }
-      router.push('/welcome');
-    } catch (err: unknown) {
-      setOtpError(err instanceof Error ? err.message : 'Invalid code');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendPhoneOTP = async () => {
-    const digits = phoneNumber.replace(/\D/g, '');
-    const { error } = await supabase.auth.signInWithOtp({ phone: `+1${digits}` });
-    if (error) throw new Error(error.message);
   };
 
   return (
@@ -582,75 +523,6 @@ export default function SignupPage() {
           margin-bottom: 16px;
         }
 
-        .signup-phone-divider {
-          display: flex;
-          align-items: center;
-          margin: 20px 0;
-          gap: 16px;
-        }
-
-        .signup-phone-divider-line {
-          flex: 1;
-          height: 1px;
-          background: linear-gradient(to right, transparent, rgba(255, 107, 53, 0.2), transparent);
-        }
-
-        .signup-phone-divider-text {
-          font-size: 10px;
-          color: rgba(255, 255, 255, 0.3);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        .phone-signup-section {
-          margin-bottom: 20px;
-        }
-
-        .phone-input-row {
-          display: flex;
-          gap: 8px;
-          margin-bottom: 12px;
-        }
-
-        .phone-prefix {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 14px;
-          min-height: 44px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 10px;
-          color: rgba(255, 255, 255, 0.5);
-          font-size: 15px;
-          font-weight: 500;
-        }
-
-        .phone-send-btn {
-          width: 100%;
-          padding: 14px;
-          min-height: 44px;
-          font-size: 13px;
-          font-weight: 500;
-          background: rgba(255, 107, 53, 0.08);
-          border: 1px solid rgba(255, 107, 53, 0.3);
-          border-radius: 10px;
-          color: #FF6B35;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          font-family: inherit;
-        }
-
-        .phone-send-btn:hover:not(:disabled) {
-          background: rgba(255, 107, 53, 0.15);
-          border-color: rgba(255, 107, 53, 0.5);
-        }
-
-        .phone-send-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
         .otp-verify-section {
           text-align: center;
           margin-bottom: 16px;
@@ -845,58 +717,6 @@ export default function SignupPage() {
                   {oauthLoading === 'google' ? '...' : 'Google'}
                 </button>
               </div>
-
-              {/* Phone Sign Up */}
-              <div className="signup-phone-divider">
-                <div className="signup-phone-divider-line" />
-                <span className="signup-phone-divider-text">or sign up with phone</span>
-                <div className="signup-phone-divider-line" />
-              </div>
-
-              {phoneStep === 'none' ? (
-                <div className="phone-signup-section">
-                  <div className="phone-input-row">
-                    <span className="phone-prefix">+1</span>
-                    <input
-                      type="tel"
-                      placeholder="(555) 555-5555"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(formatPhoneInput(e.target.value))}
-                      className="signup-input"
-                      maxLength={14}
-                      autoComplete="tel"
-                      style={{ flex: 1 }}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleSendPhoneOTP}
-                    disabled={loading}
-                    className="phone-send-btn"
-                  >
-                    {loading ? 'Sending...' : 'Send Verification Code'}
-                  </button>
-                </div>
-              ) : (
-                <div className="otp-verify-section">
-                  <p>Enter the 6-digit code sent to +1 {phoneNumber}</p>
-                  <PhoneOTPInput
-                    onComplete={handleVerifyPhoneOTP}
-                    disabled={loading}
-                    error={otpError}
-                  />
-                  <div className="otp-actions">
-                    <button
-                      type="button"
-                      className="otp-change-number"
-                      onClick={() => { setPhoneStep('none'); setOtpError(''); }}
-                    >
-                      Change number
-                    </button>
-                    <ResendCodeButton onResend={handleResendPhoneOTP} />
-                  </div>
-                </div>
-              )}
 
               <p className="signup-footer-note">
                 By signing up, you confirm you are at least 18 years old.

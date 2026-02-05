@@ -3,10 +3,11 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Allowed hosts for redirects (add your domains here)
+// Production base URL
+const PRODUCTION_URL = 'https://primalgay.com';
+
+// Allowed hosts for redirects
 const ALLOWED_HOSTS = [
-  'getsltr.com',
-  'www.getsltr.com',
   'primalgay.com',
   'www.primalgay.com',
   'localhost',
@@ -48,16 +49,6 @@ function sanitizeRedirectPath(path: string): string {
   return path;
 }
 
-/**
- * Validate x-forwarded-host against allowed hosts
- */
-function isAllowedHost(host: string | null): boolean {
-  if (!host) return false;
-  const normalizedHost = host.toLowerCase().trim();
-  return ALLOWED_HOSTS.some(allowed =>
-    normalizedHost === allowed || normalizedHost.endsWith(`.${allowed}`)
-  );
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
@@ -118,25 +109,23 @@ export async function GET(request: NextRequest) {
         });
 
         // Redirect new OAuth users to onboarding
-        return NextResponse.redirect(`${origin}/onboarding`);
+        const isLocalEnv = process.env.NODE_ENV === 'development';
+        const onboardingUrl = isLocalEnv ? `${origin}/onboarding` : `${PRODUCTION_URL}/onboarding`;
+        console.log('[auth/callback] New OAuth user, redirecting to:', onboardingUrl);
+        return NextResponse.redirect(onboardingUrl);
       }
 
       // Existing user - redirect to dashboard or specified next URL
-      const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';
+      const redirectBase = isLocalEnv ? origin : PRODUCTION_URL;
+      const redirectUrl = `${redirectBase}${next}`;
 
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost && isAllowedHost(forwardedHost)) {
-        // Only use forwarded host if it's in our allowed list
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
-      } else {
-        // Fallback to request origin (safe)
-        return NextResponse.redirect(`${origin}${next}`);
-      }
+      console.log('[auth/callback] Redirecting existing user to:', redirectUrl);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
   // Auth error - redirect to login with error
+  console.error('[auth/callback] Auth error - no code or session exchange failed');
   return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);
 }
