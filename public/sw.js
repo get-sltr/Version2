@@ -2,7 +2,7 @@
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 // Primal Service Worker
-const CACHE_NAME = 'primal-v1';
+const CACHE_NAME = 'primal-v2';
 const STATIC_ASSETS = [
   '/',
   '/login',
@@ -53,6 +53,10 @@ self.addEventListener('fetch', (event) => {
 
   // Skip OneSignal requests
   if (event.request.url.includes('onesignal.com')) return;
+
+  // Skip Google Fonts requests
+  if (event.request.url.includes('fonts.googleapis.com')) return;
+  if (event.request.url.includes('fonts.gstatic.com')) return;
 
   event.respondWith(
     fetch(event.request)
