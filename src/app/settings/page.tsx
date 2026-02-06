@@ -286,16 +286,16 @@ export default function SettingsPage() {
           <MenuItem label="Priority Support" value={profile?.is_premium ? '⭐ Active' : ''} hasArrow />
         </a>
         <a href="/settings/rate" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-          <MenuItem label="Rate Primal" hasArrow />
+          <MenuItem label="Rate Primal Men" hasArrow />
         </a>
       </Section>
 
       {/* Company Info */}
       <div style={{ padding: '30px 20px', textAlign: 'center', color: colors.textSecondary, fontSize: '12px', lineHeight: 1.6 }}>
-        <div style={{ fontWeight: 600, marginBottom: '8px' }}>PRIMAL</div>
+        <div style={{ fontWeight: 600, marginBottom: '8px' }}>PRIMAL MEN</div>
         <div style={{ marginBottom: '8px' }}>INTELLIGENT | INNOVATIVE | INTUITIVE</div>
         <div style={{ marginBottom: '8px' }}>Los Angeles, California</div>
-        <div>© 2025–2026 Primal. All Rights Reserved.</div>
+        <div>© 2025–2026 Primal Men. All Rights Reserved.</div>
       </div>
 
       {/* Logout */}

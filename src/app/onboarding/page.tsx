@@ -373,7 +373,7 @@ export default function OnboardingPage() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          PRIMAL
+          PRIMAL MEN
         </h1>
         <p style={{ color: '#666', fontSize: '13px' }}>
           Step {step} of {totalSteps}

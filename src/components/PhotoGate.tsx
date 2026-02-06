@@ -97,7 +97,7 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
         }}>
-          PRIMAL
+          PRIMAL MEN
         </div>
 
         <h1 style={{ fontSize: '22px', fontWeight: 600, marginBottom: '8px' }}>

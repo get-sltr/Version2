@@ -15,7 +15,7 @@ export default function TermsOfService() {
           <p>By creating an account or using the Service, you agree to be bound by these Terms and our Privacy Policy. If you do not agree, do not use Primal.</p>
         </Section>
         <Section title="2. Eligibility">
-          <p><strong>Age Requirement:</strong> You must be at least 18 years old to use Primal. By creating an account, you confirm you are 18 or older.</p>
+          <p><strong>Age Requirement:</strong> You must be 18 years old or older on the day you create your account. Primal Men is strictly for adults aged 18 and over. We do not permit users under the age of 18 under any circumstances. Accounts found to belong to minors will be immediately terminated.</p>
           <p><strong>Legal Restrictions:</strong> You must never have been convicted of a sex crime or required to register as a sex offender. You must not be prohibited from using the Service under applicable law.</p>
         </Section>
         <Section title="3. Account Security">

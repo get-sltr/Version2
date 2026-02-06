@@ -57,7 +57,7 @@ function VerifyPageContent() {
   return (
     <div style={{ minHeight: "100vh", background: "#fff", color: "#000", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", display: "flex", flexDirection: "column" }}>
       <header style={{ padding: "30px", borderBottom: "1px solid #eee" }}>
-        <a href="/" style={{ fontFamily: "'Audiowide', sans-serif", fontSize: "28px", fontWeight: 700, letterSpacing: "0.1em", textDecoration: "none", color: "#000" }}>PRIMAL</a>
+        <a href="/" style={{ fontFamily: "'Audiowide', sans-serif", fontSize: "28px", fontWeight: 700, letterSpacing: "0.1em", textDecoration: "none", color: "#000" }}>PRIMAL MEN</a>
       </header>
       <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "60px 30px", textAlign: "center" }}>
         <div style={{ maxWidth: "500px", width: "100%" }}>
@@ -108,7 +108,7 @@ function VerifyPageContent() {
         </div>
       </main>
       <footer style={{ padding: "20px 30px", borderTop: "1px solid #eee", textAlign: "center" }}>
-        <p style={{ fontSize: "10px", opacity: 0.3 }}>© 2025 Primal</p>
+        <p style={{ fontSize: "10px", opacity: 0.3 }}>© 2025 Primal Men</p>
       </footer>
     </div>
   );

@@ -130,6 +130,7 @@ export default function LandingPage() {
             <span className="btn-shine" />
             Sign In
           </Link>
+          <div className="age-notice">18+ Only</div>
         </div>
       </main>
 
@@ -141,8 +142,8 @@ export default function LandingPage() {
           <Link href="/about">About</Link>
         </div>
         <div className="footer-brand">
-          <span className="company-name">PRIMAL</span>
-          <span className="company-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
+          <span className="company-name">PRIMAL MEN</span>
+          <span className="company-tagline">YOUR BURNING DESIRE, UNLEASHED.</span>
         </div>
       </footer>
 
@@ -601,6 +602,21 @@ export default function LandingPage() {
         @keyframes tagline-shimmer {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
+        }
+
+        /* ===========================================
+           AGE NOTICE
+           =========================================== */
+        .age-notice {
+          margin-top: 16px;
+          font-family: 'Audiowide', sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.15em;
+          color: rgba(255, 255, 255, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 8px;
+          padding: 6px 16px;
+          display: inline-block;
         }
 
         /* ===========================================

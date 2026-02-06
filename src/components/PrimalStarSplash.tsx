@@ -142,8 +142,8 @@ export function PrimalStarSplash({ onComplete }: PrimalStarSplashProps) {
         }}
         transition={{ duration: 0.5 }}
       >
-        <h1 style={styles.primal}>PRIMAL</h1>
-        <p style={styles.tagline}>RULES DONT APPLY</p>
+        <h1 style={styles.primal}>PRIMAL MEN</h1>
+        <p style={styles.tagline}>YOUR BURNING DESIRE, UNLEASHED.</p>
       </motion.div>
 
       {/* Fonts */}

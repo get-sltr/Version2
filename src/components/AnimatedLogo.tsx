@@ -149,7 +149,7 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
               filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))',
             }}
           >
-            PRIMAL
+            PRIMAL MEN
           </span>
           <span
             style={{
@@ -161,7 +161,7 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
               textShadow: '0 0 10px rgba(255, 107, 53, 0.5)',
             }}
           >
-            RELEASE YOUR INNER DESIRE
+            YOUR BURNING DESIRE, UNLEASHED.
           </span>
         </div>
       )}

@@ -51,7 +51,7 @@ export default function PrivacyPolicy() {
           <p>We retain your data while your account is active. When you delete your account, we delete your personal data within 30 days, except where required for legal compliance, fraud prevention, or legitimate business purposes.</p>
         </Section>
         <Section title="7. Children's Privacy">
-          <p>Primal is strictly for users 18 years and older. We do not knowingly collect information from minors. If we discover an underage user, we immediately terminate the account.</p>
+          <p>Primal Men is strictly for users 18 years old and older. Users must be 18 on the day of sign up — no exceptions. We do not knowingly collect information from anyone under the age of 18. If we discover an underage user, we immediately terminate the account and delete all associated data.</p>
         </Section>
         <Section title="8. International Transfers">
           <p>Your data may be processed in the United States. By using Primal, you consent to this transfer. We use industry-standard safeguards to protect data during international transfers.</p>

@@ -46,7 +46,7 @@ export default function LoginPage() {
     setError('');
 
     if (!ageConfirmed) {
-      setError('You must confirm you are at least 18 years old');
+      setError('You must be 18 years old or older to use Primal Men. Users under 18 are not permitted.');
       return;
     }
 
@@ -630,7 +630,7 @@ export default function LoginPage() {
                         }}
                       />
                     </span>
-                    I confirm I am at least 18 years old
+                    I confirm I am 18 years old or older
                   </label>
 
                   <motion.button
@@ -650,7 +650,7 @@ export default function LoginPage() {
           </main>
 
           <footer className="login-footer">
-            <span className="login-footer-company">© 2025–2026 Primal</span>
+            <span className="login-footer-company">© 2025–2026 Primal Men</span>
             <span className="login-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
           </footer>
         </div>

@@ -75,7 +75,7 @@ export default function SignupPage() {
     }
 
     if (!isValidAge(dob, 18)) {
-      setError('You must be at least 18 years old to use Primal');
+      setError('You must be 18 years old or older on the day of sign up. We do not accept users under 18.');
       return;
     }
 
@@ -720,7 +720,7 @@ export default function SignupPage() {
                     className="signup-input"
                     style={{ colorScheme: 'dark' }}
                   />
-                  <p className="signup-hint">You must be at least 18 years old</p>
+                  <p className="signup-hint">You must be 18+ on the day of sign up. No exceptions.</p>
                 </div>
 
                 <div className="field-group" style={{ marginBottom: '24px' }}>
@@ -755,13 +755,13 @@ export default function SignupPage() {
               </form>
 
               <p className="signup-footer-note">
-                By signing up, you confirm you are at least 18 years old.
+                By signing up, you confirm you are 18 years old or older. Users under 18 are strictly prohibited.
               </p>
             </motion.div>
           </main>
 
           <footer className="signup-footer">
-            <span className="signup-footer-company">© 2025–2026 Primal</span>
+            <span className="signup-footer-company">© 2025–2026 Primal Men</span>
             <span className="signup-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
           </footer>
         </div>

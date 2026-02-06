@@ -100,8 +100,8 @@ export function PrimalNotificationEmail({
       <Body style={bodyStyle}>
         <Container style={containerStyle}>
           <Section style={innerSectionStyle}>
-            <div style={signatureStyle}>PRIMAL</div>
-            <div style={tagLineStyle}>rules don&apos;t apply</div>
+            <div style={signatureStyle}>PRIMAL MEN</div>
+            <div style={tagLineStyle}>your burning desire, unleashed.</div>
 
             <Text
               style={{

@@ -10,42 +10,8 @@ Dating for Gay & Bi Men
 The dating app built for the way you actually connect. Live video rooms, real-time updates, and a community that gets it.
 
 ## Description
-Primal is a dating and social app designed exclusively for gay and bisexual men. Built from the ground up for authentic connection — not just swiping.
 
-EXPLORE YOUR WAY
-Browse a location-based grid of nearby guys, or switch to the interactive Map View to see who's around you in real time. Filter by age, position, tribes, and more.
-
-PULSE — LIVE VIDEO ROOMS
-Join live video and audio rooms with up to 400 people. Hang out, meet new faces, and connect beyond a profile pic. Always-on community spaces with HD video and spatial audio.
-
-DOWN TO HOST (DTH)
-Broadcast that you're available right now with a 2-hour timed signal. It auto-expires, so you're only visible when you want to be.
-
-REAL-TIME MESSAGING
-Chat with guys nearby. Send photos, share profiles, and see typing indicators. Pin your favorite conversations for quick access.
-
-VIDEO CALLS
-Go face-to-face with 1-on-1 video calls. No third-party apps needed — it's all built in.
-
-CRUISING UPDATES
-Post and discover location-based status updates from guys nearby. Like, comment, and connect in the moment.
-
-GROUPS & MEETUPS
-Create or join real-world hangouts — parties, dinners, sports, gaming, and more. Set a time, location, and capacity.
-
-YOUR PROFILE, YOUR WAY
-Express yourself with 15 identity tribes (Bear, Twink, Jock, Otter, Daddy, and more), detailed stats, health transparency, and social links.
-
-4 WAYS TO SAY HI
-Send a Flame, Wave, Wink, or Looking tap to break the ice — each one says something different.
-
-PREMIUM FEATURES
-Upgrade for unlimited profiles, incognito mode, see who viewed you, read receipts, travel mode, priority support, and much more.
-
-BUILT FOR SAFETY
-Report users, block anyone, and manage your privacy. Content moderation keeps the community respectful. Your data is encrypted and your location is never shared without permission.
-
-Primal. Rules Don't Apply.
+ Rules Don't Apply.
 
 Terms of Service: https://primalgay.com/terms
 Privacy Policy: https://primalgay.com/privacy
@@ -79,7 +45,7 @@ Primal is purpose-built for the gay and bisexual male community with features no
 
 1. PULSE — Live video rooms for up to 400 people simultaneously. Not 1-on-1 matching — real group social spaces with HD video, spatial audio, and live chat. Always-on community rooms.
 
-2. DTH (DOWN TO HOST) — A timed 2-hour availability signal. Users activate DTH to broadcast they're available right now. It auto-expires, creating urgency and real-time connection.
+2. DTH (DOWN TO HANG) — A timed 2-hour availability signal. Users activate DTH to broadcast they're available right now. It auto-expires, creating urgency and real-time connection.
 
 3. CRUISING UPDATES — Location-based real-time status posts with comments, likes, and threading. A social feed tied to proximity, not a static grid.
 

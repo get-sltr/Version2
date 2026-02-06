@@ -38,13 +38,13 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Primal - Rules Don\'t Apply',
+  title: 'Primal Men - Your Burning Desire, Unleashed.',
   description: 'Dating app for gay and bisexual men',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Primal',
+    title: 'Primal Men',
   },
   icons: {
     icon: [
