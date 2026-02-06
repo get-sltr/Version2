@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import { usePremium } from '@/hooks/usePremium';
 import { PremiumPromo } from '@/components/PremiumPromo';
+import { useMediaPermissions } from '@/hooks/useMediaPermissions';
 
 type CallerProfile = {
   id: string;
@@ -29,11 +30,9 @@ export default function VideoCallPage() {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { status: mediaStatus, errorMessage: mediaError, requestPermissions } = useMediaPermissions();
 
-  // Premium gate - block non-premium users
-  if (!premiumLoading && !isPremium) {
-    return <PremiumPromo feature="Video Calls" fullPage />;
-  }
+  // ALL HOOKS MUST BE BEFORE ANY RETURNS
 
   // Load caller profile
   useEffect(() => {
@@ -123,7 +122,7 @@ export default function VideoCallPage() {
     return () => window.removeEventListener('message', handleMessage);
   }, [handleEndCall]);
 
-  // Toggle functions - these send postMessage to Daily iframe
+  // Toggle functions
   const toggleMute = () => {
     setIsMuted(!isMuted);
     if (iframeRef.current?.contentWindow) {
@@ -147,6 +146,120 @@ export default function VideoCallPage() {
       iframeRef.current.contentWindow.postMessage({ action: 'cycle-camera' }, '*');
     }
   };
+
+  // NOW CONDITIONAL RETURNS
+
+  // Premium gate - block non-premium users
+  if (!premiumLoading && !isPremium) {
+    return <PremiumPromo feature="Video Calls" fullPage />;
+  }
+
+  // Permission prompt screen - requires user tap to trigger iOS permission dialog
+  if (mediaStatus === 'idle' || mediaStatus === 'checking' || mediaStatus === 'prompt') {
+    return (
+      <div style={{
+        height: '100vh',
+        background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '20px',
+        padding: '24px',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          width: '100px',
+          height: '100px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #FF6B35, #ff8c5a)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '44px',
+          boxShadow: '0 8px 32px rgba(255,107,53,0.4)',
+        }}>
+          📹
+        </div>
+        <div style={{ fontSize: '22px', fontWeight: 700 }}>Allow Camera & Mic</div>
+        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', maxWidth: '300px', lineHeight: 1.5 }}>
+          Primal needs access to your camera and microphone for video calls.
+        </div>
+        <button
+          onClick={requestPermissions}
+          disabled={mediaStatus === 'checking'}
+          style={{
+            marginTop: '12px',
+            padding: '16px 48px',
+            background: mediaStatus === 'checking' ? 'rgba(255,107,53,0.5)' : 'linear-gradient(135deg, #FF6B35, #ff8c5a)',
+            border: 'none',
+            borderRadius: '30px',
+            color: '#fff',
+            fontSize: '17px',
+            fontWeight: 600,
+            cursor: mediaStatus === 'checking' ? 'wait' : 'pointer',
+            boxShadow: '0 4px 20px rgba(255,107,53,0.4)',
+          }}
+        >
+          {mediaStatus === 'checking' ? 'Checking...' : 'Allow Access'}
+        </button>
+        <button
+          onClick={() => router.back()}
+          style={{
+            marginTop: '8px',
+            padding: '12px 24px',
+            background: 'transparent',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: '14px',
+            cursor: 'pointer',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  // Permission denied or error screen
+  if (mediaStatus === 'denied' || mediaStatus === 'error') {
+    return (
+      <div style={{
+        height: '100vh',
+        background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '16px',
+        padding: '24px',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '48px' }}>🔒</div>
+        <div style={{ fontSize: '20px', fontWeight: 600 }}>Camera &amp; Microphone Required</div>
+        <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', maxWidth: '320px', lineHeight: 1.5 }}>
+          {mediaError || 'Please enable camera and microphone access in your device Settings to make video calls.'}
+        </div>
+        <button
+          onClick={() => router.back()}
+          style={{
+            marginTop: '8px',
+            padding: '14px 32px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '25px',
+            color: '#fff',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   if (!roomUrl) {
     return (
@@ -204,12 +317,13 @@ export default function VideoCallPage() {
       }}
       onClick={() => setShowControls(true)}
     >
-      {/* Daily.co iframe - full screen, hide all native controls */}
+      {/* Daily.co iframe - full screen video call */}
       <iframe
         ref={iframeRef}
-        src={`${roomUrl}?showLeaveButton=false&showFullscreenButton=false&showLocalVideo=false&showParticipantsBar=false&activeSpeakerMode=false&cssFile=none`}
+        src={`${roomUrl}?showLeaveButton=false&showFullscreenButton=false&showParticipantsBar=false`}
         title="Video Call"
-        allow="camera; microphone; fullscreen; display-capture; autoplay"
+        allow="camera *; microphone *; fullscreen *; display-capture *; autoplay *"
+        allowFullScreen
         style={{
           position: 'absolute',
           inset: 0,
