@@ -55,6 +55,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
   background: rgba(10, 10, 15, 0.95);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
@@ -83,7 +84,8 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  height: 40px;
+  min-height: 44px;
+  height: 44px;
   padding: 0 12px;
 }
 
@@ -94,7 +96,7 @@
 }
 
 .glassBtnIcon {
-  width: 40px;
+  width: 44px;
   padding: 0;
 }
 
@@ -241,16 +243,14 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 48px;
-  background: rgba(10, 10, 15, 0.95);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border-top: 1px solid var(--color-glass-border);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 0 4px;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 4px 4px env(safe-area-inset-bottom, 0px) 4px;
   z-index: 100;
 }
 
@@ -269,7 +269,9 @@
   text-decoration: none;
   position: relative;
   min-width: 44px;
+  min-height: 44px;
   height: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .navItemIcon {
@@ -280,8 +282,8 @@
 }
 
 .navItemIcon svg {
-  width: 16px;
-  height: 16px;
+  width: 22px;
+  height: 22px;
   stroke: #FFFFFF;
   stroke-width: 2;
   fill: none;
@@ -319,7 +321,7 @@
 
 .navItemLabel {
   font-family: 'Orbitron', sans-serif;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;

@@ -103,6 +103,7 @@ export default function TapsPage() {
       {/* Header */}
       <header style={{
         padding: '15px 20px',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 15px)',
         borderBottom: `1px solid ${colors.border}`,
         position: 'sticky',
         top: 0,
@@ -112,11 +113,11 @@ export default function TapsPage() {
         zIndex: 100
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-          <Link href="/dashboard" style={{ color: colors.text, textDecoration: 'none' }}>
+          <Link href="/dashboard" aria-label="Back to dashboard" style={{ color: colors.text, textDecoration: 'none', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconClose size={24} />
           </Link>
           <h1 style={{ fontSize: '28px', fontWeight: 700, margin: 0 }}>Taps</h1>
-          <Link href="/settings" style={{ color: colors.text, textDecoration: 'none' }}>
+          <Link href="/settings" aria-label="Settings" style={{ color: colors.text, textDecoration: 'none', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <IconMenu size={24} />
           </Link>
         </div>

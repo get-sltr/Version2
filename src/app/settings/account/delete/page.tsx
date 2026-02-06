@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
@@ -10,18 +10,31 @@ import { IconBack, IconReport, IconTrash } from '@/components/Icons';
 export default function DeleteAccountPage() {
   const router = useRouter();
   const { colors } = useTheme();
-  const [step, setStep] = useState<'warning' | 'confirm' | 'processing' | 'scheduled'>('warning');
+  const [step, setStep] = useState<'warning' | 'confirm' | 'processing' | 'done'>('warning');
   const [password, setPassword] = useState('');
+  const [confirmText, setConfirmText] = useState('');
+  const [isOAuth, setIsOAuth] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [deletionDate, setDeletionDate] = useState<string | null>(null);
+
+  // Detect if user signed in with OAuth (Google/Apple) — no password to verify
+  useEffect(() => {
+    const checkAuthMethod = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const provider = user.app_metadata?.provider;
+        setIsOAuth(provider !== 'email' && provider !== undefined);
+      }
+    };
+    checkAuthMethod();
+  }, []);
 
   const consequences = [
     'Your profile and all photos will be permanently deleted',
     'All your messages and conversation history will be erased',
     'Your favorites, taps, and views will be removed',
     'Any active subscriptions will be cancelled (no refund)',
-    'This action cannot be undone after 24 hours',
+    'This action cannot be undone',
   ];
 
   const handleConfirmDelete = async () => {
@@ -29,23 +42,35 @@ export default function DeleteAccountPage() {
     setLoading(true);
 
     try {
-      // First verify password by re-authenticating
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user?.email) {
-        setError('Unable to verify account. Please try again.');
-        return;
+      if (isOAuth) {
+        // OAuth users: confirm by typing DELETE
+        if (confirmText !== 'DELETE') {
+          setError('Please type DELETE to confirm.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Email/password users: re-authenticate with password
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user?.email) {
+          setError('Unable to verify account. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user.email,
+          password,
+        });
+
+        if (signInError) {
+          setError('Incorrect password. Please try again.');
+          setLoading(false);
+          return;
+        }
       }
 
-      // Re-authenticate with password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password,
-      });
-
-      if (signInError) {
-        setError('Incorrect password. Please try again.');
-        return;
-      }
+      setStep('processing');
 
       // Call the delete account API
       const response = await fetch('/api/account/delete', {
@@ -58,39 +83,24 @@ export default function DeleteAccountPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Failed to schedule account deletion');
+        setError(data.error || 'Failed to delete account');
+        setStep('confirm');
+        setLoading(false);
         return;
       }
 
-      setDeletionDate(data.deletionDate);
-      setStep('scheduled');
+      setStep('done');
+
+      // Sign out and redirect after a brief moment
+      setTimeout(async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+      }, 2000);
 
     } catch (err) {
       console.error('Delete account error:', err);
       setError('An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancelDeletion = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/account/delete', {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        router.push('/settings');
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to cancel deletion');
-      }
-    } catch (err) {
-      setError('Failed to cancel deletion');
+      setStep('confirm');
     } finally {
       setLoading(false);
     }
@@ -106,6 +116,7 @@ export default function DeleteAccountPage() {
       {/* Header */}
       <header style={{
         padding: '16px 20px',
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -163,7 +174,7 @@ export default function DeleteAccountPage() {
                 Delete Your Account?
               </h1>
               <p style={{ fontSize: '15px', color: colors.textSecondary, margin: 0, lineHeight: 1.6 }}>
-                We're sorry to see you go. Before you proceed, please understand what happens when you delete your account.
+                This will permanently delete your account and all associated data. This action cannot be undone.
               </p>
             </div>
 
@@ -189,18 +200,6 @@ export default function DeleteAccountPage() {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div style={{
-              background: 'rgba(255, 193, 7, 0.1)',
-              border: '1px solid rgba(255, 193, 7, 0.3)',
-              borderRadius: '12px',
-              padding: '16px',
-              marginBottom: '32px',
-            }}>
-              <p style={{ fontSize: '14px', margin: 0, color: '#FFC107' }}>
-                <strong>24-hour grace period:</strong> After requesting deletion, you have 24 hours to change your mind. Log back in to cancel.
-              </p>
             </div>
 
             <button
@@ -263,36 +262,75 @@ export default function DeleteAccountPage() {
                 Confirm Deletion
               </h1>
               <p style={{ fontSize: '15px', color: colors.textSecondary, margin: 0 }}>
-                Enter your password to confirm account deletion
+                {isOAuth
+                  ? 'Type DELETE below to permanently delete your account'
+                  : 'Enter your password to confirm account deletion'
+                }
               </p>
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: 500,
-                marginBottom: '8px',
-                color: colors.text,
-              }}>
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  fontSize: '16px',
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: '12px',
-                  background: colors.surface,
-                  color: colors.text,
-                  outline: 'none',
-                }}
-              />
+              {isOAuth ? (
+                <>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    marginBottom: '8px',
+                    color: colors.text,
+                  }}>
+                    Type <strong style={{ color: '#f44336' }}>DELETE</strong> to confirm
+                  </label>
+                  <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
+                    placeholder="Type DELETE"
+                    autoComplete="off"
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      fontSize: '16px',
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: '12px',
+                      background: colors.surface,
+                      color: colors.text,
+                      outline: 'none',
+                      letterSpacing: '2px',
+                      textAlign: 'center',
+                      fontWeight: 700,
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    marginBottom: '8px',
+                    color: colors.text,
+                  }}>
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      fontSize: '16px',
+                      border: `1px solid ${colors.border}`,
+                      borderRadius: '12px',
+                      background: colors.surface,
+                      color: colors.text,
+                      outline: 'none',
+                    }}
+                  />
+                </>
+              )}
             </div>
 
             {error && (
@@ -311,7 +349,7 @@ export default function DeleteAccountPage() {
 
             <button
               onClick={handleConfirmDelete}
-              disabled={!password || loading}
+              disabled={isOAuth ? confirmText !== 'DELETE' || loading : !password || loading}
               style={{
                 width: '100%',
                 padding: '16px',
@@ -322,11 +360,11 @@ export default function DeleteAccountPage() {
                 fontSize: '16px',
                 fontWeight: 600,
                 cursor: loading ? 'wait' : 'pointer',
-                opacity: !password ? 0.5 : 1,
+                opacity: (isOAuth ? confirmText !== 'DELETE' : !password) ? 0.5 : 1,
                 marginBottom: '12px',
               }}
             >
-              {loading ? 'Processing...' : 'Delete My Account'}
+              {loading ? 'Deleting...' : 'Permanently Delete My Account'}
             </button>
 
             <button
@@ -349,12 +387,38 @@ export default function DeleteAccountPage() {
           </motion.div>
         )}
 
-        {/* Scheduled Step */}
-        {step === 'scheduled' && (
+        {/* Processing Step */}
+        {step === 'processing' && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ textAlign: 'center' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ textAlign: 'center', paddingTop: '60px' }}
+          >
+            <div style={{
+              width: '60px',
+              height: '60px',
+              border: '3px solid rgba(244, 67, 54, 0.2)',
+              borderTop: '3px solid #f44336',
+              borderRadius: '50%',
+              margin: '0 auto 24px',
+              animation: 'spin 1s linear infinite',
+            }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 12px' }}>
+              Deleting your account...
+            </h2>
+            <p style={{ fontSize: '14px', color: colors.textSecondary }}>
+              Removing all your data. This may take a moment.
+            </p>
+          </motion.div>
+        )}
+
+        {/* Done Step */}
+        {step === 'done' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            style={{ textAlign: 'center', paddingTop: '60px' }}
           >
             <div style={{
               width: '80px',
@@ -365,64 +429,16 @@ export default function DeleteAccountPage() {
               alignItems: 'center',
               justifyContent: 'center',
               margin: '0 auto 20px',
+              fontSize: '36px',
             }}>
-              <IconTrash size={40} />
+              &#10003;
             </div>
             <h1 style={{ fontSize: '24px', fontWeight: 700, margin: '0 0 12px' }}>
-              Deletion Scheduled
+              Account Deleted
             </h1>
-            <p style={{ fontSize: '15px', color: colors.textSecondary, marginBottom: '24px', lineHeight: 1.6 }}>
-              Your account has been scheduled for deletion. It will be permanently deleted on:
+            <p style={{ fontSize: '15px', color: colors.textSecondary, lineHeight: 1.6 }}>
+              Your account and all associated data have been permanently deleted. You will be redirected shortly.
             </p>
-            <div style={{
-              padding: '20px',
-              background: colors.surface,
-              borderRadius: '12px',
-              marginBottom: '24px',
-            }}>
-              <p style={{ fontSize: '20px', fontWeight: 600, margin: 0, color: colors.text }}>
-                {deletionDate ? new Date(deletionDate).toLocaleString() : '24 hours from now'}
-              </p>
-            </div>
-            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '32px' }}>
-              Changed your mind? You can cancel the deletion within the next 24 hours by logging back in.
-            </p>
-
-            <button
-              onClick={handleCancelDeletion}
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: '#4CAF50',
-                border: 'none',
-                borderRadius: '12px',
-                color: '#fff',
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: loading ? 'wait' : 'pointer',
-                marginBottom: '12px',
-              }}
-            >
-              {loading ? 'Cancelling...' : 'Cancel Deletion'}
-            </button>
-
-            <button
-              onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
-              style={{
-                width: '100%',
-                padding: '16px',
-                background: 'transparent',
-                border: `1px solid ${colors.border}`,
-                borderRadius: '12px',
-                color: colors.text,
-                fontSize: '16px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Sign Out
-            </button>
           </motion.div>
         )}
       </div>

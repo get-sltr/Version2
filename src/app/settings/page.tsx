@@ -94,7 +94,7 @@ export default function SettingsPage() {
   return (
     <div style={{ minHeight: '100vh', background: colors.background, color: colors.text, fontFamily: "'Cormorant Garamond', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif", paddingBottom: '40px' }}>
       {/* Header */}
-      <header style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
+      <header style={{ padding: '12px 20px', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{
           width: '100%',
           maxWidth: '780px',
@@ -109,7 +109,7 @@ export default function SettingsPage() {
           justifyContent: 'center',
           position: 'relative'
         }}>
-          <a href="/dashboard" style={{ position: 'absolute', left: '16px', color: '#FFFFFF', textDecoration: 'none', display: 'flex', alignItems: 'center' }}><IconBack size={24} /></a>
+          <a href="/dashboard" aria-label="Back to dashboard" style={{ position: 'absolute', left: '16px', color: '#FFFFFF', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44 }}><IconBack size={24} /></a>
           <span style={{ fontSize: '17px', fontWeight: 700 }}>Settings</span>
         </div>
       </header>
@@ -254,6 +254,7 @@ export default function SettingsPage() {
         <ToggleMenuItem label="Show Age" storageKey="showAge" />
         <DbToggleMenuItem label="Long Session" column="long_session_visible" userId={user?.id} />
         <DbToggleMenuItem label="Hosting" column="is_hosting" userId={user?.id} />
+        <DbToggleMenuItem label="Show NSFW Content" column="show_nsfw" userId={user?.id} />
         <a href="/settings/blocked-users" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Blocked Users" hasArrow />
         </a>

@@ -22,6 +22,14 @@ export function OneSignalProvider() {
         return;
       }
 
+      // OneSignal is configured for primalgay.com - skip www subdomain to avoid errors
+      // User should add www.primalgay.com in OneSignal dashboard, or redirect www to non-www
+      if (window.location.hostname === 'www.primalgay.com') {
+        console.log('OneSignal: Redirecting to non-www domain for push notifications');
+        // Silently skip - notifications will work when user visits non-www
+        return;
+      }
+
       const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
       if (!appId) {
         console.warn('OneSignal App ID not configured');

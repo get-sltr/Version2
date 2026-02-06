@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
     hostname: 'primalgay.com',
     androidScheme: 'https',
     iosScheme: 'https',
-    allowNavigation: ['primalgay.com', '*.primalgay.com', '*.supabase.co', '*.google.com', 'accounts.google.com'],
+    allowNavigation: ['primalgay.com', '*.primalgay.com', '*.supabase.co', '*.google.com', 'accounts.google.com', '*.daily.co', '*.livekit.cloud'],
   },
   plugins: {
     SplashScreen: {

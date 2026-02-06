@@ -14,6 +14,7 @@ import {
 import '@livekit/components-styles';
 import { Track, RoomOptions, VideoPresets } from 'livekit-client';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useMediaPermissions } from '@/hooks/useMediaPermissions';
 
 interface VideoConferenceProps {
   roomName: string;
@@ -31,8 +32,12 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showChat, setShowChat] = useState(false);
+  const { status: mediaStatus, errorMessage: mediaError, requestPermissions } = useMediaPermissions();
 
+  // Only fetch token AFTER permissions are granted
   useEffect(() => {
+    if (mediaStatus !== 'granted') return;
+
     const fetchToken = async () => {
       try {
         const response = await fetch('/api/livekit/token', {
@@ -57,7 +62,120 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
     };
 
     fetchToken();
-  }, [roomName]);
+  }, [roomName, mediaStatus]);
+
+  // Permission prompt screen - requires user tap
+  if (mediaStatus === 'idle' || mediaStatus === 'checking' || mediaStatus === 'prompt') {
+    return (
+      <div
+        style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: colors.background,
+          color: colors.text,
+        }}
+      >
+        <div style={{ textAlign: 'center', maxWidth: '360px', padding: '24px' }}>
+          <div style={{
+            width: '100px',
+            height: '100px',
+            margin: '0 auto 24px',
+            borderRadius: '50%',
+            background: `linear-gradient(135deg, ${colors.accent}, #ff8c5a)`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '44px',
+            boxShadow: `0 8px 32px ${colors.accent}66`,
+          }}>
+            📹
+          </div>
+          <div style={{ fontSize: '22px', fontWeight: 700, marginBottom: '12px' }}>
+            Allow Camera &amp; Mic
+          </div>
+          <div style={{ fontSize: '14px', opacity: 0.6, marginBottom: '24px', lineHeight: 1.5 }}>
+            Primal needs access to your camera and microphone to join this room.
+          </div>
+          <button
+            onClick={requestPermissions}
+            disabled={mediaStatus === 'checking'}
+            style={{
+              padding: '16px 48px',
+              background: mediaStatus === 'checking' ? `${colors.accent}80` : colors.accent,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '30px',
+              fontSize: '17px',
+              fontWeight: 600,
+              cursor: mediaStatus === 'checking' ? 'wait' : 'pointer',
+              boxShadow: `0 4px 20px ${colors.accent}66`,
+            }}
+          >
+            {mediaStatus === 'checking' ? 'Checking...' : 'Allow Access'}
+          </button>
+          <button
+            onClick={onLeave}
+            style={{
+              display: 'block',
+              margin: '16px auto 0',
+              padding: '12px 24px',
+              background: 'transparent',
+              border: 'none',
+              color: colors.text,
+              opacity: 0.5,
+              fontSize: '14px',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Permission denied or error screen
+  if (mediaStatus === 'denied' || mediaStatus === 'error') {
+    return (
+      <div
+        style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: colors.background,
+          color: colors.text,
+        }}
+      >
+        <div style={{ textAlign: 'center', maxWidth: '360px', padding: '24px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+          <div style={{ fontSize: '20px', fontWeight: 600, marginBottom: '12px' }}>
+            Camera &amp; Microphone Required
+          </div>
+          <div style={{ fontSize: '14px', opacity: 0.6, marginBottom: '24px', lineHeight: 1.5 }}>
+            {mediaError || 'Please enable camera and microphone access in your device Settings.'}
+          </div>
+          <button
+            onClick={onLeave}
+            style={{
+              padding: '12px 24px',
+              background: colors.accent,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

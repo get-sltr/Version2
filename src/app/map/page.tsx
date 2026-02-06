@@ -5,31 +5,27 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLocationPresence } from '@/hooks/useLocationPresence';
 import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
 import { useMapGroups } from '@/hooks/useMapGroups';
 import { useMapVenues } from '@/hooks/useMapVenues';
-import { useNavBadgeCounts } from '@/hooks/useNavBadgeCounts';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import MigrationBanner from '@/components/MigrationBanner';
 import MapboxMap from '@/components/Mapbox/MapboxMap';
+import { BottomNavWithBadges } from '@/components/BottomNavWithBadges';
 import {
   MapHeader,
-  BottomNav,
   CruisingFAB,
   CruisingPanel,
   MenuPanel,
   ProfileDrawer,
   GroupDrawer,
 } from '@/components/map';
-import type { MapViewMode, MapProfile, MapGroup, Coordinates, NavTab } from '@/types/map';
+import type { MapViewMode, MapProfile, MapGroup, Coordinates } from '@/types/map';
 
 export default function MapViewPage() {
-  const router = useRouter();
-
   // View state
   const [viewMode, setViewMode] = useState<MapViewMode>('users');
   const [mapCenter, setMapCenter] = useState<Coordinates | null>(null);
@@ -39,7 +35,6 @@ export default function MapViewPage() {
   // Panel states
   const [menuOpen, setMenuOpen] = useState(false);
   const [cruisingOpen, setCruisingOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<NavTab>('explore');
 
   // Drawer state
   const [selectedProfile, setSelectedProfile] = useState<MapProfile | null>(null);
@@ -76,9 +71,6 @@ export default function MapViewPage() {
     radius: 8000,
   });
 
-  // Badge counts for bottom nav
-  const { counts: badgeCounts } = useNavBadgeCounts();
-
   // Handlers
   const handleSelectProfile = useCallback((profile: MapProfile) => {
     setCenterOn({ lat: profile.lat, lng: profile.lng });
@@ -111,27 +103,6 @@ export default function MapViewPage() {
     // success/error states and only closes on successful updates.
     await postCruisingUpdate(text, false, mapCenter?.lat, mapCenter?.lng);
   }, [mapCenter]);
-
-  const handleTabChange = useCallback((tab: NavTab) => {
-    setActiveTab(tab);
-    switch (tab) {
-      case 'explore':
-        // Already on map
-        break;
-      case 'taps':
-        router.push('/taps');
-        break;
-      case 'pro':
-        router.push('/premium');
-        break;
-      case 'messages':
-        router.push('/messages');
-        break;
-      case 'views':
-        router.push('/views');
-        break;
-    }
-  }, [router]);
 
   return (
     <div className="mapPageContainer">
@@ -196,13 +167,7 @@ export default function MapViewPage() {
       />
 
       {/* Bottom Navigation */}
-      <BottomNav
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        messageCount={badgeCounts.messages}
-        viewCount={badgeCounts.views}
-        tapCount={badgeCounts.taps}
-      />
+      <BottomNavWithBadges />
 
       {/* Global Styles */}
       <style jsx global>{`

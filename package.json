@@ -15,6 +15,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.958.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/app": "^6.0.0",
     "@capacitor/camera": "^6.0.0",
@@ -27,11 +28,10 @@
     "@capacitor/push-notifications": "^6.0.0",
     "@capacitor/splash-screen": "^6.0.0",
     "@capacitor/status-bar": "^6.0.0",
-    "@revenuecat/purchases-capacitor": "^8.0.0",
-    "@aws-sdk/client-rekognition": "^3.958.0",
     "@livekit/components-react": "^2.6.7",
     "@livekit/components-styles": "^1.1.4",
     "@react-email/components": "^1.0.1",
+    "@revenuecat/purchases-capacitor": "^8.0.0",
     "@sentry/nextjs": "^10.32.1",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
@@ -63,6 +63,7 @@
     "dotenv": "^17.2.3",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jsonwebtoken": "^9.0.3",
     "ts-jest": "^29.2.5",
     "typescript": "^5.3.0"
   }

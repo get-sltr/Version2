@@ -18,6 +18,7 @@ html, body {
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
   max-width: 100vw;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -123,10 +124,42 @@ video {
   pointer-events: none;
 }
 
-/* Only controls should be clickable */
+/* Only controls and popups should be clickable */
 .mapboxgl-ctrl,
-.mapboxgl-ctrl-group {
+.mapboxgl-ctrl-group,
+.mapboxgl-popup {
   pointer-events: auto;
+}
+
+/* Dark glass popup styling — override Mapbox white defaults */
+.mapboxgl-popup-content {
+  background: rgba(20, 20, 25, 0.92) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: rgba(20, 20, 25, 0.92) !important;
+  border-bottom-color: rgba(20, 20, 25, 0.92) !important;
+}
+
+.mapboxgl-popup-close-button {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 18px;
+  padding: 4px 8px;
+  right: 4px;
+  top: 4px;
+}
+
+.mapboxgl-popup-close-button:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px;
 }
 
 /* Hide Mapbox attribution and logo */

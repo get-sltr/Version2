@@ -30,7 +30,7 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-Content-Type-Options',
@@ -56,10 +56,10 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.mapbox.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://us.i.posthog.com https://us-assets.i.posthog.com https://onesignal.com https://*.onesignal.com https://api.revenuecat.com https://fonts.googleapis.com https://fonts.gstatic.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://us.i.posthog.com https://us-assets.i.posthog.com https://onesignal.com https://*.onesignal.com https://api.revenuecat.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.livekit.cloud wss://*.livekit.cloud https://api.daily.co https://*.daily.co wss://*.daily.co https://api.foursquare.com",
               "media-src 'self' blob: https:",
               "worker-src 'self' blob:",
-              "frame-src 'self'",
+              "frame-src 'self' https://*.daily.co https://*.livekit.cloud",
             ].join('; '),
           },
         ],

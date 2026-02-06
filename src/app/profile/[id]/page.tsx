@@ -91,6 +91,7 @@ export default function ProfileViewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [viewerShowNsfw, setViewerShowNsfw] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [hasTapped, setHasTapped] = useState(false);
   const [showTapMenu, setShowTapMenu] = useState(false);
@@ -132,6 +133,14 @@ export default function ProfileViewPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           setCurrentUserId(user.id);
+
+          // Load viewer's NSFW preference
+          const { data: viewerSettings } = await supabase
+            .from('user_settings')
+            .select('show_nsfw')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          setViewerShowNsfw(viewerSettings?.show_nsfw ?? false);
 
           // Check if already favorited (use maybeSingle to avoid error on no results)
           const { data: favData } = await supabase
@@ -676,21 +685,50 @@ export default function ProfileViewPage() {
           <div style={{ padding: '20px 0', borderBottom: hostedGroups.length > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
             <SectionHeader title="Photos" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-              {profile.photo_urls.filter((url: string) => url).map((url: string, index: number) => (
-                <div
-                  key={index}
-                  onClick={() => setPhotoIndex(index)}
-                  style={{
-                    aspectRatio: '1',
-                    background: '#1a1a1a',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-              ))}
+              {profile.photo_urls.filter((url: string) => url).map((url: string, index: number) => {
+                const isNsfw = profile.photo_nsfw_flags?.[index] ?? false;
+                const shouldBlur = isNsfw && !viewerShowNsfw;
+                return (
+                  <div
+                    key={index}
+                    onClick={() => setPhotoIndex(index)}
+                    style={{
+                      aspectRatio: '1',
+                      background: '#1a1a1a',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                      position: 'relative'
+                    }}
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        filter: shouldBlur ? 'blur(20px)' : 'none'
+                      }}
+                    />
+                    {shouldBlur && (
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(0,0,0,0.5)',
+                        color: '#FF6B35',
+                        fontSize: '10px',
+                        fontWeight: 600
+                      }}>
+                        NSFW
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -879,6 +917,8 @@ export default function ProfileViewPage() {
       {photoIndex !== null && profile.photo_urls && (() => {
         const photos = profile.photo_urls.filter((url: string) => url);
         const currentPhoto = photos[photoIndex];
+        const isCurrentNsfw = profile.photo_nsfw_flags?.[photoIndex] ?? false;
+        const shouldBlurCurrent = isCurrentNsfw && !viewerShowNsfw;
         const hasPrev = photoIndex > 0;
         const hasNext = photoIndex < photos.length - 1;
 
@@ -986,17 +1026,44 @@ export default function ProfileViewPage() {
             )}
 
             {/* Photo */}
-            <img
-              src={currentPhoto}
-              alt=""
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                objectFit: 'contain',
-                borderRadius: '8px'
-              }}
-            />
+            <div style={{ position: 'relative' }}>
+              <img
+                src={currentPhoto}
+                alt=""
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '80vh',
+                  objectFit: 'contain',
+                  borderRadius: '8px',
+                  filter: shouldBlurCurrent ? 'blur(30px)' : 'none'
+                }}
+              />
+              {shouldBlurCurrent && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.6)',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    textAlign: 'center',
+                    padding: '20px'
+                  }}
+                >
+                  <span style={{ fontSize: '24px', marginBottom: '8px' }}>🔞</span>
+                  <span style={{ fontSize: '16px', fontWeight: 600, marginBottom: '4px' }}>NSFW Content</span>
+                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
+                    Enable "Show NSFW Content" in Settings to view
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* Dots */}
             {photos.length > 1 && (

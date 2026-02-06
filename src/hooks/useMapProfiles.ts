@@ -11,7 +11,7 @@ const DEFAULT_FILTERS: MapFilterSettings = {
   positionFilters: [],
   minAge: 18,
   maxAge: 80,
-  maxDistance: 50, // 50 miles default radius
+  maxDistance: 15, // 15 miles default radius for App Store launch
 };
 
 interface UseMapProfilesOptions {

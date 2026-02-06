@@ -38,6 +38,7 @@ export default function EditProfilePage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [profilePhoto, setProfilePhoto] = useState<string>('');
   const [additionalPhotos, setAdditionalPhotos] = useState<string[]>(['', '', '', '']);
+  const [photoNsfwFlags, setPhotoNsfwFlags] = useState<boolean[]>([false, false, false, false]);
   const [uploading, setUploading] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [showTribesDropdown, setShowTribesDropdown] = useState(false);
@@ -148,6 +149,11 @@ export default function EditProfilePage() {
             // Pad array to always have 4 slots
             const photos = [...profile.photo_urls, '', '', '', ''].slice(0, 4);
             setAdditionalPhotos(photos);
+          }
+          if (profile.photo_nsfw_flags && Array.isArray(profile.photo_nsfw_flags)) {
+            // Pad array to always have 4 slots
+            const flags = [...profile.photo_nsfw_flags, false, false, false, false].slice(0, 4);
+            setPhotoNsfwFlags(flags);
           }
           if (profile.display_name) setDisplayName(profile.display_name);
           if (profile.about) setAboutMe(profile.about);
@@ -322,6 +328,12 @@ export default function EditProfilePage() {
       // Only add photo_urls if we have photos
       if (validAdditionalPhotos.length > 0) {
         updateData.photo_urls = validAdditionalPhotos;
+        // Filter NSFW flags to match valid photos (only for non-empty photo slots)
+        const validNsfwFlags = additionalPhotos
+          .map((url, i) => ({ url, isNsfw: photoNsfwFlags[i] }))
+          .filter(item => item.url && item.url.trim() !== '')
+          .map(item => item.isNsfw);
+        updateData.photo_nsfw_flags = validNsfwFlags;
       }
 
       console.log('Update data:', updateData);
@@ -495,22 +507,54 @@ export default function EditProfilePage() {
           )}
         </label>
         {[0, 1, 2, 3].map((index) => (
-          <label key={index} style={{ background: '#1c1c1e', backgroundImage: additionalPhotos[index] ? `url(${additionalPhotos[index]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: 'none', cursor: uploadingIndex === index ? 'not-allowed' : 'pointer', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={(e) => handleAdditionalPhotoUpload(e, index)}
-              disabled={uploadingIndex === index}
-              style={{ display: 'none' }}
-            />
-            {!additionalPhotos[index] && uploadingIndex !== index && (
-              <div style={{ fontSize: '24px', color: '#666' }}>+</div>
+          <div key={index} style={{ position: 'relative' }}>
+            <label style={{ background: '#1c1c1e', backgroundImage: additionalPhotos[index] ? `url(${additionalPhotos[index]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: 'none', cursor: uploadingIndex === index ? 'not-allowed' : 'pointer', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: '1' }}>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => handleAdditionalPhotoUpload(e, index)}
+                disabled={uploadingIndex === index}
+                style={{ display: 'none' }}
+              />
+              {!additionalPhotos[index] && uploadingIndex !== index && (
+                <div style={{ fontSize: '24px', color: '#666' }}>+</div>
+              )}
+              {uploadingIndex === index && (
+                <div style={{ fontSize: '12px', color: '#FF6B35' }}>Uploading...</div>
+              )}
+            </label>
+            {additionalPhotos[index] && (
+              <label style={{
+                position: 'absolute',
+                bottom: '8px',
+                left: '8px',
+                right: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(0,0,0,0.75)',
+                borderRadius: '6px',
+                padding: '6px 8px',
+                cursor: 'pointer',
+                fontSize: '11px',
+                color: photoNsfwFlags[index] ? '#FF6B35' : '#999',
+              }}>
+                <input
+                  type="checkbox"
+                  checked={photoNsfwFlags[index]}
+                  onChange={(e) => {
+                    const newFlags = [...photoNsfwFlags];
+                    newFlags[index] = e.target.checked;
+                    setPhotoNsfwFlags(newFlags);
+                    setShowSaveButton(true);
+                  }}
+                  style={{ width: '14px', height: '14px', accentColor: '#FF6B35' }}
+                />
+                NSFW
+              </label>
             )}
-            {uploadingIndex === index && (
-              <div style={{ fontSize: '12px', color: '#FF6B35' }}>Uploading...</div>
-            )}
-          </label>
+          </div>
         ))}
       </div>
 

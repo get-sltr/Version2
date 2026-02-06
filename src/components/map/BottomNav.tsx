@@ -81,6 +81,9 @@ function NavItem({ tab, label, icon, isActive, onClick, badgeCount, showBadge }:
     <button
       className={`${styles.navItem} ${isActive ? styles.active : ''}`}
       onClick={onClick}
+      role="tab"
+      aria-selected={isActive}
+      aria-label={`${label}${badgeCount && badgeCount > 0 ? `, ${badgeCount} new` : ''}`}
     >
       {isPro ? (
         <span className={styles.navItemPro}>PRO</span>
@@ -108,7 +111,7 @@ export function BottomNav({
   tapCount = 0,
 }: BottomNavProps) {
   return (
-    <nav className={styles.bottomNav}>
+    <nav className={styles.bottomNav} role="tablist" aria-label="Main navigation">
       <NavItem
         tab="explore"
         label="Explore"

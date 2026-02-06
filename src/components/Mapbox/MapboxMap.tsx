@@ -239,7 +239,8 @@ export default function MapboxMap({
       }
     }
 
-    // No marker hit - notify parent to close drawer
+    // No marker hit - close popup and notify parent to close drawer
+    setPopup(null);
     onEmptyClick?.();
   }, [viewMode, localProfiles, groups, venues, currentUserProfile, onSelectProfile, onSelectGroup, onEmptyClick]);
 
@@ -458,45 +459,43 @@ export default function MapboxMap({
           <Popup
             latitude={popup.lat}
             longitude={popup.lng}
-            offset={10}
-            closeButton={false}
+            offset={14}
+            closeButton={true}
+            closeOnClick={false}
             onClose={() => setPopup(null)}
           >
             <div
               style={{
-                backdropFilter: 'blur(10px)',
-                padding: 12,
-                borderRadius: 12,
-                border: '1px solid rgba(0,0,0,0.4)',
-                background: 'rgba(255,255,255,0.1)',
-                color: colors.text,
-                width: 200
+                padding: 14,
+                color: '#fff',
+                minWidth: 180,
+                maxWidth: 220,
               }}
             >
               {popup.type === 'venue' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <span style={{ fontSize: 20 }}>🍸</span>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{popup.data.name}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.3 }}>{popup.data.name}</div>
                   </div>
                   {popup.data.category && (
-                    <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>
                       {popup.data.category}
                     </div>
                   )}
                   {popup.data.address && (
-                    <div style={{ fontSize: 11, opacity: 0.6, marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>
                       {popup.data.address}
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 11 }}>
                     {popup.data.isOpen !== undefined && (
-                      <span style={{ color: popup.data.isOpen ? '#4caf50' : '#ff5722' }}>
+                      <span style={{ color: popup.data.isOpen ? '#4caf50' : '#ff5722', fontWeight: 600 }}>
                         {popup.data.isOpen ? 'Open' : 'Closed'}
                       </span>
                     )}
-                    {popup.data.distance && (
-                      <span style={{ opacity: 0.6 }}>
+                    {popup.data.distance != null && popup.data.distance > 0 && (
+                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>
                         {popup.data.distance < 1000
                           ? `${popup.data.distance}m away`
                           : `${(popup.data.distance / 1000).toFixed(1)}km away`}
@@ -509,7 +508,7 @@ export default function MapboxMap({
                 <div>
                   <div style={{ fontWeight: 700, marginBottom: 6 }}>{popup.data.name}</div>
                   {popup.data.host && (
-                    <div style={{ fontSize: 12, opacity: 0.7 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
                       Hosted by {popup.data.host}
                     </div>
                   )}
