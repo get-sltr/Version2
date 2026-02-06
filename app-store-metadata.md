@@ -102,9 +102,7 @@ NATIVE CAPABILITIES:
 - Offline state handling
 
 DEMO ACCOUNT:
-Email: appreviewer@primalgay.com
-Password: AppReview2026!
-(Pre-populated with profile data, messages, conversations, taps, and views)
+(Credentials provided separately — not stored in version control)
 
 ---
 
