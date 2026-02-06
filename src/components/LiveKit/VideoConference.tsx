@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   LiveKitRoom,
   GridLayout,
@@ -10,9 +10,11 @@ import {
   useTracks,
   useParticipants,
   Chat,
+  useRoomContext,
+  useConnectionState,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
-import { Track, RoomOptions, VideoPresets } from 'livekit-client';
+import { Track, RoomOptions, VideoPresets, ConnectionState } from 'livekit-client';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useMediaPermissions } from '@/hooks/useMediaPermissions';
 
@@ -254,21 +256,35 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
         token={token}
         serverUrl={serverUrl}
         connect={true}
-        video={true}
-        audio={true}
+        video={false}
+        audio={false}
         options={roomOptions}
         onDisconnected={onLeave}
         onError={(err) => {
           console.error('LiveKit error:', err);
-          // Don't set error state for device issues - just log them and continue
-          const msg = err.message?.toLowerCase() || '';
-          if (!msg.includes('device not found') && !msg.includes('media permissions') && !msg.includes('notfounderror')) {
+          // Don't kill the room for media/device issues — room stays connected
+          // and user can retry via ControlBar buttons
+          const msg = (err.message || '').toLowerCase();
+          const isMediaError =
+            msg.includes('device') ||
+            msg.includes('permission') ||
+            msg.includes('notfounderror') ||
+            msg.includes('notallowed') ||
+            msg.includes('getusermedia') ||
+            msg.includes('denied') ||
+            msg.includes('notreadable') ||
+            msg.includes('overconstrained') ||
+            msg.includes('media');
+          if (!isMediaError) {
             setError(err.message);
           }
         }}
         style={{ height: '100%' }}
         data-lk-theme="default"
       >
+        {/* Enable camera/mic AFTER room connects — avoids getUserMedia during connect
+            which causes "Client initiated disconnect" in Capacitor WKWebView */}
+        <AutoEnableTracks />
         <div style={{ display: 'flex', height: '100%' }}>
           {/* Main video area */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -439,6 +455,39 @@ function RoomHeader({
       </div>
     </div>
   );
+}
+
+/**
+ * Enables camera & mic AFTER room connects.
+ * This avoids LiveKit calling getUserMedia during the connect flow,
+ * which fails in Capacitor WKWebView and causes "Client initiated disconnect".
+ * If enabling fails (no native delegate yet), the room stays connected —
+ * user can retry via ControlBar camera/mic buttons.
+ */
+function AutoEnableTracks() {
+  const room = useRoomContext();
+  const connectionState = useConnectionState();
+  const enabledRef = useRef(false);
+
+  useEffect(() => {
+    if (connectionState !== ConnectionState.Connected || enabledRef.current) return;
+    enabledRef.current = true;
+
+    (async () => {
+      try {
+        await room.localParticipant.setCameraEnabled(true);
+      } catch (e) {
+        console.warn('Could not enable camera (will retry via ControlBar):', e);
+      }
+      try {
+        await room.localParticipant.setMicrophoneEnabled(true);
+      } catch (e) {
+        console.warn('Could not enable microphone (will retry via ControlBar):', e);
+      }
+    })();
+  }, [connectionState, room]);
+
+  return null;
 }
 
 /**
