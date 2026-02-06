@@ -46,7 +46,7 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(self), microphone=(self), geolocation=(self)',
+            value: 'camera=(self "https://*.daily.co" "https://*.livekit.cloud"), microphone=(self "https://*.daily.co" "https://*.livekit.cloud"), geolocation=(self)',
           },
           {
             key: 'Content-Security-Policy',
