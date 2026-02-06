@@ -865,7 +865,7 @@ export default function PremiumPage() {
           )}
         </motion.button>
 
-        {/* Disclaimer */}
+        {/* Disclaimer — Apple Schedule 2 required language */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -892,6 +892,12 @@ export default function PremiumPage() {
             ) : (
               `Renews at $${plans[selectedPlan].total} every ${selectedPlan === '1month' ? 'month' : selectedPlan === '3months' ? '3 months' : '6 months'}.`
             )}
+            <span style={{ display: 'block', marginTop: '8px' }}>
+              Payment will be charged to your Apple ID account at confirmation of purchase.
+              Subscription automatically renews unless auto-renew is turned off at least
+              24 hours before the end of the current period. Your account will be charged
+              for renewal within 24 hours prior to the end of the current period.
+            </span>
           </div>
         </motion.div>
 
@@ -901,10 +907,10 @@ export default function PremiumPage() {
           textAlign: 'center',
           lineHeight: 1.5,
         }}>
-          Cancel anytime from account settings. By subscribing, you agree to our{' '}
-          <span style={{ textDecoration: 'underline', cursor: 'pointer', color: 'rgba(255, 255, 255, 0.5)' }}>Terms</span>
+          Manage and cancel subscriptions in your App Store account settings. By subscribing, you agree to our{' '}
+          <a href="/terms" style={{ textDecoration: 'underline', color: 'rgba(255, 255, 255, 0.5)' }}>Terms of Service</a>
           {' & '}
-          <span style={{ textDecoration: 'underline', cursor: 'pointer', color: 'rgba(255, 255, 255, 0.5)' }}>Privacy Policy</span>.
+          <a href="/privacy" style={{ textDecoration: 'underline', color: 'rgba(255, 255, 255, 0.5)' }}>Privacy Policy</a>.
         </div>
       </div>
 

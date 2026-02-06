@@ -48,17 +48,18 @@ export function PaywallModal({ isOpen, onClose, onPurchaseComplete }: PaywallMod
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Don't render on web
-  if (!isNativePlatform()) {
-    return null;
-  }
+  const native = isNativePlatform();
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && native) {
       loadOfferings();
     }
-  }, [isOpen]);
+  }, [isOpen, native]);
+
+  // Don't render on web
+  if (!native) {
+    return null;
+  }
 
   const loadOfferings = async () => {
     setLoading(true);
@@ -448,26 +449,31 @@ export function PaywallModal({ isOpen, onClose, onPurchaseComplete }: PaywallMod
               {restoring ? 'Restoring...' : 'Restore Purchases'}
             </button>
 
-            {/* Legal links */}
+            {/* Legal disclosure — Apple Schedule 2 required language */}
             <div
               style={{
                 textAlign: 'center',
                 marginTop: '16px',
                 fontSize: '11px',
                 color: 'rgba(255, 255, 255, 0.4)',
+                lineHeight: 1.6,
               }}
             >
-              <a href="/terms" style={{ color: 'inherit' }}>
+              <span style={{ display: 'block', marginBottom: '8px' }}>
+                Payment will be charged to your Apple ID account at confirmation of purchase.
+                Subscription automatically renews unless auto-renew is turned off at least
+                24 hours before the end of the current period. Your account will be charged
+                for renewal within 24 hours prior to the end of the current period.
+                You can manage and cancel your subscriptions by going to your App Store
+                account settings after purchase.
+              </span>
+              <a href="/terms" style={{ color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'underline' }}>
                 Terms of Service
               </a>
               {' | '}
-              <a href="/privacy" style={{ color: 'inherit' }}>
+              <a href="/privacy" style={{ color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'underline' }}>
                 Privacy Policy
               </a>
-              <br />
-              <span style={{ marginTop: '8px', display: 'block' }}>
-                Subscriptions auto-renew. Cancel anytime in App Store settings.
-              </span>
             </div>
           </motion.div>
         </motion.div>

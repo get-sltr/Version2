@@ -337,6 +337,35 @@ html {
 }
 
 /* =============================================================================
+   Native App Behavior (Capacitor)
+   Prevent web-like behaviors that reveal WebView to App Review
+   ============================================================================= */
+
+/* Prevent text selection callout on non-input elements */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Allow text selection in inputs, textareas, and contenteditable */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Prevent long-press context menu on images */
+img {
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+/* Re-enable pointer events on clickable images (avatars, profile pics) */
+a img, button img, [role="button"] img {
+  pointer-events: auto;
+}
+
+/* =============================================================================
    Toast Notification
    ============================================================================= */
 

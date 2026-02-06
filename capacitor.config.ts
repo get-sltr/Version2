@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.sltrdigital.primal',
-  appName: 'Primal',
+  appName: 'Primal Men',
   webDir: 'out',
   server: {
     url: 'https://primalgay.com',

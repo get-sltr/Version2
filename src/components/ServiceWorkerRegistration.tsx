@@ -1,9 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
+    // Skip service worker on native — Capacitor handles caching
+    if (Capacitor.isNativePlatform()) return;
+
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Register service worker
       navigator.serviceWorker
