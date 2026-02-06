@@ -294,8 +294,8 @@ export default function Dashboard() {
       }
 
       // Calculate distance and filter by radius if user has location
-      // EARLY STAGE: Very lenient distance - show profiles from anywhere
-      const MAX_DISTANCE_MILES = 10000; // Essentially unlimited for early stage
+      // 15-mile radius for App Store launch
+      const MAX_DISTANCE_MILES = 15;
 
       if (hasLocation) {
         filtered = filtered
@@ -320,8 +320,8 @@ export default function Dashboard() {
 
             return { ...profile, distance };
           })
-          // Filter out profiles beyond max distance (keep profiles without location for now)
-          .filter(profile => profile.distance <= MAX_DISTANCE_MILES || profile.distance === Infinity)
+          // Filter out profiles beyond max distance (hide profiles without location for App Store)
+          .filter(profile => profile.distance <= MAX_DISTANCE_MILES && profile.distance !== Infinity)
           .sort((a, b) => {
             // Sort by distance first, then by last_seen
             // Profiles without location (Infinity) go to the end
