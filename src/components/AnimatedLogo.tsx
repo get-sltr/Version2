@@ -21,7 +21,6 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         gap: s.containerGap,
         textDecoration: 'none',
@@ -134,7 +133,7 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
 
       {/* PRIMAL Text */}
       {showText && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span
             className="brand-text"
             style={{

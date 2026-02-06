@@ -38,6 +38,7 @@ const config: CapacitorConfig = {
     contentInset: 'automatic',
     preferredContentMode: 'mobile',
     backgroundColor: '#050508',
+    allowsInlineMediaPlayback: true,
   },
   android: {
     allowMixedContent: false,

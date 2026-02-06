@@ -938,6 +938,20 @@ export default function ConversationPage() {
     setError(null);
 
     try {
+      // Request camera/mic permissions BEFORE creating the room
+      // In Capacitor WKWebView, this triggers the native iOS permission dialog
+      if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          stream.getTracks().forEach((t) => t.stop());
+        } catch (permErr: any) {
+          if (permErr?.name === 'NotAllowedError') {
+            throw new Error('Camera/microphone access denied. Please enable in Settings.');
+          }
+          // Non-permission errors (no hardware, etc.) — continue anyway
+        }
+      }
+
       const response = await fetch('/api/calls', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

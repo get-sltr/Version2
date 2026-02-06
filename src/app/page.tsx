@@ -57,6 +57,9 @@ export default function LandingPage() {
     if (video) {
       const handleCanPlay = () => setVideoLoaded(true);
       video.addEventListener('canplay', handleCanPlay);
+      // Force play — muted videos can autoplay without user gesture
+      video.muted = true;
+      video.play().catch(() => {});
       const fallback = setTimeout(() => setVideoLoaded(true), 2000);
       return () => {
         video.removeEventListener('canplay', handleCanPlay);
@@ -80,6 +83,11 @@ export default function LandingPage() {
           muted
           loop
           playsInline
+          webkit-playsinline="true"
+          x-webkit-airplay="deny"
+          disablePictureInPicture
+          controlsList="nodownload nofullscreen noremoteplayback"
+          preload="auto"
         >
           <source src="/Videos/PrimalLanding.mp4" type="video/mp4" />
         </video>
@@ -190,15 +198,25 @@ export default function LandingPage() {
 
         .bg-video.loaded { opacity: 1; }
 
-        /* Hide native video controls and play button */
+        /* Hide ALL native video controls and play button */
         .bg-video::-webkit-media-controls {
           display: none !important;
+          -webkit-appearance: none;
         }
         .bg-video::-webkit-media-controls-start-playback-button {
           display: none !important;
           -webkit-appearance: none;
         }
         .bg-video::-webkit-media-controls-panel {
+          display: none !important;
+        }
+        .bg-video::-webkit-media-controls-play-button {
+          display: none !important;
+        }
+        .bg-video::-webkit-media-controls-overlay-play-button {
+          display: none !important;
+        }
+        .bg-video::-internal-media-controls-overlay-cast-button {
           display: none !important;
         }
 
@@ -395,6 +413,12 @@ export default function LandingPage() {
           justify-content: center;
           position: relative;
           transform: scale(1.3);
+        }
+
+        /* Stack logo vertically on landing page */
+        .logo-composition > div {
+          flex-direction: column !important;
+          align-items: center !important;
         }
 
         /* ===========================================

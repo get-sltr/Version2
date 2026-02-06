@@ -597,9 +597,8 @@ export default function SignupPage() {
         <div className="signup-content">
           <header className="signup-header">
             <AnimatedLogo size="small" href="/" />
-            <Link href="/login" className="signup-header-link">
-              Already have an account?
-              <span className="signup-header-btn">Log in</span>
+            <Link href="/login" className="signup-header-btn">
+              Sign In
             </Link>
           </header>
 
@@ -730,7 +729,7 @@ export default function SignupPage() {
                     className="signup-input"
                     style={{ colorScheme: 'dark', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
                   />
-                  <p className="signup-hint">You must be 18+ on the day of sign up. No exceptions.</p>
+                  <p className="signup-hint">You must be 18 or older to sign up.</p>
                 </div>
 
                 <div className="field-group" style={{ marginBottom: '24px' }}>
@@ -746,7 +745,7 @@ export default function SignupPage() {
                       />
                     </span>
                     <span className="signup-checkbox-text">
-                      I am at least 18 years old and agree to the{' '}
+                      I agree to the{' '}
                       <Link href="/terms">Terms of Service</Link>,{' '}
                       <Link href="/privacy">Privacy Policy</Link>, and{' '}
                       <Link href="/guidelines">Community Guidelines</Link>
@@ -764,9 +763,6 @@ export default function SignupPage() {
                 </motion.button>
               </form>
 
-              <p className="signup-footer-note">
-                By signing up, you confirm you are 18 years old or older. Users under 18 are strictly prohibited.
-              </p>
             </motion.div>
           </main>
 

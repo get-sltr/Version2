@@ -45,11 +45,6 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
 
-    if (!ageConfirmed) {
-      setError('You must be 18 years old or older to use Primal Men. Users under 18 are not permitted.');
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -608,30 +603,6 @@ export default function LoginPage() {
                       Forgot password?
                     </Link>
                   </div>
-
-                  <label style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    marginBottom: '20px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    color: 'rgba(255,255,255,0.7)',
-                  }}>
-                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, flexShrink: 0 }}>
-                      <input
-                        type="checkbox"
-                        checked={ageConfirmed}
-                        onChange={(e) => setAgeConfirmed(e.target.checked)}
-                        style={{
-                          width: '20px',
-                          height: '20px',
-                          accentColor: '#FF6B35',
-                        }}
-                      />
-                    </span>
-                    I confirm I am 18 years old or older
-                  </label>
 
                   <motion.button
                     type="submit"

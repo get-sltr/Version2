@@ -184,7 +184,7 @@ export default function VideoCallPage() {
         </div>
         <div style={{ fontSize: '22px', fontWeight: 700 }}>Allow Camera & Mic</div>
         <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', maxWidth: '300px', lineHeight: 1.5 }}>
-          Primal needs access to your camera and microphone for video calls.
+          Primal Men needs access to your camera and microphone for video calls.
         </div>
         <button
           onClick={requestPermissions}

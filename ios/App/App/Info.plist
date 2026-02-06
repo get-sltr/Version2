@@ -46,12 +46,12 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Primal needs camera access for video calls</string>
+	<string>Primal Men needs camera access for video calls and Pulse rooms</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Primal needs microphone access for voice and video calls</string>
+	<string>Primal Men needs microphone access for voice and video calls</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Primal needs photo library access to upload profile pictures</string>
+	<string>Primal Men needs photo library access to upload profile pictures</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Primal uses your location to show nearby people on the map</string>
+	<string>Primal Men uses your location to show nearby people on the map</string>
 </dict>
 </plist>

@@ -96,7 +96,7 @@ export default function VideoConference({ roomName, onLeave }: VideoConferencePr
             Allow Camera &amp; Mic
           </div>
           <div style={{ fontSize: '14px', opacity: 0.6, marginBottom: '24px', lineHeight: 1.5 }}>
-            Primal needs access to your camera and microphone to join this room.
+            Primal Men needs access to your camera and microphone to join this room.
           </div>
           <button
             onClick={requestPermissions}
