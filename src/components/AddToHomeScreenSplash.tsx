@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Capacitor } from '@capacitor/core';
 import { AnimatedLogo } from './AnimatedLogo';
 import { supabase } from '../lib/supabase';
 
@@ -39,6 +40,13 @@ export function AddToHomeScreenSplash({ userId, onDismiss }: AddToHomeScreenSpla
 
   useEffect(() => {
     const checkDismissalStatus = async () => {
+      // Don't show on native iOS/Android app
+      if (Capacitor.isNativePlatform()) {
+        setLoading(false);
+        onDismiss?.();
+        return;
+      }
+
       const detectedPlatform = detectPlatform();
       setPlatform(detectedPlatform);
 
