@@ -651,7 +651,7 @@ export default function LoginPage() {
 
           <footer className="login-footer">
             <span className="login-footer-company">© 2025–2026 Primal Men</span>
-            <span className="login-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
+            <span className="login-footer-tagline">YOUR BURNING DESIRE, UNLEASHED.</span>
           </footer>
         </div>
       </div>

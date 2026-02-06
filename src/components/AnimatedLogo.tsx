@@ -21,6 +21,7 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
     <div
       style={{
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         gap: s.containerGap,
         textDecoration: 'none',
@@ -133,7 +134,7 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
 
       {/* PRIMAL Text */}
       {showText && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
           <span
             className="brand-text"
             style={{
@@ -156,9 +157,11 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
               fontFamily: "'Audiowide', 'Orbitron', sans-serif",
               fontSize: s.tagline,
               fontWeight: 400,
-              letterSpacing: '0.2em',
+              letterSpacing: '0.1em',
               color: '#FF6B35',
               textShadow: '0 0 10px rgba(255, 107, 53, 0.5)',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
             }}
           >
             YOUR BURNING DESIRE, UNLEASHED.

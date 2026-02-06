@@ -293,7 +293,7 @@ export default function SettingsPage() {
       {/* Company Info */}
       <div style={{ padding: '30px 20px', textAlign: 'center', color: colors.textSecondary, fontSize: '12px', lineHeight: 1.6 }}>
         <div style={{ fontWeight: 600, marginBottom: '8px' }}>PRIMAL MEN</div>
-        <div style={{ marginBottom: '8px' }}>INTELLIGENT | INNOVATIVE | INTUITIVE</div>
+        <div style={{ marginBottom: '8px' }}>YOUR BURNING DESIRE, UNLEASHED.</div>
         <div style={{ marginBottom: '8px' }}>Los Angeles, California</div>
         <div>© 2025–2026 Primal Men. All Rights Reserved.</div>
       </div>

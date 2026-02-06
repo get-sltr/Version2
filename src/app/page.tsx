@@ -130,7 +130,6 @@ export default function LandingPage() {
             <span className="btn-shine" />
             Sign In
           </Link>
-          <div className="age-notice">18+ Only</div>
         </div>
       </main>
 
@@ -190,6 +189,18 @@ export default function LandingPage() {
         }
 
         .bg-video.loaded { opacity: 1; }
+
+        /* Hide native video controls and play button */
+        .bg-video::-webkit-media-controls {
+          display: none !important;
+        }
+        .bg-video::-webkit-media-controls-start-playback-button {
+          display: none !important;
+          -webkit-appearance: none;
+        }
+        .bg-video::-webkit-media-controls-panel {
+          display: none !important;
+        }
 
         .video-overlay {
           position: absolute;
@@ -383,7 +394,7 @@ export default function LandingPage() {
           align-items: center;
           justify-content: center;
           position: relative;
-          transform: scale(1.5);
+          transform: scale(1.3);
         }
 
         /* ===========================================
@@ -605,26 +616,11 @@ export default function LandingPage() {
         }
 
         /* ===========================================
-           AGE NOTICE
-           =========================================== */
-        .age-notice {
-          margin-top: 16px;
-          font-family: 'Audiowide', sans-serif;
-          font-size: 11px;
-          letter-spacing: 0.15em;
-          color: rgba(255, 255, 255, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 8px;
-          padding: 6px 16px;
-          display: inline-block;
-        }
-
-        /* ===========================================
            RESPONSIVE
            =========================================== */
         @media (max-width: 700px) {
           .logo-composition {
-            transform: scale(1.2);
+            transform: scale(1);
           }
 
           .cta-container {

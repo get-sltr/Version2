@@ -536,6 +536,16 @@ export default function SignupPage() {
           margin-bottom: 16px;
         }
 
+        /* Fix date input to match text inputs */
+        input[type="date"].signup-input {
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box;
+        }
+
         .otp-verify-section {
           text-align: center;
           margin-bottom: 16px;
@@ -718,7 +728,7 @@ export default function SignupPage() {
                     onChange={(e) => setDob(e.target.value)}
                     required
                     className="signup-input"
-                    style={{ colorScheme: 'dark' }}
+                    style={{ colorScheme: 'dark', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
                   />
                   <p className="signup-hint">You must be 18+ on the day of sign up. No exceptions.</p>
                 </div>
@@ -762,7 +772,7 @@ export default function SignupPage() {
 
           <footer className="signup-footer">
             <span className="signup-footer-company">© 2025–2026 Primal Men</span>
-            <span className="signup-footer-tagline">INTELLIGENT | INNOVATIVE | INTUITIVE</span>
+            <span className="signup-footer-tagline">YOUR BURNING DESIRE, UNLEASHED.</span>
           </footer>
         </div>
       </div>
