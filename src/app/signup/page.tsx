@@ -604,6 +604,30 @@ export default function SignupPage() {
                 </motion.div>
               )}
 
+              <div className="signup-oauth" style={{ marginBottom: '0' }}>
+                <button
+                  type="button"
+                  onClick={() => handleOAuthSignup('apple')}
+                  disabled={loading || oauthLoading !== null}
+                  className="signup-oauth-btn"
+                  style={{
+                    background: '#000',
+                    color: '#fff',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    fontWeight: 500,
+                  }}
+                >
+                  <AppleIcon />
+                  {oauthLoading === 'apple' ? 'Signing up...' : 'Sign up with Apple'}
+                </button>
+              </div>
+
+              <div className="signup-divider">
+                <div className="signup-divider-line" />
+                <span className="signup-divider-text">or continue with email</span>
+                <div className="signup-divider-line" />
+              </div>
+
               <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
                 <div className="field-group">
                   <label htmlFor={emailId} className="signup-label">
@@ -701,25 +725,6 @@ export default function SignupPage() {
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </motion.button>
               </form>
-
-              <div className="signup-divider">
-                <div className="signup-divider-line" />
-                <span className="signup-divider-text">or sign up with</span>
-                <div className="signup-divider-line" />
-              </div>
-
-              <div className="signup-oauth">
-                <button
-                  type="button"
-                  onClick={() => handleOAuthSignup('apple')}
-                  disabled={loading || oauthLoading !== null}
-                  className="signup-oauth-btn"
-                  style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-                >
-                  <AppleIcon />
-                  {oauthLoading === 'apple' ? '...' : 'Sign up with Apple'}
-                </button>
-              </div>
 
               <p className="signup-footer-note">
                 By signing up, you confirm you are at least 18 years old.

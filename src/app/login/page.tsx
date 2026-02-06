@@ -518,6 +518,30 @@ export default function LoginPage() {
                 </motion.div>
               )}
 
+              <div className="login-oauth" style={{ marginBottom: '0' }}>
+                <button
+                  type="button"
+                  onClick={() => handleOAuthLogin('apple')}
+                  disabled={loading || oauthLoading !== null}
+                  className="login-oauth-btn"
+                  style={{
+                    background: '#000',
+                    color: '#fff',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    fontWeight: 500,
+                  }}
+                >
+                  <AppleIcon />
+                  {oauthLoading === 'apple' ? 'Signing in...' : 'Sign in with Apple'}
+                </button>
+              </div>
+
+              <div className="login-divider">
+                <div className="login-divider-line" />
+                <span className="login-divider-text">or continue with email</span>
+                <div className="login-divider-line" />
+              </div>
+
               <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
                   <div className="field-group">
                     <label htmlFor={emailId} className="login-label">
@@ -590,25 +614,6 @@ export default function LoginPage() {
                     {loading ? 'Logging in...' : 'Log In'}
                   </motion.button>
                 </form>
-
-              <div className="login-divider">
-                <div className="login-divider-line" />
-                <span className="login-divider-text">or continue with</span>
-                <div className="login-divider-line" />
-              </div>
-
-              <div className="login-oauth">
-                <button
-                  type="button"
-                  onClick={() => handleOAuthLogin('apple')}
-                  disabled={loading || oauthLoading !== null}
-                  className="login-oauth-btn"
-                  style={{ background: 'rgba(255, 255, 255, 0.05)' }}
-                >
-                  <AppleIcon />
-                  {oauthLoading === 'apple' ? '...' : 'Sign in with Apple'}
-                </button>
-              </div>
 
               <p className="login-signup-link">
                 Don't have an account? <Link href="/signup">Sign up</Link>
