@@ -198,7 +198,7 @@ function GridPanel({ activeTab, onTabChange }: { activeTab: GridTab; onTabChange
         ))}
       </div>
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+      <div style={{ flex: 1, overflow: 'hidden', padding: '8px', minHeight: 0 }}>
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>
             Loading...
@@ -208,18 +208,18 @@ function GridPanel({ activeTab, onTabChange }: { activeTab: GridTab; onTabChange
             No profiles yet
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', height: 'fit-content' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '6px', height: '100%' }}>
             {profiles.map(p => (
               <div
                 key={p.id}
                 onClick={() => router.push(`/profile/${p.id}`)}
                 style={{
                   position: 'relative',
-                  aspectRatio: '3/4',
                   borderRadius: '10px',
                   overflow: 'hidden',
                   cursor: 'pointer',
                   background: '#1a1a1a',
+                  minHeight: 0,
                 }}
               >
                 <div style={{
@@ -639,12 +639,11 @@ export default function MissionControlPage() {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      maxHeight: '100vh',
+      height: '100vh',
       background: '#000',
       color: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
+      display: 'grid',
+      gridTemplateRows: 'auto 1fr auto 1fr auto',
       overflow: 'hidden',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     }}>
@@ -658,7 +657,6 @@ export default function MissionControlPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        flexShrink: 0,
         zIndex: 50,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -715,7 +713,6 @@ export default function MissionControlPage() {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: '1px',
-        flex: 1,
         minHeight: 0,
         background: 'rgba(255,255,255,0.04)',
       }}>
@@ -730,7 +727,6 @@ export default function MissionControlPage() {
       {/* CHROME BANNER */}
       <div style={{
         height: '32px',
-        flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -758,7 +754,6 @@ export default function MissionControlPage() {
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gap: '1px',
-        flex: 1,
         minHeight: 0,
         background: 'rgba(255,255,255,0.04)',
       }}>
@@ -777,7 +772,6 @@ export default function MissionControlPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        flexShrink: 0,
       }}>
         <span style={{
           fontSize: '9px',
