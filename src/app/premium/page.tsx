@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+import {
+  getOfferings,
+  purchasePackage,
+  restorePurchases,
+  isNativePlatform,
+} from '@/lib/revenuecat';
 import posthog from 'posthog-js';
 import {
   IconInfinity,
@@ -36,19 +42,17 @@ import {
 
 export default function PremiumPage() {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<'launch_special' | 'week' | '1month' | '3months' | '6months'>('launch_special');
   const [loading, setLoading] = useState(false);
+  const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isNative, setIsNative] = useState(false);
 
-  const plans = {
-    launch_special: { price: 4.99, total: 4.99, discount: null, per: 'month', label: 'Launch Special', isPromo: true },
-    week: { price: 4.99, total: 4.99, discount: null, per: 'week', label: '1 Week' },
-    '1month': { price: 12.99, total: 12.99, discount: '53%', per: 'month', label: '1 Month' },
-    '3months': { price: 7.99, total: 23.97, discount: '77%', per: 'month', label: '3 Months' },
-    '6months': { price: 5.99, total: 35.97, discount: '82%', per: 'month', label: '6 Months' }
-  };
+  useEffect(() => {
+    setIsNative(isNativePlatform());
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -68,30 +72,82 @@ export default function PremiumPage() {
     checkAuth();
   }, [router]);
 
-  const handleContinue = async () => {
+  const handleSubscribe = async () => {
     if (!isAuthenticated) {
       router.push('/login?redirect=/premium');
       return;
     }
 
-    // Check if running on native (Capacitor) or web
-    const isNative = typeof window !== 'undefined' &&
-      (window as any).Capacitor?.isNativePlatform?.();
-
-    if (isNative) {
-      // RevenueCat will handle purchases on native
-      // This will be implemented in Phase 2
-      setError('Subscription coming soon to the app!');
+    if (!isNative) {
       return;
     }
 
-    // On web, show message about free access
-    posthog.capture('premium_page_viewed_web', {
-      plan: selectedPlan,
-    });
+    setLoading(true);
+    setError(null);
 
-    // Web users get free access - redirect to dashboard
-    router.push('/dashboard');
+    try {
+      posthog.capture('premium_subscribe_tapped', { plan: 'primal_pro_monthly' });
+
+      const offerings = await getOfferings();
+      if (!offerings?.current) {
+        setError('Unable to load subscription. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Get the monthly package from the current offering
+      const monthlyPackage = offerings.current.monthly
+        ?? offerings.current.availablePackages?.[0];
+
+      if (!monthlyPackage) {
+        setError('Subscription not available. Please try again later.');
+        setLoading(false);
+        return;
+      }
+
+      const result = await purchasePackage(monthlyPackage);
+
+      if (result.success) {
+        posthog.capture('premium_subscribed', { plan: 'primal_pro_monthly' });
+        setSuccess('Welcome to Primal Pro!');
+        setTimeout(() => router.push('/dashboard'), 1500);
+      } else if (result.error === 'Purchase cancelled') {
+        // User cancelled — do nothing
+      } else {
+        setError(result.error || 'Purchase failed. Please try again.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setRestoring(true);
+    setError(null);
+
+    try {
+      posthog.capture('premium_restore_tapped');
+      const result = await restorePurchases();
+
+      if (result.success && result.customerInfo) {
+        const hasActive = Object.keys(result.customerInfo.entitlements.active).length > 0;
+        if (hasActive) {
+          posthog.capture('premium_restored');
+          setSuccess('Purchases restored! Welcome back.');
+          setTimeout(() => router.push('/dashboard'), 1500);
+        } else {
+          setError('No active subscriptions found.');
+        }
+      } else {
+        setError(result.error || 'Could not restore purchases.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setRestoring(false);
+    }
   };
 
   // Highlighted features with icons
@@ -262,17 +318,6 @@ export default function PremiumPage() {
           }}
         >
           <IconBack size={24} />
-          {/* Reflective shine */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '-100%',
-            width: '200%',
-            height: '100%',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
-            animation: 'buttonShine 2s ease-in-out infinite',
-            pointerEvents: 'none',
-          }} />
         </motion.button>
         <h1 style={{
           fontSize: '14px',
@@ -283,7 +328,7 @@ export default function PremiumPage() {
           margin: 0,
           textShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
         }}>
-          UPGRADE
+          PRIMAL PRO
         </h1>
         <motion.button
           whileHover={{ scale: 1.1, boxShadow: '0 0 15px rgba(255, 255, 255, 0.3)' }}
@@ -304,17 +349,6 @@ export default function PremiumPage() {
           }}
         >
           <IconClose size={20} />
-          {/* Reflective shine */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '-100%',
-            width: '200%',
-            height: '100%',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
-            animation: 'buttonShine 2.5s ease-in-out infinite',
-            pointerEvents: 'none',
-          }} />
         </motion.button>
       </motion.header>
 
@@ -415,15 +449,10 @@ export default function PremiumPage() {
                 background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%)',
               }} />
 
-              {/* Icon */}
-              <div style={{
-                marginBottom: '12px',
-                color: 'rgba(255, 255, 255, 0.7)',
-              }}>
+              <div style={{ marginBottom: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
                 <feature.icon size={28} />
               </div>
 
-              {/* Title */}
               <div style={{
                 fontSize: '12px',
                 fontWeight: 600,
@@ -434,7 +463,6 @@ export default function PremiumPage() {
                 {feature.title}
               </div>
 
-              {/* Description */}
               <div style={{
                 fontSize: '11px',
                 color: 'rgba(255, 255, 255, 0.45)',
@@ -512,249 +540,87 @@ export default function PremiumPage() {
           </div>
         </motion.div>
 
-        {/* Plan Selection */}
+        {/* Price Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
-          style={{ marginBottom: '24px' }}
+          style={{
+            position: 'relative',
+            padding: '28px 24px',
+            marginBottom: '20px',
+            background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 140, 90, 0.06) 100%)',
+            border: '1px solid rgba(255, 107, 53, 0.4)',
+            borderRadius: '16px',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 0 30px rgba(255, 107, 53, 0.15)',
+            textAlign: 'center',
+            overflow: 'hidden',
+          }}
         >
-          <h3 style={{
-            fontSize: '11px',
+          {/* Top shine line */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '10%',
+            right: '10%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
+          }} />
+
+          <div style={{
+            fontSize: '13px',
             fontWeight: 600,
             letterSpacing: '3px',
             textTransform: 'uppercase',
-            color: 'rgba(255, 255, 255, 0.4)',
-            marginBottom: '16px',
-            textAlign: 'center',
+            color: '#FF6B35',
+            marginBottom: '12px',
           }}>
-            SELECT YOUR PLAN
-          </h3>
+            PRIMAL PRO
+          </div>
 
-          {/* Launch Special */}
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={() => setSelectedPlan('launch_special')}
-            style={{
-              position: 'relative',
-              padding: '20px',
-              marginBottom: '12px',
-              background: selectedPlan === 'launch_special'
-                ? 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 140, 90, 0.06) 100%)'
-                : 'rgba(255, 255, 255, 0.02)',
-              border: `1px solid ${selectedPlan === 'launch_special' ? 'rgba(255, 107, 53, 0.5)' : 'rgba(255, 255, 255, 0.06)'}`,
-              borderRadius: '14px',
-              cursor: 'pointer',
-              overflow: 'hidden',
-              backdropFilter: 'blur(10px)',
-              boxShadow: selectedPlan === 'launch_special' ? '0 0 30px rgba(255, 107, 53, 0.15)' : 'none',
-            }}
-          >
-            {/* Limited badge */}
-            <div style={{
-              position: 'absolute',
-              top: '-1px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              padding: '6px 16px',
-              background: 'linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%)',
-              borderRadius: '0 0 10px 10px',
-              fontSize: '9px',
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'center',
+            gap: '4px',
+            marginBottom: '8px',
+          }}>
+            <span style={{
+              fontSize: '36px',
               fontWeight: 700,
-              letterSpacing: '1px',
-              textTransform: 'uppercase',
-              color: '#000',
+              color: '#fff',
+              lineHeight: 1,
             }}>
-              LIMITED TIME
-            </div>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: '8px',
+              $12.99
+            </span>
+            <span style={{
+              fontSize: '14px',
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontWeight: 400,
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {/* Radio */}
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  border: `2px solid ${selectedPlan === 'launch_special' ? '#FF6B35' : 'rgba(255, 255, 255, 0.3)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}>
-                  {selectedPlan === 'launch_special' && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        background: '#FF6B35',
-                      }}
-                    />
-                  )}
-                </div>
-                <div>
-                  <div style={{
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    color: '#fff',
-                    letterSpacing: '0.5px',
-                  }}>
-                    Launch Special
-                  </div>
-                  <div style={{
-                    fontSize: '11px',
-                    color: '#FF6B35',
-                    letterSpacing: '0.3px',
-                  }}>
-                    1 Month Premium
-                  </div>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: 700,
-                  color: '#fff',
-                }}>
-                  $4.99
-                </div>
-                <div style={{
-                  fontSize: '10px',
-                  color: 'rgba(255, 255, 255, 0.4)',
-                }}>
-                  50% off
-                </div>
-              </div>
-            </div>
+              /month
+            </span>
+          </div>
 
-            {/* Shine animation */}
-            {selectedPlan === 'launch_special' && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '200%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
-                animation: 'shine 4s ease-in-out infinite',
-                pointerEvents: 'none',
-              }} />
-            )}
-          </motion.div>
+          <div style={{
+            fontSize: '12px',
+            color: 'rgba(255, 255, 255, 0.4)',
+          }}>
+            Cancel anytime
+          </div>
 
-          {/* Other plans */}
-          {[
-            { key: 'week', label: '1 Week', price: '$4.99' },
-            { key: '6months', label: '6 Months', price: '$5.99/mo', discount: '82%' },
-            { key: '3months', label: '3 Months', price: '$7.99/mo', discount: '77%' },
-            { key: '1month', label: '1 Month', price: '$12.99/mo', discount: '53%' },
-          ].map((plan) => (
-            <motion.div
-              key={plan.key}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => setSelectedPlan(plan.key as typeof selectedPlan)}
-              style={{
-                position: 'relative',
-                padding: '16px 20px',
-                marginBottom: '8px',
-                background: selectedPlan === plan.key
-                  ? 'rgba(255, 255, 255, 0.05)'
-                  : 'rgba(255, 255, 255, 0.02)',
-                border: `1px solid ${selectedPlan === plan.key ? 'rgba(255, 107, 53, 0.4)' : 'rgba(255, 255, 255, 0.05)'}`,
-                borderRadius: '12px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              {plan.discount && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '16px',
-                  padding: '4px 10px',
-                  background: 'rgba(255, 107, 53, 0.9)',
-                  borderRadius: '8px',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  color: '#000',
-                }}>
-                  {plan.discount} OFF
-                </div>
-              )}
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  border: `2px solid ${selectedPlan === plan.key ? '#FF6B35' : 'rgba(255, 255, 255, 0.25)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s',
-                }}>
-                  {selectedPlan === plan.key && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: '#FF6B35',
-                      }}
-                    />
-                  )}
-                </div>
-                <span style={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: selectedPlan === plan.key ? '#fff' : 'rgba(255, 255, 255, 0.7)',
-                }}>
-                  {plan.label}
-                </span>
-              </div>
-              <span style={{
-                fontSize: '14px',
-                fontWeight: 600,
-                color: selectedPlan === plan.key ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-              }}>
-                {plan.price}
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Total */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
-          style={{
-            textAlign: 'center',
-            marginBottom: '24px',
-            fontSize: '14px',
-            color: 'rgba(255, 255, 255, 0.5)',
-          }}
-        >
-          <span style={{ fontWeight: 600, color: '#fff' }}>${plans[selectedPlan].total}</span>
-          {' total'}
-          {selectedPlan === 'launch_special' && ' • 1 month'}
-          {selectedPlan === '1month' && ' • 1 month'}
-          {selectedPlan === '3months' && ' • 3 months'}
-          {selectedPlan === '6months' && ' • 6 months'}
+          {/* Shine animation */}
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '200%',
+            height: '100%',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
+            animation: 'shine 4s ease-in-out infinite',
+            pointerEvents: 'none',
+          }} />
         </motion.div>
 
         {/* Error */}
@@ -777,93 +643,154 @@ export default function PremiumPage() {
           </motion.div>
         )}
 
-        {/* CTA Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          whileHover={{
-            scale: 1.03,
-            boxShadow: '0 0 60px rgba(255, 107, 53, 0.6), 0 0 100px rgba(255, 140, 90, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
-          }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleContinue}
-          disabled={loading}
-          style={{
-            width: '100%',
-            position: 'relative',
-            padding: '20px',
-            background: loading
-              ? 'rgba(255, 255, 255, 0.1)'
-              : 'linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(255, 140, 90, 0.2) 50%, rgba(255, 107, 53, 0.3) 100%)',
-            border: '1px solid rgba(255, 107, 53, 0.7)',
-            borderRadius: '16px',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: 700,
-            letterSpacing: '3px',
-            textTransform: 'uppercase',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            backdropFilter: 'blur(15px)',
-            boxShadow: '0 0 40px rgba(255, 107, 53, 0.35), 0 0 80px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.2)',
-            overflow: 'hidden',
-            marginBottom: '20px',
-            textShadow: '0 0 15px rgba(255, 255, 255, 0.5)',
-          }}
-        >
-          {/* Top bright edge */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '5%',
-            right: '5%',
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 25%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 100%)',
-          }} />
+        {/* Success */}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              padding: '14px 16px',
+              marginBottom: '16px',
+              background: 'rgba(52, 199, 89, 0.1)',
+              border: '1px solid rgba(52, 199, 89, 0.3)',
+              borderRadius: '12px',
+              color: '#34C759',
+              fontSize: '13px',
+              textAlign: 'center',
+            }}
+          >
+            {success}
+          </motion.div>
+        )}
 
-          {/* Bottom orange glow edge */}
-          <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '10%',
-            right: '10%',
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.6) 50%, transparent 100%)',
-          }} />
-
-          <span style={{ position: 'relative', zIndex: 1 }}>
-            {loading ? 'PROCESSING...' : 'CONTINUE'}
-          </span>
-
-          {/* Primary fast shine */}
-          {!loading && (
+        {/* CTA Button — Native: Subscribe / Web: Download prompt */}
+        {isNative ? (
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: '0 0 60px rgba(255, 107, 53, 0.6), 0 0 100px rgba(255, 140, 90, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
+            }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSubscribe}
+            disabled={loading}
+            style={{
+              width: '100%',
+              position: 'relative',
+              padding: '20px',
+              background: loading
+                ? 'rgba(255, 255, 255, 0.1)'
+                : 'linear-gradient(135deg, rgba(255, 107, 53, 0.3) 0%, rgba(255, 140, 90, 0.2) 50%, rgba(255, 107, 53, 0.3) 100%)',
+              border: '1px solid rgba(255, 107, 53, 0.7)',
+              borderRadius: '16px',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 700,
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              backdropFilter: 'blur(15px)',
+              boxShadow: '0 0 40px rgba(255, 107, 53, 0.35), 0 0 80px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.2)',
+              overflow: 'hidden',
+              marginBottom: '12px',
+              textShadow: '0 0 15px rgba(255, 255, 255, 0.5)',
+            }}
+          >
+            {/* Top bright edge */}
             <div style={{
               position: 'absolute',
               top: 0,
-              left: '-100%',
-              width: '200%',
-              height: '100%',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 55%, transparent 100%)',
-              animation: 'buttonShine 2s ease-in-out infinite',
-              pointerEvents: 'none',
+              left: '5%',
+              right: '5%',
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 25%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 100%)',
             }} />
-          )}
 
-          {/* Secondary slower orange shine */}
-          {!loading && (
+            {/* Bottom orange glow edge */}
             <div style={{
               position: 'absolute',
-              top: 0,
-              left: '-100%',
-              width: '200%',
-              height: '100%',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.15) 50%, transparent 100%)',
-              animation: 'buttonShine 3.5s ease-in-out infinite',
-              animationDelay: '0.5s',
-              pointerEvents: 'none',
+              bottom: 0,
+              left: '10%',
+              right: '10%',
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.6) 50%, transparent 100%)',
             }} />
-          )}
-        </motion.button>
+
+            <span style={{ position: 'relative', zIndex: 1 }}>
+              {loading ? 'PROCESSING...' : 'SUBSCRIBE'}
+            </span>
+
+            {/* Shine animation */}
+            {!loading && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '200%',
+                height: '100%',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 55%, transparent 100%)',
+                animation: 'buttonShine 2s ease-in-out infinite',
+                pointerEvents: 'none',
+              }} />
+            )}
+          </motion.button>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.5 }}
+            style={{
+              width: '100%',
+              padding: '20px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              textAlign: 'center',
+              marginBottom: '12px',
+            }}
+          >
+            <div style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              color: '#fff',
+              marginBottom: '6px',
+            }}>
+              Download the app to subscribe
+            </div>
+            <div style={{
+              fontSize: '12px',
+              color: 'rgba(255, 255, 255, 0.4)',
+            }}>
+              Primal Pro is available via in-app purchase on iOS
+            </div>
+          </motion.div>
+        )}
+
+        {/* Restore Purchases — native only */}
+        {isNative && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            onClick={handleRestore}
+            disabled={restoring}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontSize: '13px',
+              fontWeight: 500,
+              cursor: restoring ? 'not-allowed' : 'pointer',
+              marginBottom: '24px',
+            }}
+          >
+            {restoring ? 'Restoring...' : 'Restore Purchases'}
+          </motion.button>
+        )}
 
         {/* Disclaimer — Apple Schedule 2 required language */}
         <motion.div
@@ -885,13 +812,7 @@ export default function PremiumPage() {
             textAlign: 'center',
           }}>
             <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 500 }}>Auto-Renewal:</span>{' '}
-            {selectedPlan === 'week' ? (
-              'The 1-week plan is a one-time purchase.'
-            ) : selectedPlan === 'launch_special' ? (
-              'This is a one-time promotional offer.'
-            ) : (
-              `Renews at $${plans[selectedPlan].total} every ${selectedPlan === '1month' ? 'month' : selectedPlan === '3months' ? '3 months' : '6 months'}.`
-            )}
+            Subscription automatically renews at $12.99/month unless cancelled.
             <span style={{ display: 'block', marginTop: '8px' }}>
               Payment will be charged to your Apple ID account at confirmation of purchase.
               Subscription automatically renews unless auto-renew is turned off at least
@@ -901,6 +822,7 @@ export default function PremiumPage() {
           </div>
         </motion.div>
 
+        {/* Terms & Privacy */}
         <div style={{
           fontSize: '10px',
           color: 'rgba(255, 255, 255, 0.3)',
@@ -917,6 +839,10 @@ export default function PremiumPage() {
       {/* Global styles for animations */}
       <style jsx global>{`
         @keyframes shine {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes buttonShine {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
         }
