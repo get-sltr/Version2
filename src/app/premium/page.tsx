@@ -45,7 +45,7 @@ export default function PremiumPage() {
   const plans = {
     launch_special: { price: 4.99, total: 4.99, discount: null, per: 'month', label: 'Launch Special', isPromo: true },
     week: { price: 4.99, total: 4.99, discount: null, per: 'week', label: '1 Week' },
-    '1month': { price: 9.99, total: 9.99, discount: '64%', per: 'month', label: '1 Month' },
+    '1month': { price: 12.99, total: 12.99, discount: '53%', per: 'month', label: '1 Month' },
     '3months': { price: 7.99, total: 23.97, discount: '77%', per: 'month', label: '3 Months' },
     '6months': { price: 5.99, total: 35.97, discount: '82%', per: 'month', label: '6 Months' }
   };
@@ -655,7 +655,7 @@ export default function PremiumPage() {
             { key: 'week', label: '1 Week', price: '$4.99' },
             { key: '6months', label: '6 Months', price: '$5.99/mo', discount: '82%' },
             { key: '3months', label: '3 Months', price: '$7.99/mo', discount: '77%' },
-            { key: '1month', label: '1 Month', price: '$9.99/mo', discount: '64%' },
+            { key: '1month', label: '1 Month', price: '$12.99/mo', discount: '53%' },
           ].map((plan) => (
             <motion.div
               key={plan.key}
