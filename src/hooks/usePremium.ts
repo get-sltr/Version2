@@ -20,15 +20,44 @@ interface PremiumStatus {
   refresh: () => Promise<void>;
 }
 
+// Module-level cache so all hook instances share the same result
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+let cachedResult: {
+  isPremium: boolean;
+  premiumUntil: Date | null;
+  platform: 'web' | 'ios' | 'android';
+  timestamp: number;
+} | null = null;
+
+function getCachedResult() {
+  if (cachedResult && Date.now() - cachedResult.timestamp < CACHE_TTL_MS) {
+    return cachedResult;
+  }
+  return null;
+}
+
 export function usePremium(): PremiumStatus {
-  const [isPremium, setIsPremium] = useState(false);
-  const [premiumUntil, setPremiumUntil] = useState<Date | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const cached = getCachedResult();
+  const [isPremium, setIsPremium] = useState(cached?.isPremium ?? false);
+  const [premiumUntil, setPremiumUntil] = useState<Date | null>(cached?.premiumUntil ?? null);
+  const [isLoading, setIsLoading] = useState(!cached);
   const [error, setError] = useState<string | null>(null);
   const [messagesRemaining, setMessagesRemaining] = useState(Infinity);
-  const [platform, setPlatform] = useState<'web' | 'ios' | 'android'>('web');
+  const [platform, setPlatform] = useState<'web' | 'ios' | 'android'>(cached?.platform ?? 'web');
 
-  const checkPremiumStatus = useCallback(async () => {
+  const checkPremiumStatus = useCallback(async (bypassCache = false) => {
+    // Return cached result if available and not bypassing
+    if (!bypassCache) {
+      const cached = getCachedResult();
+      if (cached) {
+        setIsPremium(cached.isPremium);
+        setPremiumUntil(cached.premiumUntil);
+        setPlatform(cached.platform);
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
       setIsLoading(true);
       setError(null);
@@ -38,10 +67,10 @@ export function usePremium(): PremiumStatus {
 
       // Web users get free premium access
       if (!isNativePlatform()) {
-        console.log('[usePremium] Web platform - granting free access');
         setIsPremium(true);
         setPremiumUntil(null);
         setIsLoading(false);
+        cachedResult = { isPremium: true, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
         return;
       }
 
@@ -49,9 +78,9 @@ export function usePremium(): PremiumStatus {
       const hasRevenueCatPremium = await checkEntitlement('primal_premium');
 
       if (hasRevenueCatPremium) {
-        console.log('[usePremium] RevenueCat premium active');
         setIsPremium(true);
         setIsLoading(false);
+        cachedResult = { isPremium: true, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
         return;
       }
 
@@ -60,6 +89,7 @@ export function usePremium(): PremiumStatus {
       if (!user) {
         setIsPremium(false);
         setIsLoading(false);
+        cachedResult = { isPremium: false, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
         return;
       }
 
@@ -82,19 +112,12 @@ export function usePremium(): PremiumStatus {
       const now = new Date();
       const premiumExpiry = profile.premium_until ? new Date(profile.premium_until) : null;
 
-      // User is premium if is_premium is true
-      // Expiry is only checked if premium_until is set
       const isCurrentlyPremium = profile.is_premium === true &&
         (premiumExpiry === null || premiumExpiry > now);
 
-      console.log('[usePremium] Database check:', {
-        is_premium: profile.is_premium,
-        premium_until: profile.premium_until,
-        isCurrentlyPremium
-      });
-
       setIsPremium(isCurrentlyPremium);
       setPremiumUntil(premiumExpiry);
+      cachedResult = { isPremium: isCurrentlyPremium, premiumUntil: premiumExpiry, platform: currentPlatform, timestamp: Date.now() };
 
     } catch (err) {
       console.error('[usePremium] Error:', err);
@@ -110,6 +133,10 @@ export function usePremium(): PremiumStatus {
     checkPremiumStatus();
   }, [checkPremiumStatus]);
 
+  const refresh = useCallback(async () => {
+    await checkPremiumStatus(true);
+  }, [checkPremiumStatus]);
+
   return {
     isPremium,
     premiumUntil,
@@ -117,7 +144,7 @@ export function usePremium(): PremiumStatus {
     error,
     messagesRemaining,
     platform,
-    refresh: checkPremiumStatus
+    refresh
   };
 }
 

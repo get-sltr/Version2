@@ -1,8 +1,19 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePremium } from '@/hooks/usePremium';
+import { supabase } from '@/lib/supabase';
+
+interface SearchProfile {
+  id: string;
+  display_name: string;
+  photo_url: string | null;
+  age: number | null;
+  position: string | null;
+  tribes: string[] | null;
+  is_online: boolean;
+}
 
 export default function SearchPage() {
   const router = useRouter();
@@ -10,6 +21,8 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showPremiumPrompt, setShowPremiumPrompt] = useState(false);
+  const [profiles, setProfiles] = useState<SearchProfile[]>([]);
+  const [loadingProfiles, setLoadingProfiles] = useState(true);
 
   // Filters
   const [ageMin, setAgeMin] = useState(18);
@@ -19,6 +32,31 @@ export default function SearchPage() {
   const [tribes, setTribes] = useState<string[]>([]);
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [withPhotos, setWithPhotos] = useState(false);
+
+  // Fetch real profiles from Supabase
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      setLoadingProfiles(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, display_name, photo_url, age, position, tribes, is_online')
+          .limit(50);
+
+        if (error) {
+          console.error('Error fetching profiles:', error);
+        } else {
+          setProfiles(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch profiles:', err);
+      } finally {
+        setLoadingProfiles(false);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
 
   // Track which filter category is active (for free users - only 1 allowed)
   const getActiveFilterType = (): string | null => {
@@ -49,46 +87,34 @@ export default function SearchPage() {
   const positions = ['Top', 'Bottom', 'Versatile', 'Top Vers', 'Btm Vers', 'Side'];
   const tribeOptions = ['Bear', 'Twink', 'Jock', 'Otter', 'Daddy', 'Leather', 'Poz', 'Discreet', 'Clean Cut'];
 
-  const mockProfiles = [
-    { id: 1, name: 'HungTop4U', image: '/images/2.jpg', distance: '0.5 mi', age: 28, position: 'Top', tribes: ['Jock'], online: true },
-    { id: 2, name: 'DiscretBttm', image: '/images/3.jpg', distance: '1.2 mi', age: 32, position: 'Bottom', tribes: ['Discreet'], online: false },
-    { id: 3, name: 'VersGuy420', image: '/images/4.jpg', distance: '2.8 mi', age: 25, position: 'Versatile', tribes: ['Clean Cut'], online: true },
-    { id: 4, name: 'NeedTHROAT🐴', image: '/images/6.jpg', distance: '3.0 mi', age: 30, position: 'Top', tribes: ['Bear'], online: true },
-    { id: 5, name: 'FitJock23', image: '/images/5.jpg', distance: '0.8 mi', age: 23, position: 'Versatile', tribes: ['Jock'], online: true },
-    { id: 6, name: 'DaddyBear', image: '/images/6.jpg', distance: '5.0 mi', age: 45, position: 'Top', tribes: ['Bear', 'Daddy'], online: false }
-  ];
-
   const togglePosition = (pos: string) => {
-    setPosition(prev => 
+    setPosition(prev =>
       prev.includes(pos) ? prev.filter(p => p !== pos) : [...prev, pos]
     );
   };
 
   const toggleTribe = (tribe: string) => {
-    setTribes(prev => 
+    setTribes(prev =>
       prev.includes(tribe) ? prev.filter(t => t !== tribe) : [...prev, tribe]
     );
   };
 
-  const filteredProfiles = mockProfiles.filter(profile => {
+  const filteredProfiles = profiles.filter(profile => {
     // Search query
-    if (searchQuery && !profile.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+    if (searchQuery && !(profile.display_name || '').toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
     // Age range
-    if (profile.age < ageMin || profile.age > ageMax) return false;
-    // Distance
-    const profileDistance = parseFloat(profile.distance);
-    if (profileDistance > distance) return false;
+    if (profile.age != null && (profile.age < ageMin || profile.age > ageMax)) return false;
     // Position
-    if (position.length > 0 && !position.includes(profile.position)) return false;
+    if (position.length > 0 && (!profile.position || !position.includes(profile.position))) return false;
     // Tribes
-    if (tribes.length > 0 && !tribes.some(t => profile.tribes.includes(t))) return false;
+    if (tribes.length > 0 && (!profile.tribes || !tribes.some(t => profile.tribes!.includes(t)))) return false;
     // Online only
-    if (onlineOnly && !profile.online) return false;
-    // With photos (all mock profiles have photos)
-    if (withPhotos && !profile.image) return false;
-    
+    if (onlineOnly && !profile.is_online) return false;
+    // With photos
+    if (withPhotos && !profile.photo_url) return false;
+
     return true;
   });
 
@@ -102,7 +128,7 @@ export default function SearchPage() {
     setWithPhotos(false);
   };
 
-  const activeFilterCount = 
+  const activeFilterCount =
     (ageMin !== 18 || ageMax !== 80 ? 1 : 0) +
     (distance !== 30 ? 1 : 0) +
     position.length +
@@ -463,10 +489,18 @@ export default function SearchPage() {
           color: '#aaa',
           marginBottom: '16px'
         }}>
-          {filteredProfiles.length} {filteredProfiles.length === 1 ? 'result' : 'results'}
+          {loadingProfiles ? 'Loading...' : `${filteredProfiles.length} ${filteredProfiles.length === 1 ? 'result' : 'results'}`}
         </div>
 
-        {filteredProfiles.length === 0 ? (
+        {loadingProfiles ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            color: '#666'
+          }}>
+            <div style={{ fontSize: '16px' }}>Loading profiles...</div>
+          </div>
+        ) : filteredProfiles.length === 0 ? (
           <div style={{
             textAlign: 'center',
             padding: '60px 20px',
@@ -499,16 +533,30 @@ export default function SearchPage() {
                   background: '#1c1c1e'
                 }}
               >
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundImage: `url(${profile.image})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }} />
-                
+                {profile.photo_url ? (
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundImage: `url(${profile.photo_url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }} />
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '40px',
+                    color: '#444'
+                  }}>
+                    👤
+                  </div>
+                )}
+
                 {/* Online Indicator */}
-                {profile.online && (
+                {profile.is_online && (
                   <div style={{
                     position: 'absolute',
                     top: '8px',
@@ -538,7 +586,7 @@ export default function SearchPage() {
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }}>
-                    {profile.name}
+                    {profile.display_name || 'New User'}
                   </div>
                   <div style={{
                     fontSize: '11px',
@@ -546,9 +594,7 @@ export default function SearchPage() {
                     display: 'flex',
                     gap: '6px'
                   }}>
-                    <span>{profile.age}</span>
-                    <span>•</span>
-                    <span>{profile.distance}</span>
+                    {profile.age && <span>{profile.age}</span>}
                   </div>
                 </div>
               </div>

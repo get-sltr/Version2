@@ -117,13 +117,15 @@ export default function ProfileViewPage() {
   };
 
   // Validate and extract profile ID
-  const profileId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+  const rawId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const profileId = rawId && UUID_REGEX.test(rawId) ? rawId : null;
 
   useEffect(() => {
     const loadProfile = async () => {
-      // Validate profileId
+      // Validate profileId is a valid UUID
       if (!profileId) {
-        setError('Invalid profile ID');
+        setError('Profile not found');
         setLoading(false);
         return;
       }
