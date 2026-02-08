@@ -23,17 +23,17 @@ export function useBlockedUsers(): UseBlockedUsersReturn {
     }
 
     const { data, error } = await supabase
-      .from('blocked_users')
-      .select('blocked_id')
-      .eq('blocker_id', session.user.id);
+      .from('blocks')
+      .select('blocked_user_id')
+      .eq('user_id', session.user.id);
 
     if (error) {
-      console.error('Failed to load blocked users:', error);
+      console.error('Failed to load blocked users:', error.message, error.code, error.details);
       setIsReady(true);
       return;
     }
 
-    const ids = new Set((data ?? []).map((row) => row.blocked_id));
+    const ids = new Set((data ?? []).map((row) => row.blocked_user_id));
     cachedRef.current = ids;
     setBlockedIds(ids);
     setIsReady(true);
@@ -72,18 +72,18 @@ export function useBlockedUsers(): UseBlockedUsersReturn {
 
     // Check if already blocked first
     const { data: existing } = await supabase
-      .from('blocked_users')
+      .from('blocks')
       .select('id')
-      .eq('blocker_id', userId)
-      .eq('blocked_id', id)
+      .eq('user_id', userId)
+      .eq('blocked_user_id', id)
       .maybeSingle();
 
     if (existing) return; // Already blocked, optimistic update is correct
 
     // Insert the block — check .error (Supabase doesn't throw)
     const { error } = await supabase
-      .from('blocked_users')
-      .insert({ blocker_id: userId, blocked_id: id });
+      .from('blocks')
+      .insert({ user_id: userId, blocked_user_id: id });
 
     if (error) {
       // Duplicate key = already blocked, treat as success

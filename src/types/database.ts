@@ -390,8 +390,8 @@ export interface FavoriteWithProfile extends Favorite {
  */
 export interface BlockedUser {
   id: string;
-  blocker_id: string;
-  blocked_id: string;
+  user_id: string;
+  blocked_user_id: string;
   reason: string | null;
   created_at: string;
 }
@@ -627,7 +627,7 @@ export interface Database {
         Insert: Omit<Favorite, 'id' | 'created_at'>;
         Update: Partial<Pick<Favorite, 'note'>>;
       };
-      blocked_users: {
+      blocks: {
         Row: BlockedUser;
         Insert: Omit<BlockedUser, 'id' | 'created_at'>;
         Update: never;

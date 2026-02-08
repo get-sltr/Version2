@@ -149,9 +149,9 @@ export async function POST(request: NextRequest) {
 
     // Blocked users
     const { data: blockedUsers } = await supabase
-      .from('blocked_users')
-      .select('id, blocked_id, reason, created_at')
-      .eq('blocker_id', user.id);
+      .from('blocks')
+      .select('id, blocked_user_id, reason, created_at')
+      .eq('user_id', user.id);
 
     exportData.blockedUsers = blockedUsers || [];
 

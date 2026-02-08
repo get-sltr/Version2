@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 interface BlockedUserWithProfile {
   id: string;
-  blocked_id: string;
+  blocked_user_id: string;
   reason: string | null;
   created_at: string;
   blocked_user: {
@@ -38,15 +38,15 @@ export default function BlockedUsersPage() {
       }
 
       const { data, error: fetchError } = await supabase
-        .from('blocked_users')
+        .from('blocks')
         .select(`
           id,
-          blocked_id,
+          blocked_user_id,
           reason,
           created_at,
-          blocked_user:profiles!blocked_id(id, display_name, photo_url)
+          blocked_user:profiles!blocked_user_id(id, display_name, photo_url)
         `)
-        .eq('blocker_id', user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
@@ -72,7 +72,7 @@ export default function BlockedUsersPage() {
     setUnblockingId(blockId);
     try {
       const { error: deleteError } = await supabase
-        .from('blocked_users')
+        .from('blocks')
         .delete()
         .eq('id', blockId);
 
@@ -98,9 +98,9 @@ export default function BlockedUsersPage() {
       if (!user) return;
 
       const { error: deleteError } = await supabase
-        .from('blocked_users')
+        .from('blocks')
         .delete()
-        .eq('blocker_id', user.id);
+        .eq('user_id', user.id);
 
       if (deleteError) throw deleteError;
 
@@ -205,7 +205,7 @@ export default function BlockedUsersPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => unblockUser(block.id, block.blocked_id)}
+                  onClick={() => unblockUser(block.id, block.blocked_user_id)}
                   disabled={unblockingId === block.id}
                   style={{
                     background: darkMode ? '#1c1c1e' : '#f5f5f5',

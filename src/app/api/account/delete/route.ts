@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     await adminClient.from('profile_views').delete().or(`viewer_id.eq.${userId},viewed_id.eq.${userId}`);
 
     // 8. Delete blocks
-    await adminClient.from('blocked_users').delete().or(`blocker_id.eq.${userId},blocked_id.eq.${userId}`);
+    await adminClient.from('blocks').delete().or(`user_id.eq.${userId},blocked_user_id.eq.${userId}`);
 
     // 9. Delete user settings
     await adminClient.from('user_settings').delete().eq('user_id', userId);
