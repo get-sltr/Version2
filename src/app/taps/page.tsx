@@ -6,6 +6,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { getReceivedTaps, getSentTaps, markTapViewed, sendTap } from '@/lib/api/taps';
 import { IconFlame, IconWave, IconWink, IconEye, IconClose, IconMenu, IconLocation } from '@/components/Icons';
 import BottomNavWithBadges from '@/components/BottomNavWithBadges';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import type { TapWithUser, TapType } from '@/types/database';
 import posthog from 'posthog-js';
 
@@ -33,6 +34,7 @@ const TapIcon = ({ tapType, size = 16 }: { tapType: TapType; size?: number }) =>
 
 export default function TapsPage() {
   const { colors } = useTheme();
+  const { blockedIds } = useBlockedUsers();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const [receivedTaps, setReceivedTaps] = useState<TapWithUser[]>([]);
   const [sentTaps, setSentTaps] = useState<TapWithUser[]>([]);
@@ -51,8 +53,8 @@ export default function TapsPage() {
         getReceivedTaps(),
         getSentTaps()
       ]);
-      setReceivedTaps(received);
-      setSentTaps(sent);
+      setReceivedTaps(received.filter(t => !blockedIds.has(t.user.id)));
+      setSentTaps(sent.filter(t => !blockedIds.has(t.user.id)));
     } catch (err: any) {
       setError(err.message || 'Failed to load taps');
     } finally {

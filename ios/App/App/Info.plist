@@ -22,6 +22,16 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Primal Men needs camera access for video calls and Pulse rooms</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Primal Men uses your location to show nearby users and cruising spots on the map.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Primal Men uses your location to show nearby people on the map</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Primal Men needs microphone access for voice and video calls</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Primal Men needs photo library access to upload profile pictures</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -45,13 +55,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Primal Men needs camera access for video calls and Pulse rooms</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Primal Men needs microphone access for voice and video calls</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Primal Men needs photo library access to upload profile pictures</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Primal Men uses your location to show nearby people on the map</string>
 </dict>
 </plist>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePremium } from '@/hooks/usePremium';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { getProfileViews, markViewSeen, markAllViewsSeen, type ProfileViewWithViewer } from '@/lib/api/views';
 import { IconClose, IconMenu, IconLocation } from '@/components/Icons';
 import BottomNavWithBadges from '@/components/BottomNavWithBadges';
@@ -42,6 +43,7 @@ export default function ViewsPage() {
   const { colors } = useTheme();
   const router = useRouter();
   const { isPremium, isLoading: premiumLoading } = usePremium();
+  const { blockedIds } = useBlockedUsers();
   const [views, setViews] = useState<ProfileViewWithViewer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export default function ViewsPage() {
       setLoading(true);
       setError(null);
       const data = await getProfileViews();
-      setViews(data);
+      setViews(data.filter(v => !blockedIds.has(v.viewer.id)));
     } catch (err: any) {
       setError(err.message || 'Failed to load views');
     } finally {

@@ -8,7 +8,6 @@ import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
 import { useLocationPresence } from '@/hooks/useLocationPresence';
 import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
-import { getMyFavorites } from '@/lib/api/favorites';
 import { getReceivedTaps } from '@/lib/api/taps';
 import { getProfileViews } from '@/lib/api/views';
 import { getCruisingUpdates } from '@/lib/api/cruisingUpdates';
@@ -24,7 +23,7 @@ import type { CruisingUpdateWithUser } from '@/lib/api/cruisingUpdates';
 // TYPES
 // ============================================
 
-type GridTab = 'favorites' | 'taps' | 'views';
+type GridTab = 'online' | 'grid' | 'taps' | 'views';
 
 type GridProfile = {
   id: string;
@@ -72,15 +71,17 @@ function PanelHeader({ title, expandHref }: { title: string; expandHref: string 
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '8px 12px',
-      borderBottom: '1px solid rgba(255,255,255,0.06)',
+      borderBottom: '1px solid rgba(255,107,53,0.12)',
+      background: 'linear-gradient(180deg, rgba(255,107,53,0.06) 0%, transparent 100%)',
     }}>
       <span style={{
         fontSize: '11px',
-        fontWeight: 700,
+        fontWeight: 800,
         letterSpacing: '2px',
         textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.5)',
+        color: 'rgba(255,255,255,0.85)',
         fontFamily: "'Orbitron', sans-serif",
+        textShadow: '0 0 8px rgba(255,107,53,0.5), 0 0 20px rgba(255,107,53,0.25)',
       }}>
         {title}
       </span>
@@ -89,7 +90,7 @@ function PanelHeader({ title, expandHref }: { title: string; expandHref: string 
         style={{
           background: 'none',
           border: 'none',
-          color: 'rgba(255,255,255,0.4)',
+          color: 'rgba(255,107,53,0.6)',
           cursor: 'pointer',
           fontSize: '16px',
           padding: '4px',
@@ -120,14 +121,35 @@ function GridPanel({ activeTab, onTabChange }: { activeTab: GridTab; onTabChange
       setLoading(true);
       try {
         let result: GridProfile[] = [];
-        if (activeTab === 'favorites') {
-          const data = await getMyFavorites();
-          result = data.slice(0, 4).map(f => ({
-            id: f.profile.id,
-            display_name: f.profile.display_name,
-            age: f.profile.age,
-            photo_url: f.profile.photo_url,
-            position: f.profile.position,
+        if (activeTab === 'online') {
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, display_name, age, photo_url, position')
+            .gte('last_seen', fiveMinutesAgo)
+            .neq('is_incognito', true)
+            .order('last_seen', { ascending: false })
+            .limit(4);
+          result = (data || []).map(p => ({
+            id: p.id,
+            display_name: p.display_name,
+            age: p.age,
+            photo_url: p.photo_url,
+            position: p.position,
+          }));
+        } else if (activeTab === 'grid') {
+          const { data } = await supabase
+            .from('profiles')
+            .select('id, display_name, age, photo_url, position')
+            .neq('is_incognito', true)
+            .order('last_seen', { ascending: false })
+            .limit(4);
+          result = (data || []).map(p => ({
+            id: p.id,
+            display_name: p.display_name,
+            age: p.age,
+            photo_url: p.photo_url,
+            position: p.position,
           }));
         } else if (activeTab === 'taps') {
           const data = await getReceivedTaps();
@@ -160,10 +182,11 @@ function GridPanel({ activeTab, onTabChange }: { activeTab: GridTab; onTabChange
     return () => { cancelled = true; };
   }, [activeTab]);
 
-  const expandHref = activeTab === 'favorites' ? '/favorites' : activeTab === 'taps' ? '/taps' : '/views';
+  const expandHref = activeTab === 'taps' ? '/taps' : activeTab === 'views' ? '/views' : '/dashboard';
 
   const tabs: { key: GridTab; label: string }[] = [
-    { key: 'favorites', label: 'Fav' },
+    { key: 'online', label: 'Online' },
+    { key: 'grid', label: 'Grid' },
     { key: 'taps', label: 'Taps' },
     { key: 'views', label: 'Views' },
   ];
@@ -585,7 +608,7 @@ function MapPanel() {
 export default function MissionControlPage() {
   const router = useRouter();
   const { isPremium, isLoading: premiumLoading } = usePremium();
-  const [gridTab, setGridTab] = useState<GridTab>('favorites');
+  const [gridTab, setGridTab] = useState<GridTab>('online');
   const [onlineCount, setOnlineCount] = useState(0);
 
   // Fetch online count (profiles with last_seen within 5 minutes)
@@ -606,7 +629,7 @@ export default function MissionControlPage() {
   // Persist grid tab preference
   useEffect(() => {
     const saved = localStorage.getItem('mc_grid_tab');
-    if (saved === 'favorites' || saved === 'taps' || saved === 'views') {
+    if (saved === 'online' || saved === 'grid' || saved === 'taps' || saved === 'views') {
       setGridTab(saved);
     }
   }, []);
@@ -662,12 +685,13 @@ export default function MissionControlPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{
             fontSize: '11px',
-            fontWeight: 700,
+            fontWeight: 900,
             letterSpacing: '2px',
             fontFamily: "'Orbitron', sans-serif",
-            background: 'linear-gradient(135deg, #FF6B35, #ff8c5a)',
+            background: 'linear-gradient(135deg, #FF6B35, #ff8c5a, #FFB088)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
+            filter: 'drop-shadow(0 0 6px rgba(255,107,53,0.4))',
           }}>
             MISSION CONTROL
           </span>
@@ -712,40 +736,58 @@ export default function MissionControlPage() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '1px',
+        gap: '0px',
         minHeight: 0,
-        background: 'rgba(255,255,255,0.04)',
       }}>
-        <div style={{ ...glassCard, borderRadius: 0, border: 'none', overflow: 'hidden' }}>
+        <div style={{
+          ...glassCard,
+          borderRadius: 0,
+          border: 'none',
+          borderRight: '1px solid rgba(255,107,53,0.2)',
+          borderBottom: '1px solid rgba(255,107,53,0.15)',
+          overflow: 'hidden',
+          boxShadow: 'inset -1px 0 8px rgba(255,107,53,0.05)',
+        }}>
           <GridPanel activeTab={gridTab} onTabChange={handleGridTabChange} />
         </div>
-        <div style={{ ...glassCard, borderRadius: 0, border: 'none', overflow: 'hidden' }}>
+        <div style={{
+          ...glassCard,
+          borderRadius: 0,
+          border: 'none',
+          borderLeft: '1px solid rgba(255,107,53,0.2)',
+          borderBottom: '1px solid rgba(255,107,53,0.15)',
+          overflow: 'hidden',
+          boxShadow: 'inset 1px 0 8px rgba(255,107,53,0.05)',
+        }}>
           <MessagesPanel />
         </div>
       </div>
 
-      {/* CHROME BANNER */}
+      {/* PRIMAL MEN CHROME BANNER */}
       <div style={{
-        height: '32px',
+        height: '36px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(90deg, #8a8a8a, #d4d4d4, #f5f5f5, #d4d4d4, #8a8a8a)',
-        backgroundSize: '200% 100%',
-        animation: 'mc-chrome-sweep 4s ease-in-out infinite',
+        background: 'linear-gradient(90deg, #555, #8a8a8a, #d4d4d4, #f5f5f5, #fff, #f5f5f5, #d4d4d4, #8a8a8a, #555)',
+        backgroundSize: '300% 100%',
+        animation: 'mc-chrome-sweep 3s ease-in-out infinite',
         position: 'relative',
         overflow: 'hidden',
+        borderTop: '1px solid rgba(255,107,53,0.3)',
+        borderBottom: '1px solid rgba(255,107,53,0.3)',
+        boxShadow: '0 0 12px rgba(255,107,53,0.15), inset 0 1px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(255,255,255,0.2)',
       }}>
         <span style={{
-          fontSize: '10px',
-          fontWeight: 700,
-          letterSpacing: '4px',
+          fontSize: '12px',
+          fontWeight: 900,
+          letterSpacing: '6px',
           fontFamily: "'Orbitron', sans-serif",
-          color: '#222',
-          textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+          color: '#111',
+          textShadow: '0 1px 0 rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.3)',
           zIndex: 1,
         }}>
-          PRIMAL+
+          PRIMAL MEN
         </span>
       </div>
 
@@ -753,33 +795,63 @@ export default function MissionControlPage() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '1px',
+        gap: '0px',
         minHeight: 0,
-        background: 'rgba(255,255,255,0.04)',
       }}>
-        <div style={{ ...glassCard, borderRadius: 0, border: 'none', overflow: 'hidden' }}>
+        <div style={{
+          ...glassCard,
+          borderRadius: 0,
+          border: 'none',
+          borderRight: '1px solid rgba(255,107,53,0.2)',
+          borderTop: '1px solid rgba(255,107,53,0.15)',
+          overflow: 'hidden',
+          boxShadow: 'inset -1px 0 8px rgba(255,107,53,0.05)',
+        }}>
           <CruisingPanel />
         </div>
-        <div style={{ ...glassCard, borderRadius: 0, border: 'none', overflow: 'hidden' }}>
+        <div style={{
+          ...glassCard,
+          borderRadius: 0,
+          border: 'none',
+          borderLeft: '1px solid rgba(255,107,53,0.2)',
+          borderTop: '1px solid rgba(255,107,53,0.15)',
+          overflow: 'hidden',
+          boxShadow: 'inset 1px 0 8px rgba(255,107,53,0.05)',
+        }}>
           <MapPanel />
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER — reflective chrome effect */}
       <footer style={{
         ...glassBottomNav,
-        padding: '8px 16px calc(env(safe-area-inset-bottom, 0px) + 8px)',
+        padding: '10px 16px calc(env(safe-area-inset-bottom, 0px) + 10px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'linear-gradient(180deg, rgba(20,20,25,0.95) 0%, rgba(10,10,15,0.98) 100%)',
+        borderTop: '1px solid rgba(255,107,53,0.2)',
       }}>
+        {/* Reflective sweep overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 30%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 70%, transparent 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'mc-footer-sweep 5s ease-in-out infinite',
+          pointerEvents: 'none',
+        }} />
         <span style={{
-          fontSize: '9px',
-          fontWeight: 700,
+          fontSize: '11px',
+          fontWeight: 900,
           letterSpacing: '6px',
           fontFamily: "'Orbitron', sans-serif",
-          color: 'rgba(255,255,255,0.25)',
+          color: 'rgba(255,255,255,0.7)',
           textTransform: 'uppercase',
+          textShadow: '0 0 10px rgba(255,107,53,0.4), 0 0 30px rgba(255,107,53,0.15)',
+          zIndex: 1,
         }}>
           MISSION CONTROL
         </span>
@@ -792,7 +864,12 @@ export default function MissionControlPage() {
           50% { opacity: 0.5; transform: scale(0.8); }
         }
         @keyframes mc-chrome-sweep {
-          0% { background-position: 200% 0; }
+          0% { background-position: 300% 0; }
+          100% { background-position: -300% 0; }
+        }
+        @keyframes mc-footer-sweep {
+          0% { background-position: -200% 0; }
+          50% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
         @keyframes mc-spin {

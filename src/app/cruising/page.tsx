@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { usePremium } from '@/hooks/usePremium';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import {
   getCruisingUpdates,
   postCruisingUpdate,
@@ -22,6 +23,7 @@ import type { CruisingUpdateWithUser, CruisingReply } from '@/lib/api/cruisingUp
 export default function CruisingUpdatesPage() {
   const router = useRouter();
   const { isPremium, isLoading: premiumLoading } = usePremium();
+  const { blockedIds } = useBlockedUsers();
   const [sortBy, setSortBy] = useState<'time' | 'distance'>('time');
   const [updateText, setUpdateText] = useState('');
   const [isHosting, setIsHosting] = useState(false);
@@ -64,7 +66,7 @@ export default function CruisingUpdatesPage() {
           getMyLikedUpdateIds()
         ]);
         if (mounted) {
-          setUpdates(data);
+          setUpdates(data.filter(u => !blockedIds.has(u.user_id)));
           setLikedIds(myLikes);
         }
       } catch (err) {
@@ -85,7 +87,7 @@ export default function CruisingUpdatesPage() {
         table: 'cruising_updates'
       }, () => {
         getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy)
-          .then(data => { if (mounted) setUpdates(data); });
+          .then(data => { if (mounted) setUpdates(data.filter(u => !blockedIds.has(u.user_id))); });
       })
       .subscribe();
 
@@ -93,7 +95,7 @@ export default function CruisingUpdatesPage() {
       mounted = false;
       supabase.removeChannel(channel);
     };
-  }, [sortBy, userLocation]);
+  }, [sortBy, userLocation, blockedIds]);
 
   // Post update
   const handlePostUpdate = async () => {
@@ -112,7 +114,7 @@ export default function CruisingUpdatesPage() {
       setIsHosting(false);
       // Refresh updates
       const data = await getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy);
-      setUpdates(data);
+      setUpdates(data.filter(u => !blockedIds.has(u.user_id)));
     } catch (err: any) {
       alert(err.message || 'Failed to post update');
     } finally {
@@ -604,7 +606,7 @@ export default function CruisingUpdatesPage() {
               onClick={async () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 const data = await getCruisingUpdates(userLocation?.lat, userLocation?.lng, sortBy);
-                setUpdates(data);
+                setUpdates(data.filter(u => !blockedIds.has(u.user_id)));
               }}
               style={{
                 background: 'rgba(255,107,53,0.15)',
