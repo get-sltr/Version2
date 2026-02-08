@@ -9,6 +9,7 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 import { usePremium, useMessage } from '@/hooks/usePremium';
 import { PremiumPromo } from '@/components/PremiumPromo';
 import { listMyAlbums, listPhotosInAlbum, getAlbumWithPhotos } from '@/lib/api/albumMedia';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import posthog from 'posthog-js';
 
 // =============================================================================
@@ -373,6 +374,7 @@ export default function ConversationPage() {
   const params = useParams();
   const router = useRouter();
   const { colors } = useTheme();
+  const { blockUser } = useBlockedUsers();
   const otherUserId = params.id as string;
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageRecord[]>([]);
@@ -894,12 +896,8 @@ export default function ConversationPage() {
     if (!confirm(`Block ${otherUser?.display_name || 'this user'}? They won't be able to message you.`)) return;
 
     try {
-      await supabase.from('blocked_users').insert({
-        blocker_id: currentUserId,
-        blocked_id: otherUserId,
-      });
+      await blockUser(otherUserId);
 
-      // Capture user_blocked event in PostHog
       posthog.capture('user_blocked', {
         blocked_user_id: otherUserId,
       });
@@ -911,17 +909,19 @@ export default function ConversationPage() {
   };
 
   const handleReportUser = async (reason: string) => {
-    try {
-      await supabase.from('reports').insert({
-        reporter_id: currentUserId,
-        reported_id: otherUserId,
-        reason,
-      });
-      setShowReportModal(false);
-      alert('Report submitted. Thank you.');
-    } catch (err) {
+    const { error: reportError } = await supabase.from('reports').insert({
+      reporter_id: currentUserId,
+      reported_id: otherUserId,
+      reason,
+    });
+
+    if (reportError) {
       setError('Failed to submit report');
+      return;
     }
+
+    setShowReportModal(false);
+    alert('Report submitted. Thank you.');
   };
 
   const startVideoCall = async () => {

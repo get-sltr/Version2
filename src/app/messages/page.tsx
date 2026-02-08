@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { supabase } from '../../lib/supabase';
 import { IconClose, IconMenu, IconChat } from '@/components/Icons';
@@ -56,7 +56,11 @@ export default function MessagesPage() {
   const [typingMap, setTypingMap] = useState<Record<string, boolean>>({});
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [longPressId, setLongPressId] = useState<string | null>(null);
-  const { blockedIds } = useBlockedUsers();
+  const { blockedIds, isReady: blockedReady } = useBlockedUsers();
+  // Stable key for blockedIds so the effect doesn't loop on Set reference changes
+  const blockedKey = useMemo(() => Array.from(blockedIds).sort().join(','), [blockedIds]);
+  const blockedRef = useRef(blockedIds);
+  blockedRef.current = blockedIds;
 
   // Load pinned conversations from localStorage
   useEffect(() => {
@@ -97,6 +101,8 @@ export default function MessagesPage() {
   };
 
   useEffect(() => {
+    if (!blockedReady) return;
+
     let isMounted = true;
 
     const loadConversations = async () => {
@@ -198,7 +204,7 @@ export default function MessagesPage() {
       });
 
       // Remove blocked users from conversations
-      blockedIds.forEach(id => conversationMap.delete(id));
+      blockedRef.current.forEach(id => conversationMap.delete(id));
 
       if (isMounted) {
         setConversations(Array.from(conversationMap.values()));
@@ -214,7 +220,7 @@ export default function MessagesPage() {
       isMounted = false;
       void supabase.removeChannel(channel);
     };
-  }, [currentUserId]);
+  }, [currentUserId, blockedKey, blockedReady]);
 
   const filteredConversations = useMemo(() => {
     let filtered = conversations;
