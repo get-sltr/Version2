@@ -8,7 +8,7 @@
 -- Table: apple_subscriptions
 -- Maps Apple originalTransactionId to Supabase users and tracks subscription state
 CREATE TABLE IF NOT EXISTS apple_subscriptions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     original_transaction_id VARCHAR(100) NOT NULL,
     product_id VARCHAR(200),
@@ -39,7 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_apple_sub_active ON apple_subscriptions (status) 
 -- Notification log for idempotency and debugging
 -- Every incoming webhook event is logged here before processing
 CREATE TABLE IF NOT EXISTS apple_notification_log (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- RevenueCat event ID — unique per event, used for idempotency
     event_id VARCHAR(200) UNIQUE NOT NULL,
