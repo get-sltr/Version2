@@ -93,6 +93,15 @@ export type GroupMemberRole = 'member' | 'admin' | 'host';
 /** Report status */
 export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed';
 
+/** Apple subscription status */
+export type AppleSubscriptionStatus =
+  | 'active'
+  | 'expired'
+  | 'revoked'
+  | 'grace_period'
+  | 'billing_retry'
+  | 'refunded';
+
 // ============================================================================
 // MAIN ENTITY INTERFACES
 // ============================================================================
@@ -491,6 +500,37 @@ export interface AlbumShare {
 }
 
 /**
+ * Apple subscription record — tracks App Store subscription state server-side
+ */
+export interface AppleSubscription {
+  id: string;
+  user_id: string;
+  original_transaction_id: string;
+  product_id: string | null;
+  status: AppleSubscriptionStatus;
+  expires_at: string | null;
+  environment: 'Production' | 'Sandbox';
+  last_event_type: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Apple notification log — idempotency + debugging for webhook events
+ */
+export interface AppleNotificationLog {
+  id: string;
+  event_id: string;
+  event_type: string;
+  original_transaction_id: string | null;
+  user_id: string | null;
+  payload_summary: Record<string, unknown>;
+  processed_successfully: boolean;
+  error_message: string | null;
+  created_at: string;
+}
+
+/**
  * Report record
  */
 export interface Report {
@@ -671,6 +711,23 @@ export interface Database {
         Row: Report;
         Insert: Omit<Report, 'id' | 'created_at' | 'status' | 'reviewed_at' | 'reviewed_by' | 'resolution_notes'>;
         Update: Partial<Pick<Report, 'status' | 'reviewed_at' | 'reviewed_by' | 'resolution_notes'>>;
+      };
+      apple_subscriptions: {
+        Row: AppleSubscription;
+        Insert: Omit<AppleSubscription, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<AppleSubscription, 'id' | 'created_at'>>;
+      };
+      apple_notification_log: {
+        Row: AppleNotificationLog;
+        Insert: Omit<AppleNotificationLog, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Pick<AppleNotificationLog, 'processed_successfully' | 'error_message'>>;
       };
     };
     Functions: {

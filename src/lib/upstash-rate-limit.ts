@@ -121,6 +121,19 @@ export const rateLimiters = {
         analytics: true,
       })
     : null,
+
+  /**
+   * Webhook endpoints (RevenueCat, etc.) - generous limit for retries
+   * 100 requests per minute
+   */
+  webhook: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(100, '1 m'),
+        prefix: 'ratelimit:webhook',
+        analytics: true,
+      })
+    : null,
 };
 
 export type RateLimiterType = keyof typeof rateLimiters;
