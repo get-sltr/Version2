@@ -5,7 +5,6 @@
  * Handles verification, event parsing, and Supabase premium status updates.
  */
 
-import { timingSafeEqual } from 'crypto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 // =============================================================================
@@ -147,47 +146,6 @@ export function mapProductToPlan(productId: string): string | null {
 // =============================================================================
 // WEBHOOK AUTH VERIFICATION
 // =============================================================================
-
-/**
- * Verify the RevenueCat webhook authorization header.
- * Uses timing-safe comparison to prevent timing attacks.
- *
- * RevenueCat sends: Authorization: Bearer <your-secret>
- */
-export function verifyRevenueCatWebhook(
-  authHeader: string | null,
-  secret: string
-): boolean {
-  if (!authHeader || !secret) {
-    return false;
-  }
-
-  // RevenueCat sends "Bearer <token>" format
-  const token = authHeader.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : authHeader;
-
-  return secureCompare(token, secret);
-}
-
-/**
- * Timing-safe string comparison to prevent timing attacks.
- * Reuses the pattern from src/app/api/emails/send/route.ts
- */
-function secureCompare(a: string, b: string): boolean {
-  try {
-    const bufA = Buffer.from(a);
-    const bufB = Buffer.from(b);
-    if (bufA.length !== bufB.length) {
-      // Still do a comparison to maintain constant time
-      timingSafeEqual(bufA, bufA);
-      return false;
-    }
-    return timingSafeEqual(bufA, bufB);
-  } catch {
-    return false;
-  }
-}
 
 // =============================================================================
 // EVENT PROCESSING

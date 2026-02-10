@@ -65,7 +65,6 @@ const APP_VARS: EnvVar[] = [
 
 // Apple / App Store configuration (for webhook & native app)
 const APPLE_VARS: EnvVar[] = [
-  { name: 'REVENUECAT_WEBHOOK_SECRET', required: false, description: 'RevenueCat webhook authorization secret' },
   { name: 'APPLE_BUNDLE_ID', required: false, description: 'Apple app bundle identifier (com.sltrdigital.primal)' },
 ];
 

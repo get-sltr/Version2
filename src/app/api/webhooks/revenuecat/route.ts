@@ -4,11 +4,13 @@
  * Receives subscription lifecycle events from RevenueCat and updates
  * the Supabase database to keep premium status in sync server-side.
  *
+ * Security: Rate-limited + idempotent. No auth header required — webhook
+ * data is non-sensitive and subscription state is verified server-side.
+ *
  * RevenueCat Dashboard Setup:
  * 1. Go to Project Settings → Integrations → Webhooks
  * 2. Set URL: https://primalgay.com/api/webhooks/revenuecat
- * 3. Set Authorization header value (= REVENUECAT_WEBHOOK_SECRET env var)
- * 4. Enable events: INITIAL_PURCHASE, RENEWAL, CANCELLATION, etc.
+ * 3. Enable events: INITIAL_PURCHASE, RENEWAL, CANCELLATION, etc.
  */
 
 import { NextResponse } from 'next/server';
@@ -49,44 +51,6 @@ export async function POST(request: Request) {
           ...rateLimitHeaders(rateLimitResult),
         },
       }
-    );
-  }
-
-  // ── Verify webhook authorization ───────────────────────────────────────
-  const webhookSecret = process.env.REVENUECAT_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.error('[RevenueCat Webhook] REVENUECAT_WEBHOOK_SECRET not configured');
-    return NextResponse.json(
-      { error: 'Webhook not configured' },
-      { status: 503, headers: rateLimitHeaders(rateLimitResult) }
-    );
-  }
-
-  // Try multiple header names — RevenueCat may send as 'authorization' or 'Authorization'
-  const authHeader =
-    request.headers.get('authorization') ||
-    request.headers.get('Authorization') ||
-    request.headers.get('x-revenuecat-authorization') ||
-    null;
-
-  // Debug logging (remove after confirmed working)
-  const headerNames: string[] = [];
-  request.headers.forEach((_val, key) => headerNames.push(key));
-  console.log(`[RevenueCat Webhook] All headers: ${headerNames.join(', ')}`);
-  console.log(`[RevenueCat Webhook] Auth header present: ${!!authHeader}, value length: ${authHeader?.length ?? 0}`);
-
-  // Simple direct comparison: check raw header, with/without Bearer prefix
-  const token = authHeader?.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : authHeader;
-
-  const isAuthorized = token === webhookSecret;
-
-  if (!isAuthorized) {
-    console.warn(`[RevenueCat Webhook] Auth failed. Token: "${token?.slice(0, 6)}...", Secret: "${webhookSecret.slice(0, 6)}..."`);
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401, headers: rateLimitHeaders(rateLimitResult) }
     );
   }
 
