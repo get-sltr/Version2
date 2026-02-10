@@ -140,18 +140,9 @@ export async function POST(request: Request) {
       'This may be a RevenueCat anonymous ID. Skipping profile update.'
     );
 
-    // Still upsert the subscription record for tracking
-    if (event.original_transaction_id) {
-      await upsertAppleSubscription(supabaseAdmin, {
-        userId: '', // No valid user mapping
-        originalTransactionId: event.original_transaction_id,
-        productId: event.product_id,
-        status: 'active',
-        expiresAt: event.expiration_at_ms ? new Date(event.expiration_at_ms) : null,
-        environment: event.environment,
-        lastEventType: event.type,
-      });
-    }
+    // Skip subscription upsert — user_id is NOT NULL with a foreign key constraint,
+    // so we can't store a record without a valid user mapping. The event is still
+    // logged in apple_notification_log for debugging.
 
     // Update log as processed (but with warning)
     await updateLogEntry(supabaseAdmin, event.id, true, 'Non-UUID app_user_id, skipped profile update');
