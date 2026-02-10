@@ -64,6 +64,8 @@ export async function POST(request: Request) {
   }
 
   const authHeader = request.headers.get('authorization');
+  // Debug: log header info (lengths only, not values, for security)
+  console.log(`[RevenueCat Webhook] Auth header present: ${!!authHeader}, length: ${authHeader?.length ?? 0}, secret length: ${webhookSecret.length}, starts with Bearer: ${authHeader?.startsWith('Bearer ') ?? false}`);
   if (!verifyRevenueCatWebhook(authHeader, webhookSecret)) {
     console.warn('[RevenueCat Webhook] Invalid authorization');
     return NextResponse.json(
