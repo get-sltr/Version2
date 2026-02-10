@@ -19,7 +19,6 @@ import {
   rateLimitHeaders,
 } from '@/lib/upstash-rate-limit';
 import {
-  verifyRevenueCatWebhook,
   mapProductToPlan,
   mapEventToPremiumUpdate,
   updatePremiumStatus,
@@ -63,11 +62,28 @@ export async function POST(request: Request) {
     );
   }
 
-  const authHeader = request.headers.get('authorization');
-  // Debug: log header info (lengths only, not values, for security)
-  console.log(`[RevenueCat Webhook] Auth header present: ${!!authHeader}, length: ${authHeader?.length ?? 0}, secret length: ${webhookSecret.length}, starts with Bearer: ${authHeader?.startsWith('Bearer ') ?? false}`);
-  if (!verifyRevenueCatWebhook(authHeader, webhookSecret)) {
-    console.warn('[RevenueCat Webhook] Invalid authorization');
+  // Try multiple header names — RevenueCat may send as 'authorization' or 'Authorization'
+  const authHeader =
+    request.headers.get('authorization') ||
+    request.headers.get('Authorization') ||
+    request.headers.get('x-revenuecat-authorization') ||
+    null;
+
+  // Debug logging (remove after confirmed working)
+  const headerNames: string[] = [];
+  request.headers.forEach((_val, key) => headerNames.push(key));
+  console.log(`[RevenueCat Webhook] All headers: ${headerNames.join(', ')}`);
+  console.log(`[RevenueCat Webhook] Auth header present: ${!!authHeader}, value length: ${authHeader?.length ?? 0}`);
+
+  // Simple direct comparison: check raw header, with/without Bearer prefix
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : authHeader;
+
+  const isAuthorized = token === webhookSecret;
+
+  if (!isAuthorized) {
+    console.warn(`[RevenueCat Webhook] Auth failed. Token: "${token?.slice(0, 6)}...", Secret: "${webhookSecret.slice(0, 6)}..."`);
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401, headers: rateLimitHeaders(rateLimitResult) }
