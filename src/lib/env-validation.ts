@@ -63,11 +63,18 @@ const APP_VARS: EnvVar[] = [
   { name: 'NEXT_PUBLIC_APP_URL', required: true, description: 'Public app URL for redirects' },
 ];
 
+// Apple / App Store configuration (for webhook & native app)
+const APPLE_VARS: EnvVar[] = [
+  { name: 'REVENUECAT_WEBHOOK_SECRET', required: false, description: 'RevenueCat webhook authorization secret' },
+  { name: 'APPLE_BUNDLE_ID', required: false, description: 'Apple app bundle identifier (com.sltrdigital.primal)' },
+];
+
 // All environment variables grouped
 const ALL_ENV_VARS = {
   supabase: SUPABASE_VARS,
   database: DATABASE_VARS,
   revenuecat: REVENUECAT_VARS,
+  apple: APPLE_VARS,
   livekit: LIVEKIT_VARS,
   daily: DAILY_VARS,
   email: EMAIL_VARS,
