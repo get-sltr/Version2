@@ -32,9 +32,8 @@ CREATE TABLE IF NOT EXISTS apple_subscriptions (
     UNIQUE(original_transaction_id)
 );
 
--- Indexes for common lookups
+-- Indexes for common lookups (original_transaction_id already indexed via UNIQUE constraint)
 CREATE INDEX IF NOT EXISTS idx_apple_sub_user ON apple_subscriptions (user_id);
-CREATE INDEX IF NOT EXISTS idx_apple_sub_txn ON apple_subscriptions (original_transaction_id);
 CREATE INDEX IF NOT EXISTS idx_apple_sub_active ON apple_subscriptions (status) WHERE status = 'active';
 
 -- Notification log for idempotency and debugging
@@ -62,7 +61,7 @@ CREATE TABLE IF NOT EXISTS apple_notification_log (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_apple_notif_event_id ON apple_notification_log (event_id);
+-- event_id already indexed via UNIQUE constraint
 CREATE INDEX IF NOT EXISTS idx_apple_notif_txn ON apple_notification_log (original_transaction_id);
 CREATE INDEX IF NOT EXISTS idx_apple_notif_user ON apple_notification_log (user_id);
 
