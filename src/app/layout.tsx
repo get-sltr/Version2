@@ -8,6 +8,7 @@ import { LocationPermission } from '../components/LocationPermission';
 import { OneSignalProvider } from '../components/OneSignalProvider';
 import AuthListener from '../components/AuthListener';
 import { PhotoGate } from '../components/PhotoGate';
+import { RevenueCatProvider } from '../components/RevenueCatProvider';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { readonly children: React.Reac
           <ServiceWorkerRegistration />
           <LocationPermission />
           <OneSignalProvider />
+          <RevenueCatProvider />
         </ThemeProvider>
         <Analytics />
       </body>
