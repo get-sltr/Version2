@@ -80,15 +80,20 @@ export async function initializeRevenueCat(userId?: string): Promise<boolean> {
 
   try {
     // Dynamic import of RevenueCat for native platforms
+    console.log('[RevenueCat] Importing Purchases module...');
     const { Purchases: PurchasesModule } = await import('@revenuecat/purchases-capacitor');
     Purchases = PurchasesModule;
+    console.log('[RevenueCat] Purchases module loaded');
 
     const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_API_KEY;
+    console.log('[RevenueCat] API key present:', !!apiKey, apiKey ? `(${apiKey.substring(0, 10)}...)` : '');
+
     if (!apiKey) {
       console.error('[RevenueCat] API key not configured');
       return false;
     }
 
+    console.log('[RevenueCat] Calling configure...');
     await Purchases.configure({
       apiKey,
       appUserID: userId || null, // null lets RevenueCat generate anonymous ID
@@ -141,13 +146,27 @@ export async function logoutRevenueCat(): Promise<void> {
  * Get available subscription offerings
  */
 export async function getOfferings(): Promise<PurchasesOfferings | null> {
-  if (!Capacitor.isNativePlatform() || !Purchases) {
+  console.log('[RevenueCat] getOfferings called, isNative:', Capacitor.isNativePlatform(), 'Purchases:', !!Purchases);
+
+  if (!Capacitor.isNativePlatform()) {
+    console.log('[RevenueCat] Not native platform, returning null');
     return null;
   }
 
+  if (!Purchases) {
+    console.log('[RevenueCat] Purchases not initialized, attempting init...');
+    const success = await initializeRevenueCat();
+    if (!success || !Purchases) {
+      console.error('[RevenueCat] Failed to initialize on demand');
+      return null;
+    }
+  }
+
   try {
+    console.log('[RevenueCat] Fetching offerings...');
     const { offerings } = await Purchases.getOfferings();
-    console.log('[RevenueCat] Offerings:', offerings);
+    console.log('[RevenueCat] Offerings result:', JSON.stringify(offerings, null, 2));
+    console.log('[RevenueCat] Current offering:', offerings?.current);
     return offerings;
   } catch (error) {
     console.error('[RevenueCat] Failed to get offerings:', error);
