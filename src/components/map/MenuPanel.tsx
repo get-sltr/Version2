@@ -106,7 +106,11 @@ export function MenuPanel({
     <div className={`${styles.menuPanel} ${isOpen ? styles.open : ''}`}>
       <div className={styles.menuHeader}>
         <span className={styles.menuTitle}>Menu</span>
-        <button className={styles.menuClose} onClick={onClose}>
+        <button
+          className={styles.menuClose}
+          onClick={onClose}
+          aria-label="Close menu"
+        >
           <CloseIcon />
         </button>
       </div>

@@ -56,11 +56,12 @@ export default function MapViewPage() {
     onLocationLoaded: handleCenterUpdate,
   });
 
-  const { blockedIds } = useBlockedUsers();
+  const { blockedIds, isReady: blockedReady } = useBlockedUsers();
 
   const { profiles, refetch: refetchProfiles } = useMapProfiles({
     mapCenter,
     blockedIds,
+    enabled: blockedReady,
   });
 
   const { groups } = useMapGroups();

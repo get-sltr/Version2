@@ -17,7 +17,11 @@ const CloseIcon = () => (
 export function GroupDrawer({ group, onClose, isOpen }: GroupDrawerProps) {
   return (
     <div className={`${styles.groupDrawer} ${isOpen ? styles.open : ''}`}>
-      <button className={styles.profileDrawerClose} onClick={onClose}>
+      <button
+        className={styles.profileDrawerClose}
+        onClick={onClose}
+        aria-label="Close group details"
+      >
         <CloseIcon />
       </button>
 

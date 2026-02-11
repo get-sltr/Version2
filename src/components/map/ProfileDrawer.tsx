@@ -21,7 +21,11 @@ export function ProfileDrawer({ profile, onClose, isOpen }: ProfileDrawerProps) 
 
   return (
     <div className={`${styles.profileDrawer} ${isOpen ? styles.open : ''}`}>
-      <button className={styles.profileDrawerClose} onClick={onClose}>
+      <button
+        className={styles.profileDrawerClose}
+        onClick={onClose}
+        aria-label="Close profile"
+      >
         <CloseIcon />
       </button>
 

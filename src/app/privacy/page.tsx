@@ -22,7 +22,14 @@ export default function PrivacyPolicy() {
         <Section title="2. How We Use Your Information">
           <p>Create and manage your account. Display your profile to other users based on proximity. Enable messaging, voice, and video calls. Detect and prevent fraud and abuse. Verify age compliance (18+). Process and manage subscriptions. Send service-related notifications.</p>
         </Section>
-        <Section title="3. Information Sharing">
+        <Section title="3. Automated Photo Scanning">
+          <p><strong>On-Device Content Moderation:</strong> When you upload a public profile photo, it is automatically scanned for explicit content using on-device AI technology. This scanning happens entirely on your device—your photos are never sent to external servers for analysis.</p>
+          <p><strong>What We Log:</strong> We log the scan result (pass/fail), confidence scores, and timestamp to maintain platform safety. We do not store rejected images.</p>
+          <p><strong>What Gets Blocked:</strong> Photos containing explicit nudity or sexual content are blocked from public profiles. Shirtless, swimwear, and fitness photos are allowed.</p>
+          <p><strong>Private Content:</strong> Photos in private albums and direct messages are not subject to automated scanning, as these are shared between consenting adults.</p>
+          <p><strong>Manual Review:</strong> In rare cases where automated scanning is unavailable, photos may be flagged for manual review by our safety team.</p>
+        </Section>
+        <Section title="4. Information Sharing">
           <p><strong>We do not sell your personal information.</strong></p>
           <p>Your public profile is visible to other users within your radius. We share data with service providers who help operate our platform:</p>
           <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
@@ -36,10 +43,10 @@ export default function PrivacyPolicy() {
           </ul>
           <p style={{ marginTop: '15px' }}>We may share data to comply with legal requirements or protect user safety.</p>
         </Section>
-        <Section title="4. Data Security">
+        <Section title="5. Data Security">
           <p>TLS 1.3+ encryption in transit. AES-256 encryption at rest. Role-based access control. Secure password hashing with bcrypt. Regular security audits. Row-level security on all database tables.</p>
         </Section>
-        <Section title="5. Your Rights (CCPA/GDPR)">
+        <Section title="6. Your Rights (CCPA/GDPR)">
           <p><strong>Access:</strong> View all data we have about you via data export.</p>
           <p><strong>Portability:</strong> Export your data in JSON format from Settings → Export Data.</p>
           <p><strong>Correction:</strong> Update your profile information at any time.</p>
@@ -47,19 +54,19 @@ export default function PrivacyPolicy() {
           <p><strong>Opt-out:</strong> Disable marketing communications in notification settings.</p>
           <p style={{ marginTop: '15px' }}>California residents: You have the right to know what personal information is collected, request deletion, and opt-out of the sale of personal information (we do not sell your data).</p>
         </Section>
-        <Section title="6. Data Retention">
+        <Section title="7. Data Retention">
           <p>We retain your data while your account is active. When you delete your account, we delete your personal data within 30 days, except where required for legal compliance, fraud prevention, or legitimate business purposes.</p>
         </Section>
-        <Section title="7. Children's Privacy">
+        <Section title="8. Children's Privacy">
           <p>Primal Men is strictly for users 18 years old and older. Users must be 18 on the day of sign up — no exceptions. We do not knowingly collect information from anyone under the age of 18. If we discover an underage user, we immediately terminate the account and delete all associated data.</p>
         </Section>
-        <Section title="8. International Transfers">
+        <Section title="9. International Transfers">
           <p>Your data may be processed in the United States. By using Primal, you consent to this transfer. We use industry-standard safeguards to protect data during international transfers.</p>
         </Section>
-        <Section title="9. Changes to This Policy">
+        <Section title="10. Changes to This Policy">
           <p>We may update this policy periodically. We will notify you of significant changes via email or in-app notification. Continued use after changes constitutes acceptance.</p>
         </Section>
-        <Section title="10. Contact">
+        <Section title="11. Contact">
           <p><strong>Email:</strong> support@primalgay.com</p>
           <p><strong>Company:</strong> Primal / SLTR DIGITAL LLC, Los Angeles, CA</p>
           <p style={{ marginTop: '15px' }}>For data requests, email privacy@primalgay.com with "Data Request" in the subject line.</p>

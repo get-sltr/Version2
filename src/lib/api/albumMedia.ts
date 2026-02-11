@@ -1,5 +1,75 @@
 import { supabase } from '../supabase';
 
+/**
+ * Get or create the user's "Private Photos" album
+ */
+export async function getOrCreatePrivateAlbum() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // Check if private album exists
+  const { data: existing } = await supabase
+    .from('profile_albums')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('name', 'Private Photos')
+    .eq('is_private', true)
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  // Create it
+  const { data, error } = await supabase
+    .from('profile_albums')
+    .insert({
+      user_id: user.id,
+      name: 'Private Photos',
+      description: 'Photos moved from profile',
+      is_private: true
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Move a photo URL to the private album
+ */
+export async function movePhotoToPrivateAlbum(photoUrl: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const album = await getOrCreatePrivateAlbum();
+
+  // Extract storage path from URL or generate a reference path
+  // Profile photos are stored like: user_id/filename.ext
+  let storagePath = `${user.id}/moved/${Date.now()}.jpg`;
+
+  // Try to extract actual path from URL if it's from our storage
+  const urlMatch = photoUrl.match(/profile-media\/(.+?)(\?|$)/);
+  if (urlMatch) {
+    storagePath = urlMatch[1];
+  }
+
+  // Add photo record to the private album
+  const { data, error } = await supabase
+    .from('profile_photos')
+    .insert({
+      user_id: user.id,
+      album_id: album.id,
+      storage_path: storagePath,
+      public_url: photoUrl,
+      is_private: true
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function createAlbum(name: string, description = '', isPrivate = false) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');

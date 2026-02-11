@@ -41,7 +41,7 @@ export default function Dashboard() {
   const router = useRouter();
   const { colors } = useTheme();
   const { isPremium, isLoading: premiumLoading } = usePremium();
-  const { blockedIds } = useBlockedUsers();
+  const { blockedIds, isReady: blockedReady } = useBlockedUsers();
   const [activeFilter, setActiveFilter] = useState('online');
   const [showAd, setShowAd] = useState(false);
   const [profiles, setProfiles] = useState<any[]>([]);
@@ -365,11 +365,12 @@ export default function Dashboard() {
   }, [activeFilter, selectedPositions, selectedTribes, ageMin, ageMax, currentUser, blockedIds]);
 
   // Re-fetch when filter changes or current user updates
+  // Wait for blocked IDs to be ready before fetching
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && blockedReady) {
       fetchProfiles();
     }
-  }, [fetchProfiles, currentUser]);
+  }, [fetchProfiles, currentUser, blockedReady]);
 
   const getProfileImage = (profile: any, index: number) => {
     // Use photo_url from profile or fallback to placeholder images

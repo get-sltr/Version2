@@ -56,7 +56,8 @@ export default function CommunityGuidelines() {
           <p style={{ marginTop: '15px' }}>If you encounter any such content, report it immediately. Our safety team takes these reports seriously and acts swiftly.</p>
         </Section>
         <Section title="Profile Guidelines">
-          <p><strong>Photos:</strong> Must be of yourself. No nudity in public profile photos. Private albums may contain NSFW content but must follow consent rules.</p>
+          <p><strong>Photos:</strong> Must be of yourself. No explicit nudity in public profile photos—shirtless, swimwear, and fitness photos are allowed. Private albums may contain NSFW content but must follow consent rules.</p>
+          <p><strong>Automated Scanning:</strong> Public profile photos are automatically scanned on your device for explicit content before upload. This keeps the platform safe while respecting your privacy—photos are never sent to external servers for analysis.</p>
           <p><strong>Bio:</strong> Be authentic. Don't include contact info that bypasses our messaging system.</p>
           <p><strong>Verification:</strong> Verified profiles help build trust. Consider getting verified.</p>
         </Section>

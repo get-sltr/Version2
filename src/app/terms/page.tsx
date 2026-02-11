@@ -38,7 +38,14 @@ export default function TermsOfService() {
           <p>You retain ownership of content you post. By posting content, you grant Primal a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and display your content to provide and promote the Service.</p>
           <p>You represent that you have the right to post all content and that it does not infringe any third-party rights.</p>
         </Section>
-        <Section title="6. Subscriptions & Payments">
+        <Section title="6. Content Moderation & Automated Scanning">
+          <p><strong>Automated Photo Scanning:</strong> Public profile photos are automatically scanned for explicit content using on-device AI technology before upload. Photos that violate our content policies will be blocked.</p>
+          <p><strong>What Is Allowed:</strong> Shirtless, swimwear, fitness, and similar photos are permitted on public profiles. Only explicit nudity and sexual content is blocked.</p>
+          <p><strong>Private Content:</strong> Private albums and direct messages between consenting adults are not subject to automated scanning.</p>
+          <p><strong>Consent to Scanning:</strong> By uploading photos, you consent to automated content moderation. This is required to maintain a safe platform and comply with app store policies.</p>
+          <p><strong>Appeals:</strong> If you believe your content was incorrectly blocked, contact support@primalgay.com.</p>
+        </Section>
+        <Section title="7. Subscriptions & Payments">
           <p><strong>In-App Purchases:</strong> Premium features are available through in-app subscriptions processed by the Apple App Store or Google Play Store.</p>
           <p><strong>Auto-Renewal:</strong> Subscriptions automatically renew unless canceled at least 24 hours before the end of the current period.</p>
           <p><strong>Managing Subscriptions:</strong></p>
@@ -49,7 +56,7 @@ export default function TermsOfService() {
           <p style={{ marginTop: '15px' }}><strong>Refunds:</strong> Refund requests must be submitted to Apple or Google, as they process all payments. Primal does not have access to your payment information and cannot process refunds directly.</p>
           <p><strong>Price Changes:</strong> We may change subscription prices. You will be notified in advance, and price changes will apply to subsequent billing periods.</p>
         </Section>
-        <Section title="7. Account Deletion">
+        <Section title="8. Account Deletion">
           <p>You may delete your account at any time from Settings → Delete Account. After initiating deletion:</p>
           <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
             <li>You have 24 hours to cancel the deletion by logging back in</li>
@@ -57,24 +64,24 @@ export default function TermsOfService() {
             <li>Active subscriptions are not automatically canceled—manage them via Apple/Google</li>
           </ul>
         </Section>
-        <Section title="8. Disclaimers">
+        <Section title="9. Disclaimers">
           <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. We do not guarantee that the Service will be uninterrupted, secure, or error-free.</p>
           <p>We are not responsible for the actions, content, or behavior of other users. Use caution when meeting people in person.</p>
         </Section>
-        <Section title="9. Limitation of Liability">
+        <Section title="10. Limitation of Liability">
           <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, PRIMAL SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE.</p>
         </Section>
-        <Section title="10. Arbitration & Class Action Waiver">
+        <Section title="11. Arbitration & Class Action Waiver">
           <p>Any disputes will be resolved by binding individual arbitration, not in court. You waive any right to participate in class actions.</p>
           <p><strong>Opt-Out:</strong> You may opt out of this arbitration provision within 30 days of account creation by emailing legal@primalgay.com with "Arbitration Opt-Out" in the subject line.</p>
         </Section>
-        <Section title="11. Governing Law">
+        <Section title="12. Governing Law">
           <p>These Terms are governed by the laws of the State of California, without regard to conflict of law principles.</p>
         </Section>
-        <Section title="12. Changes to Terms">
+        <Section title="13. Changes to Terms">
           <p>We may modify these Terms at any time. Continued use after changes constitutes acceptance. We will notify you of material changes via email or in-app notification.</p>
         </Section>
-        <Section title="13. Contact">
+        <Section title="14. Contact">
           <p><strong>Email:</strong> support@primalgay.com</p>
           <p><strong>Legal:</strong> legal@primalgay.com</p>
           <p><strong>Company:</strong> Primal / SLTR DIGITAL LLC, Los Angeles, CA</p>

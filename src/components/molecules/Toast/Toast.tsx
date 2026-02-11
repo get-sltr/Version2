@@ -136,9 +136,15 @@ export const Toast: React.FC<ToastProps> = ({
             color: colors.neutral.white,
             opacity: 0.6,
             cursor: 'pointer',
-            padding: '4px',
+            padding: '14px',
+            minWidth: '44px',
+            minHeight: '44px',
             fontSize: '16px',
             lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: '-10px',
           }}
         >
           ✕

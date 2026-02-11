@@ -4,14 +4,19 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { uploadAvatar } from '@/lib/api/profileMedia';
 import { compressImage } from '@/lib/imageUtils';
+import { scanImage, preloadNSFWModel, isModelLoading } from '@/lib/nsfwDetection';
 
 export function PhotoGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<'loading' | 'gate' | 'pass'>('loading');
   const [uploading, setUploading] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Preload NSFW model in background for faster scanning
+    preloadNSFWModel();
+
     const check = async () => {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -51,11 +56,41 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    setUploading(true);
     setError('');
+    setScanning(true);
 
     try {
+      // First compress the image
       const compressed = await compressImage(file);
+
+      // Scan for NSFW content (runs on-device, no external API)
+      const scanResult = await scanImage(compressed);
+
+      // Log scan result to database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('photo_moderation_log').insert({
+          user_id: user.id,
+          photo_path: 'photogate_upload',
+          scan_passed: scanResult.passed,
+          model_available: scanResult.modelAvailable,
+          scores: scanResult.scores,
+          failed_category: scanResult.failedCategory,
+          requires_manual_review: scanResult.requiresManualReview,
+        });
+      }
+
+      // If scan failed, show message and don't upload
+      if (!scanResult.passed) {
+        setScanning(false);
+        setError(scanResult.message || 'This photo cannot be used as a profile photo.');
+        return;
+      }
+
+      setScanning(false);
+      setUploading(true);
+
+      // Upload the photo
       await uploadAvatar(compressed);
       setState('pass');
     } catch (err: any) {
@@ -63,6 +98,7 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
       setError(err.message || 'Upload failed. Please try again.');
     } finally {
       setUploading(false);
+      setScanning(false);
     }
   };
 
@@ -139,7 +175,7 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
             border: '2px dashed rgba(255,107,53,0.5)',
             background: 'rgba(255,107,53,0.08)',
             margin: '0 auto 24px',
-            cursor: uploading ? 'not-allowed' : 'pointer',
+            cursor: (uploading || scanning) ? 'not-allowed' : 'pointer',
             fontSize: '56px',
             transition: 'border-color 0.2s',
           }}
@@ -150,10 +186,12 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
             accept="image/*"
             capture="environment"
             onChange={handleFileChange}
-            disabled={uploading}
+            disabled={uploading || scanning}
             style={{ display: 'none' }}
           />
-          {uploading ? (
+          {scanning ? (
+            <span style={{ fontSize: '16px', color: '#FF6B35' }}>Checking...</span>
+          ) : uploading ? (
             <span style={{ fontSize: '16px', color: '#FF6B35' }}>Uploading...</span>
           ) : (
             <span role="img" aria-label="camera">📸</span>
@@ -162,7 +200,7 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
 
         <button
           onClick={() => fileRef.current?.click()}
-          disabled={uploading}
+          disabled={uploading || scanning}
           style={{
             width: '100%',
             padding: '18px',
@@ -174,11 +212,11 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
             border: '1px solid rgba(255,107,53,0.5)',
             borderRadius: '12px',
             color: '#FF6B35',
-            cursor: uploading ? 'not-allowed' : 'pointer',
-            opacity: uploading ? 0.6 : 1,
+            cursor: (uploading || scanning) ? 'not-allowed' : 'pointer',
+            opacity: (uploading || scanning) ? 0.6 : 1,
           }}
         >
-          {uploading ? 'Uploading...' : 'Choose Photo'}
+          {scanning ? 'Checking Photo...' : uploading ? 'Uploading...' : 'Choose Photo'}
         </button>
       </div>
     </div>

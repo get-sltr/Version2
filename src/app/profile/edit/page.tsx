@@ -6,6 +6,8 @@ import { supabase } from '../../../lib/supabase';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { uploadAvatar } from '../../../lib/api/profileMedia';
 import { compressImage } from '@/lib/imageUtils';
+import { scanImage, preloadNSFWModel } from '@/lib/nsfwDetection';
+import { movePhotoToPrivateAlbum } from '@/lib/api/albumMedia';
 
 type ThemeColors = {
   background: string;
@@ -41,8 +43,14 @@ export default function EditProfilePage() {
   const [photoNsfwFlags, setPhotoNsfwFlags] = useState<boolean[]>([false, false, false, false]);
   const [uploading, setUploading] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [scanningPhoto, setScanningPhoto] = useState(false);
+  const [scanningIndex, setScanningIndex] = useState<number | null>(null);
   const [showTribesDropdown, setShowTribesDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Photo action menu state: 'profile' | index number | null
+  const [photoActionMenu, setPhotoActionMenu] = useState<'profile' | number | null>(null);
+  const [movingToAlbum, setMovingToAlbum] = useState(false);
 
   // Expectations
   const [lookingFor, setLookingFor] = useState<string[]>([]);
@@ -123,6 +131,9 @@ export default function EditProfilePage() {
   const relationshipOptions = ['Single', 'Seeing Someone', 'Open Relationship', 'Monogamous Relationship', 'Married', 'Partnered', "It's Complicated"];
 
   useEffect(() => {
+    // Preload NSFW model in background
+    preloadNSFWModel();
+
     const loadProfile = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
@@ -389,10 +400,38 @@ export default function EditProfilePage() {
       return;
     }
 
-    setUploading(true);
+    setScanningPhoto(true);
 
     try {
       const compressed = await compressImage(file);
+
+      // Scan for NSFW content (runs on-device)
+      const scanResult = await scanImage(compressed);
+
+      // Log scan result to database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('photo_moderation_log').insert({
+          user_id: user.id,
+          photo_path: 'profile_main_photo',
+          scan_passed: scanResult.passed,
+          model_available: scanResult.modelAvailable,
+          scores: scanResult.scores,
+          failed_category: scanResult.failedCategory,
+          requires_manual_review: scanResult.requiresManualReview,
+        });
+      }
+
+      // If scan failed, show message and don't upload
+      if (!scanResult.passed) {
+        setScanningPhoto(false);
+        alert(scanResult.message || 'This photo cannot be used as a profile photo.');
+        return;
+      }
+
+      setScanningPhoto(false);
+      setUploading(true);
+
       const url = await uploadAvatar(compressed);
       setProfilePhoto(url);
       markAsChanged();
@@ -401,6 +440,7 @@ export default function EditProfilePage() {
       alert(error.message || 'Failed to upload photo');
     } finally {
       setUploading(false);
+      setScanningPhoto(false);
     }
   };
 
@@ -420,15 +460,39 @@ export default function EditProfilePage() {
       return;
     }
 
-    setUploadingIndex(index);
+    setScanningIndex(index);
 
     try {
       // Compress before uploading
       const compressed = await compressImage(file);
 
+      // Scan for NSFW content (runs on-device)
+      const scanResult = await scanImage(compressed);
+
       // Upload additional photo to profile-media bucket
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
+
+      // Log scan result to database
+      await supabase.from('photo_moderation_log').insert({
+        user_id: user.id,
+        photo_path: `profile_additional_photo_${index}`,
+        scan_passed: scanResult.passed,
+        model_available: scanResult.modelAvailable,
+        scores: scanResult.scores,
+        failed_category: scanResult.failedCategory,
+        requires_manual_review: scanResult.requiresManualReview,
+      });
+
+      // If scan failed, show message and don't upload
+      if (!scanResult.passed) {
+        setScanningIndex(null);
+        alert(scanResult.message || 'This photo cannot be used as a profile photo.');
+        return;
+      }
+
+      setScanningIndex(null);
+      setUploadingIndex(index);
 
       const ext = 'jpg';
       const path = `${user.id}/photo-${Date.now()}.${ext}`;
@@ -458,6 +522,7 @@ export default function EditProfilePage() {
       alert(error.message || 'Failed to upload photo');
     } finally {
       setUploadingIndex(null);
+      setScanningIndex(null);
     }
   };
 
@@ -483,76 +548,137 @@ export default function EditProfilePage() {
 
       {/* Photo Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gridTemplateRows: 'repeat(2, 1fr)', gap: '2px', aspectRatio: '3/2' }}>
-        <label style={{ gridRow: 'span 2', background: '#1c1c1e', backgroundImage: profilePhoto ? `url(${profilePhoto})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', cursor: uploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <label style={{ gridRow: 'span 2', background: '#1c1c1e', backgroundImage: profilePhoto ? `url(${profilePhoto})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', cursor: (uploading || scanningPhoto) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <input
             type="file"
             accept="image/*"
             capture="environment"
             onChange={handlePhotoUpload}
-            disabled={uploading}
+            disabled={uploading || scanningPhoto}
             style={{ display: 'none' }}
           />
-          {!profilePhoto && !uploading && (
+          {!profilePhoto && !uploading && !scanningPhoto && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}>
               📷
             </div>
           )}
           <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', padding: '4px 8px', fontSize: '12px' }}>
-            {uploading ? 'Uploading...' : 'Profile Photo'}
+            {scanningPhoto ? 'Checking...' : uploading ? 'Uploading...' : 'Profile Photo'}
           </div>
-          {!uploading && profilePhoto && (
-            <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
-              ✏️
-            </div>
+          {!uploading && !scanningPhoto && profilePhoto && (
+            <>
+              <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
+                ✏️
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setPhotoActionMenu('profile');
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  left: '10px',
+                  background: 'rgba(0,0,0,0.7)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  zIndex: 10,
+                }}
+              >
+                •••
+              </button>
+            </>
           )}
         </label>
         {[0, 1, 2, 3].map((index) => (
           <div key={index} style={{ position: 'relative' }}>
-            <label style={{ background: '#1c1c1e', backgroundImage: additionalPhotos[index] ? `url(${additionalPhotos[index]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: 'none', cursor: uploadingIndex === index ? 'not-allowed' : 'pointer', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: '1' }}>
+            <label style={{ background: '#1c1c1e', backgroundImage: additionalPhotos[index] ? `url(${additionalPhotos[index]})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: 'none', cursor: (uploadingIndex === index || scanningIndex === index) ? 'not-allowed' : 'pointer', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: '1' }}>
               <input
                 type="file"
                 accept="image/*"
                 capture="environment"
                 onChange={(e) => handleAdditionalPhotoUpload(e, index)}
-                disabled={uploadingIndex === index}
+                disabled={uploadingIndex === index || scanningIndex === index}
                 style={{ display: 'none' }}
               />
-              {!additionalPhotos[index] && uploadingIndex !== index && (
+              {!additionalPhotos[index] && uploadingIndex !== index && scanningIndex !== index && (
                 <div style={{ fontSize: '24px', color: '#666' }}>+</div>
+              )}
+              {scanningIndex === index && (
+                <div style={{ fontSize: '12px', color: '#FF6B35' }}>Checking...</div>
               )}
               {uploadingIndex === index && (
                 <div style={{ fontSize: '12px', color: '#FF6B35' }}>Uploading...</div>
               )}
             </label>
             {additionalPhotos[index] && (
-              <label style={{
-                position: 'absolute',
-                bottom: '8px',
-                left: '8px',
-                right: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'rgba(0,0,0,0.75)',
-                borderRadius: '6px',
-                padding: '6px 8px',
-                cursor: 'pointer',
-                fontSize: '11px',
-                color: photoNsfwFlags[index] ? '#FF6B35' : '#999',
-              }}>
-                <input
-                  type="checkbox"
-                  checked={photoNsfwFlags[index]}
-                  onChange={(e) => {
-                    const newFlags = [...photoNsfwFlags];
-                    newFlags[index] = e.target.checked;
-                    setPhotoNsfwFlags(newFlags);
-                    setShowSaveButton(true);
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setPhotoActionMenu(index);
                   }}
-                  style={{ width: '14px', height: '14px', accentColor: '#FF6B35' }}
-                />
-                NSFW
-              </label>
+                  style={{
+                    position: 'absolute',
+                    top: '6px',
+                    right: '6px',
+                    background: 'rgba(0,0,0,0.7)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    zIndex: 10,
+                  }}
+                >
+                  •••
+                </button>
+                <label style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  left: '8px',
+                  right: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'rgba(0,0,0,0.75)',
+                  borderRadius: '6px',
+                  padding: '6px 8px',
+                  cursor: 'pointer',
+                  fontSize: '11px',
+                  color: photoNsfwFlags[index] ? '#FF6B35' : '#999',
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={photoNsfwFlags[index]}
+                    onChange={(e) => {
+                      const newFlags = [...photoNsfwFlags];
+                      newFlags[index] = e.target.checked;
+                      setPhotoNsfwFlags(newFlags);
+                      setShowSaveButton(true);
+                    }}
+                    style={{ width: '14px', height: '14px', accentColor: '#FF6B35' }}
+                  />
+                  NSFW
+                </label>
+              </>
             )}
           </div>
         ))}
@@ -563,30 +689,54 @@ export default function EditProfilePage() {
         <div style={{ padding: '20px 0 12px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ fontSize: '14px', fontWeight: 600 }}>Photo Albums</span>
-            <span style={{ fontSize: '12px', color: '#666' }}>0 albums</span>
+            <a href="/profile/edit/albums" style={{ fontSize: '13px', color: '#FF6B35', textDecoration: 'none' }}>
+              Manage Albums
+            </a>
           </div>
-          <a 
-            href="/profile/edit/albums/create"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              background: 'rgba(255,107,53,0.1)',
-              border: '1px dashed #FF6B35',
-              borderRadius: '12px',
-              padding: '16px',
-              textDecoration: 'none',
-              color: '#FF6B35',
-              cursor: 'pointer'
-            }}
-          >
-            <span style={{ fontSize: '24px' }}>📁</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '2px' }}>Create Album</div>
-              <div style={{ fontSize: '12px', opacity: 0.8 }}>Organize photos into public or private albums</div>
-            </div>
-            <span style={{ fontSize: '18px' }}>+</span>
-          </a>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <a
+              href="/profile/edit/albums"
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                padding: '16px',
+                textDecoration: 'none',
+                color: '#fff',
+                cursor: 'pointer'
+              }}
+            >
+              <span style={{ fontSize: '24px' }}>📷</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '2px' }}>View Albums</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Manage your photo albums</div>
+              </div>
+              <span style={{ fontSize: '18px', color: 'rgba(255,255,255,0.3)' }}>›</span>
+            </a>
+            <a
+              href="/profile/edit/albums/create"
+              style={{
+                width: '56px',
+                height: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#FF6B35',
+                borderRadius: '12px',
+                textDecoration: 'none',
+                color: '#fff',
+                fontSize: '28px',
+                fontWeight: 300,
+                alignSelf: 'center',
+              }}
+            >
+              +
+            </a>
+          </div>
         </div>
       </Section>
 
@@ -1048,6 +1198,126 @@ export default function EditProfilePage() {
           >
             Save Changes
           </button>
+        </div>
+      )}
+
+      {/* Photo Action Menu Modal */}
+      {photoActionMenu !== null && (
+        <div
+          onClick={() => setPhotoActionMenu(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#1c1c1e',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '400px',
+              overflow: 'hidden',
+              marginBottom: '20px',
+            }}
+          >
+            <div style={{ padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: '#fff' }}>Photo Options</div>
+              <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', marginTop: '4px' }}>
+                {photoActionMenu === 'profile' ? 'Profile Photo' : `Photo ${(photoActionMenu as number) + 1}`}
+              </div>
+            </div>
+
+            <button
+              onClick={async () => {
+                const photoUrl = photoActionMenu === 'profile' ? profilePhoto : additionalPhotos[photoActionMenu as number];
+                if (!photoUrl) return;
+
+                setMovingToAlbum(true);
+                try {
+                  await movePhotoToPrivateAlbum(photoUrl);
+                  // Remove from current location
+                  if (photoActionMenu === 'profile') {
+                    setProfilePhoto('');
+                  } else {
+                    const newPhotos = [...additionalPhotos];
+                    newPhotos[photoActionMenu as number] = '';
+                    setAdditionalPhotos(newPhotos);
+                  }
+                  setShowSaveButton(true);
+                  setPhotoActionMenu(null);
+                } catch (err) {
+                  console.error('Failed to move photo:', err);
+                  alert('Failed to move photo to album');
+                } finally {
+                  setMovingToAlbum(false);
+                }
+              }}
+              disabled={movingToAlbum}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                color: '#FF6B35',
+                fontSize: '17px',
+                fontWeight: 500,
+                cursor: movingToAlbum ? 'not-allowed' : 'pointer',
+                opacity: movingToAlbum ? 0.5 : 1,
+              }}
+            >
+              {movingToAlbum ? 'Moving...' : 'Move to Private Album'}
+            </button>
+
+            <button
+              onClick={() => {
+                if (photoActionMenu === 'profile') {
+                  setProfilePhoto('');
+                } else {
+                  const newPhotos = [...additionalPhotos];
+                  newPhotos[photoActionMenu as number] = '';
+                  setAdditionalPhotos(newPhotos);
+                }
+                setShowSaveButton(true);
+                setPhotoActionMenu(null);
+              }}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                color: '#ff4444',
+                fontSize: '17px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              Delete Photo
+            </button>
+
+            <button
+              onClick={() => setPhotoActionMenu(null)}
+              style={{
+                width: '100%',
+                padding: '16px',
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: '17px',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
     </div>

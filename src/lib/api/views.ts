@@ -76,7 +76,12 @@ export async function recordProfileView(viewedId: string): Promise<void> {
     });
 
   if (error) {
-    console.error('[recordProfileView] Error inserting view:', error);
+    console.error('[recordProfileView] Error inserting view:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    });
     throw error;
   }
 
