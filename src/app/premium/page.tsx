@@ -89,8 +89,9 @@ export default function PremiumPage() {
       posthog.capture('premium_subscribe_tapped', { plan: 'primal_pro_monthly' });
 
       const offerings = await getOfferings();
+      console.log('[Premium] Offerings received:', JSON.stringify(offerings, null, 2));
       if (!offerings?.current) {
-        setError('Unable to load subscription. Please try again.');
+        setError(`Unable to load subscription. Offerings: ${offerings ? 'exists but no current' : 'null'}`);
         setLoading(false);
         return;
       }
