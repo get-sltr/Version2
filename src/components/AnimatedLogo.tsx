@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface AnimatedLogoProps {
   size?: 'small' | 'medium' | 'large';
@@ -10,9 +11,9 @@ interface AnimatedLogoProps {
 
 export function AnimatedLogo({ size = 'small', href = '/', showText = true }: AnimatedLogoProps) {
   const scales = {
-    small: { stripeW: 8, stripeH: 28, gap: 4, text: '18px', containerGap: '10px', tagline: '8px' },
-    medium: { stripeW: 12, stripeH: 38, gap: 5, text: '24px', containerGap: '14px', tagline: '10px' },
-    large: { stripeW: 16, stripeH: 50, gap: 6, text: '32px', containerGap: '18px', tagline: '12px' },
+    small: { logoSize: 36, text: '18px', containerGap: '10px', tagline: '8px' },
+    medium: { logoSize: 48, text: '24px', containerGap: '14px', tagline: '10px' },
+    large: { logoSize: 70, text: '32px', containerGap: '18px', tagline: '12px' },
   };
 
   const s = scales[size];
@@ -27,14 +28,12 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
         color: '#FFFFFF',
       }}
     >
-      {/* Logo Mark - 3 Tilted Stripes */}
+      {/* Logo Mark - X Icon */}
       <div
         style={{
           position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          gap: `${s.gap}px`,
-          height: `${s.stripeH}px`,
+          width: `${s.logoSize}px`,
+          height: `${s.logoSize}px`,
         }}
       >
         {/* Ambient Glow */}
@@ -49,86 +48,37 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
           }}
         />
 
-        {/* Stripe 1 - Orange */}
-        <div
+        {/* Logo Image */}
+        <Image
+          src="/icons/icon-512x512.png"
+          alt="Primal"
+          width={s.logoSize}
+          height={s.logoSize}
           style={{
-            width: `${s.stripeW}px`,
-            height: '100%',
-            borderRadius: '3px',
-            transform: 'skewX(-15deg)',
-            background: 'linear-gradient(180deg, #ff9f5a 0%, #ff7b3d 100%)',
-            boxShadow: '0 0 12px rgba(255, 123, 61, 0.5)',
+            borderRadius: `${s.logoSize * 0.2}px`,
             position: 'relative',
-            overflow: 'hidden',
             zIndex: 2,
+            filter: 'drop-shadow(0 0 15px rgba(255, 107, 53, 0.5))',
           }}
-        >
-          <div
-            className="shine-white"
-            style={{
-              position: 'absolute',
-              top: '-100%',
-              left: '-50%',
-              width: '200%',
-              height: '100%',
-              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%)',
-            }}
-          />
-        </div>
+          priority
+        />
 
-        {/* Stripe 2 - White with Orange Shine */}
+        {/* Shine overlay */}
         <div
+          className="logo-shine"
           style={{
-            width: `${s.stripeW}px`,
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '200%',
             height: '100%',
-            borderRadius: '3px',
-            transform: 'skewX(-15deg)',
-            background: '#ffffff',
-            boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
-            position: 'relative',
+            background: 'linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.15) 40%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.15) 60%, transparent 80%)',
+            zIndex: 3,
+            pointerEvents: 'none',
+            borderRadius: `${s.logoSize * 0.2}px`,
             overflow: 'hidden',
-            zIndex: 2,
           }}
-        >
-          <div
-            className="shine-orange-1"
-            style={{
-              position: 'absolute',
-              top: '-100%',
-              left: '-50%',
-              width: '200%',
-              height: '100%',
-              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 123, 61, 0.9) 50%, transparent 100%)',
-            }}
-          />
-        </div>
-
-        {/* Stripe 3 - White with Orange Shine */}
-        <div
-          style={{
-            width: `${s.stripeW}px`,
-            height: '100%',
-            borderRadius: '3px',
-            transform: 'skewX(-15deg)',
-            background: '#ffffff',
-            boxShadow: '0 0 8px rgba(255, 255, 255, 0.3)',
-            position: 'relative',
-            overflow: 'hidden',
-            zIndex: 2,
-          }}
-        >
-          <div
-            className="shine-orange-2"
-            style={{
-              position: 'absolute',
-              top: '-100%',
-              left: '-50%',
-              width: '200%',
-              height: '100%',
-              background: 'linear-gradient(180deg, transparent 0%, rgba(255, 123, 61, 0.9) 50%, transparent 100%)',
-            }}
-          />
-        </div>
+        />
       </div>
 
       {/* PRIMAL Text */}
@@ -171,37 +121,29 @@ export function AnimatedLogo({ size = 'small', href = '/', showText = true }: An
       {/* CSS Animations */}
       <style jsx>{`
         @keyframes glowPulse {
-          0%, 100% { 
-            opacity: 0.5; 
-            transform: scale(1); 
+          0%, 100% {
+            opacity: 0.5;
+            transform: scale(1);
           }
-          50% { 
-            opacity: 0.8; 
-            transform: scale(1.1); 
+          50% {
+            opacity: 0.8;
+            transform: scale(1.1);
           }
         }
-        @keyframes shineStripe {
-          0% { top: -100%; }
-          50%, 100% { top: 200%; }
+        @keyframes logoShine {
+          0% { left: -100%; }
+          50%, 100% { left: 150%; }
         }
         @keyframes steelShine {
-          0%, 100% { 
+          0%, 100% {
             background-position: -200% center;
           }
-          50% { 
+          50% {
             background-position: 200% center;
           }
         }
-        .shine-white {
-          animation: shineStripe 2s ease-in-out infinite;
-        }
-        .shine-orange-1 {
-          animation: shineStripe 2s ease-in-out infinite;
-          animation-delay: 0.15s;
-        }
-        .shine-orange-2 {
-          animation: shineStripe 2s ease-in-out infinite;
-          animation-delay: 0.3s;
+        .logo-shine {
+          animation: logoShine 3s ease-in-out infinite;
         }
         .brand-text {
           animation: steelShine 3s ease-in-out infinite;

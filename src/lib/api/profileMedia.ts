@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { computePhotoHash, isPhotoSimilarToRejected } from '@/lib/photoHash';
 
 // Allowed image MIME types and their extensions
 const ALLOWED_MIME_TYPES: Record<string, string> = {
@@ -28,6 +29,18 @@ export async function uploadAvatar(file: File): Promise<string> {
   const ext = ALLOWED_MIME_TYPES[file.type];
   if (!ext) {
     throw new Error('Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+  }
+
+  // Check if this photo was previously rejected
+  try {
+    const hash = await computePhotoHash(file);
+    const { rejected } = await isPhotoSimilarToRejected(hash);
+    if (rejected) {
+      throw new Error('This photo has been previously removed by moderation and cannot be re-uploaded.');
+    }
+  } catch (err: any) {
+    if (err?.message?.includes('previously removed')) throw err;
+    console.warn('[PhotoHash] Hash check failed, allowing upload:', err);
   }
 
   const path = `${user.id}/avatar-${Date.now()}.${ext}`;

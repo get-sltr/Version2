@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { computePhotoHash, isPhotoSimilarToRejected } from '@/lib/photoHash';
 
 /**
  * Get or create the user's "Private Photos" album
@@ -96,6 +97,18 @@ export async function uploadAlbumPhoto(
 ) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Not authenticated');
+
+  // Check if this photo was previously rejected
+  try {
+    const hash = await computePhotoHash(file);
+    const { rejected } = await isPhotoSimilarToRejected(hash);
+    if (rejected) {
+      throw new Error('This photo has been previously removed by moderation and cannot be re-uploaded.');
+    }
+  } catch (err: any) {
+    if (err?.message?.includes('previously removed')) throw err;
+    console.warn('[PhotoHash] Hash check failed, allowing upload:', err);
+  }
 
   const ext = file.name.split('.').pop() || 'jpg';
   const path = `${user.id}/albums/${albumId}/${Date.now()}.${ext}`;
