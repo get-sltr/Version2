@@ -62,7 +62,7 @@ interface CustomerInfo {
 }
 
 // The entitlement identifier configured in RevenueCat
-const PREMIUM_ENTITLEMENT = 'primal_premium';
+const PREMIUM_ENTITLEMENT = 'Primal Pro';
 
 // Dynamically import RevenueCat only on native platforms
 let Purchases: any = null;

@@ -75,7 +75,7 @@ export function usePremium(): PremiumStatus {
       }
 
       // For native platforms, check RevenueCat first
-      const hasRevenueCatPremium = await checkEntitlement('primal_premium');
+      const hasRevenueCatPremium = await checkEntitlement('Primal Pro');
 
       if (hasRevenueCatPremium) {
         setIsPremium(true);

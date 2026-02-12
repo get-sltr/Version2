@@ -122,7 +122,7 @@ export function PaywallModal({ isOpen, onClose, onPurchaseComplete }: PaywallMod
       const result = await restorePurchases();
 
       if (result.success && result.customerInfo) {
-        const hasPremium = result.customerInfo.entitlements.active['primal_premium']?.isActive;
+        const hasPremium = result.customerInfo.entitlements.active['Primal Pro']?.isActive;
 
         if (hasPremium) {
           onPurchaseComplete?.();
