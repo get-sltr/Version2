@@ -303,7 +303,7 @@ export default function SettingsPage() {
         <button onClick={handleLogout} style={{ width: '100%', background: 'transparent', border: `1px solid ${colors.accent}`, color: colors.accent, padding: '15px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer' }}>
           Log Out
         </button>
-        <a href="/settings/account" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(244,67,54,0.5)', color: '#f44336', padding: '15px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', display: 'block' }}>
+        <a href="/settings/account/delete" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(244,67,54,0.5)', color: '#f44336', padding: '15px', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', display: 'block' }}>
           Delete Account
         </a>
       </div>

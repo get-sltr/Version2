@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { isValidAge, calculateAge } from '@/lib/validation';
 import type { Position, Tribe } from '@/types/database';
 import posthog from 'posthog-js';
 
@@ -50,6 +51,12 @@ export default function OnboardingPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Age verification state (for OAuth users who skip signup DOB)
+  const [needsAgeVerification, setNeedsAgeVerification] = useState(false);
+  const [ageVerified, setAgeVerified] = useState(false);
+  const [dobInput, setDobInput] = useState('');
+  const [ageError, setAgeError] = useState('');
+
   // Form data
   const [displayName, setDisplayName] = useState('');
   const [position, setPosition] = useState<Position | null>(null);
@@ -66,6 +73,17 @@ export default function OnboardingPage() {
       }
 
       setUserId(user.id);
+
+      // Check if user has age/dob in their auth metadata (set during email signup)
+      const userMetadata = user.user_metadata;
+      const hasDob = userMetadata?.dob || userMetadata?.age_verified;
+
+      if (!hasDob) {
+        // OAuth user — needs age verification before proceeding
+        setNeedsAgeVerification(true);
+      } else {
+        setAgeVerified(true);
+      }
 
       // Check if profile is already complete (has phone verified and display_name)
       const { data: profile } = await supabase
@@ -250,6 +268,40 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleAgeVerification = async () => {
+    setAgeError('');
+    if (!dobInput) {
+      setAgeError('Please enter your date of birth.');
+      return;
+    }
+    if (!isValidAge(dobInput, 18)) {
+      setAgeError('You must be 18 years or older to use Primal Men.');
+      return;
+    }
+
+    // Store DOB in user metadata
+    const birthDate = new Date(dobInput);
+    const userAge = calculateAge(birthDate);
+
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          dob: dobInput,
+          age: userAge,
+          age_verified: true,
+          age_verified_at: new Date().toISOString(),
+        },
+      });
+
+      setNeedsAgeVerification(false);
+      setAgeVerified(true);
+      posthog.capture('age_verified_onboarding', { age: userAge });
+    } catch (err) {
+      console.error('Error saving age data:', err);
+      setAgeError('Failed to save. Please try again.');
+    }
+  };
+
   const toggleTribe = (tribe: Tribe) => {
     if (selectedTribes.includes(tribe)) {
       setSelectedTribes(selectedTribes.filter(t => t !== tribe));
@@ -329,8 +381,9 @@ export default function OnboardingPage() {
     );
   }
 
-  const totalSteps = 4;
-  const progress = (step / totalSteps) * 100;
+  const totalSteps = needsAgeVerification && !ageVerified ? 5 : 4;
+  const effectiveStep = needsAgeVerification && !ageVerified ? 0 : step;
+  const progress = needsAgeVerification && !ageVerified ? 5 : (step / 4) * 100;
 
   return (
     <div style={{
@@ -376,7 +429,10 @@ export default function OnboardingPage() {
           PRIMAL MEN
         </h1>
         <p style={{ color: '#666', fontSize: '13px' }}>
-          Step {step} of {totalSteps}
+          {needsAgeVerification && !ageVerified
+            ? 'Age Verification Required'
+            : `Step ${step} of 4`
+          }
         </p>
       </div>
 
@@ -386,8 +442,117 @@ export default function OnboardingPage() {
         margin: '0 auto',
         padding: '20px',
       }}>
+        {/* Age Verification Gate (OAuth users only) */}
+        {needsAgeVerification && !ageVerified && (
+          <div>
+            <div style={{
+              textAlign: 'center',
+              fontSize: '48px',
+              marginBottom: '16px',
+            }}>
+              🔒
+            </div>
+            <h2 style={{
+              fontSize: '28px',
+              fontWeight: 700,
+              marginBottom: '12px',
+              textAlign: 'center',
+            }}>
+              Age Verification
+            </h2>
+            <p style={{
+              color: '#888',
+              textAlign: 'center',
+              marginBottom: '40px',
+              fontSize: '15px',
+              lineHeight: 1.6,
+            }}>
+              Primal Men is an 18+ community.<br />
+              Please enter your date of birth to continue.
+            </p>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '11px',
+                fontWeight: 600,
+                marginBottom: '8px',
+                color: '#666',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+              }}>
+                Date of Birth
+              </label>
+              <input
+                type="date"
+                value={dobInput}
+                onChange={(e) => { setDobInput(e.target.value); setAgeError(''); }}
+                style={{
+                  width: '100%',
+                  background: '#151515',
+                  border: '2px solid #333',
+                  borderRadius: '12px',
+                  padding: '18px 20px',
+                  fontSize: '18px',
+                  color: '#fff',
+                  outline: 'none',
+                  colorScheme: 'dark',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#FF6B35'}
+                onBlur={(e) => e.target.style.borderColor = '#333'}
+              />
+            </div>
+
+            {ageError && (
+              <p style={{
+                color: '#ff6b6b',
+                fontSize: '14px',
+                textAlign: 'center',
+                marginBottom: '20px',
+                background: 'rgba(255, 80, 80, 0.1)',
+                padding: '12px',
+                borderRadius: '8px',
+              }}>
+                {ageError}
+              </p>
+            )}
+
+            <button
+              onClick={handleAgeVerification}
+              disabled={!dobInput}
+              style={{
+                width: '100%',
+                padding: '18px',
+                background: !dobInput
+                  ? '#333'
+                  : 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                color: '#fff',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: !dobInput ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              Verify &amp; Continue
+            </button>
+
+            <p style={{
+              color: '#555',
+              fontSize: '11px',
+              textAlign: 'center',
+              marginTop: '20px',
+              lineHeight: 1.5,
+            }}>
+              By continuing, you confirm you are 18 years or older.
+            </p>
+          </div>
+        )}
+
         {/* Step 1: Phone Verification */}
-        {step === 1 && (
+        {step === 1 && (!needsAgeVerification || ageVerified) && (
           <div>
             <h2 style={{
               fontSize: '28px',

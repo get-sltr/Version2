@@ -33,6 +33,7 @@ function GoogleIcon() {
 
 export default function SignupPage() {
   const router = useRouter();
+  const [ageVerified, setAgeVerified] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -41,6 +42,7 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'apple' | 'google' | null>(null);
+  const [ageError, setAgeError] = useState('');
 
   const emailId = useId();
   const passwordId = useId();
@@ -48,6 +50,19 @@ export default function SignupPage() {
   const dobId = useId();
   const termsId = useId();
   const errorId = useId();
+
+  const handleAgeCheck = () => {
+    setAgeError('');
+    if (!dob) {
+      setAgeError('Please enter your date of birth to continue.');
+      return;
+    }
+    if (!isValidAge(dob, 18)) {
+      setAgeError('You must be 18 years or older to use Primal Men. We do not accept users under 18.');
+      return;
+    }
+    setAgeVerified(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,16 +84,7 @@ export default function SignupPage() {
       return;
     }
 
-    if (!dob) {
-      setError('Please enter your date of birth');
-      return;
-    }
-
-    if (!isValidAge(dob, 18)) {
-      setError('You must be 18 years old or older on the day of sign up. We do not accept users under 18.');
-      return;
-    }
-
+    // DOB already validated in age gate step
     const birthDate = new Date(dob);
     const userAge = calculateAge(birthDate);
 
@@ -579,6 +585,99 @@ export default function SignupPage() {
         .otp-change-number:hover {
           color: #FF6B35;
         }
+
+        .age-gate-card {
+          width: 100%;
+          max-width: 440px;
+          background: rgba(255, 255, 255, 0.02);
+          backdrop-filter: blur(40px);
+          -webkit-backdrop-filter: blur(40px);
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 40px 28px;
+          box-shadow:
+            0 25px 50px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+          text-align: center;
+        }
+
+        .age-gate-icon {
+          font-size: 48px;
+          margin-bottom: 16px;
+        }
+
+        .age-gate-title {
+          font-family: 'Orbitron', sans-serif;
+          font-size: 22px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          color: #FF6B35;
+        }
+
+        .age-gate-desc {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.5);
+          margin-bottom: 28px;
+          line-height: 1.6;
+        }
+
+        .age-gate-error {
+          background: rgba(255, 80, 80, 0.1);
+          backdrop-filter: blur(10px);
+          color: #ff8888;
+          padding: 14px;
+          margin-bottom: 20px;
+          font-size: 14px;
+          border-left: 3px solid rgba(255, 80, 80, 0.5);
+          border-radius: 8px;
+          text-align: left;
+        }
+
+        .age-gate-btn {
+          width: 100%;
+          padding: 18px;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          background: rgba(255, 107, 53, 0.1);
+          backdrop-filter: blur(20px);
+          color: #FF6B35;
+          border: 1px solid rgba(255, 107, 53, 0.4);
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          box-shadow:
+            0 0 30px rgba(255, 107, 53, 0.2),
+            inset 0 1px 0 rgba(255, 200, 150, 0.1);
+          margin-top: 8px;
+        }
+
+        .age-gate-btn:hover {
+          background: rgba(255, 107, 53, 0.2);
+          border-color: rgba(255, 107, 53, 0.6);
+          color: #fff;
+          box-shadow:
+            0 0 40px rgba(255, 107, 53, 0.4),
+            0 0 80px rgba(255, 107, 53, 0.2),
+            inset 0 1px 0 rgba(255, 200, 150, 0.2);
+        }
+
+        .age-gate-note {
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.3);
+          margin-top: 20px;
+          line-height: 1.5;
+        }
+
+        .age-gate-note a {
+          color: #FF6B35;
+          text-decoration: none;
+        }
       `}</style>
 
       <div className="signup-container">
@@ -603,120 +702,33 @@ export default function SignupPage() {
           </header>
 
           <main className="signup-main">
-            <motion.div
-              className="signup-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="signup-title">Create Account</h1>
-              <p className="signup-subtitle">Join the community</p>
+            {!ageVerified ? (
+              /* ── STEP 1: Age Gate ── */
+              <motion.div
+                className="age-gate-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="age-gate-icon">🔒</div>
+                <h1 className="age-gate-title">Age Verification</h1>
+                <p className="age-gate-desc">
+                  Primal Men is an 18+ community.<br />
+                  Please enter your date of birth to continue.
+                </p>
 
-              {error && (
-                <motion.div
-                  className="signup-error"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  role="alert"
-                  id={errorId}
-                >
-                  {error}
-                </motion.div>
-              )}
+                {ageError && (
+                  <motion.div
+                    className="age-gate-error"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    role="alert"
+                  >
+                    {ageError}
+                  </motion.div>
+                )}
 
-              <div className="signup-oauth" style={{ marginBottom: '0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button
-                  type="button"
-                  onClick={() => handleOAuthSignup('apple')}
-                  disabled={loading || oauthLoading !== null}
-                  className="signup-oauth-btn"
-                  style={{
-                    background: '#000',
-                    color: '#fff',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    fontWeight: 500,
-                    width: '100%',
-                  }}
-                >
-                  <AppleIcon />
-                  {oauthLoading === 'apple' ? 'Signing up...' : 'Sign up with Apple'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOAuthSignup('google')}
-                  disabled={loading || oauthLoading !== null}
-                  className="signup-oauth-btn"
-                  style={{
-                    background: '#fff',
-                    color: '#333',
-                    border: '1px solid rgba(0, 0, 0, 0.1)',
-                    fontWeight: 500,
-                    width: '100%',
-                  }}
-                >
-                  <GoogleIcon />
-                  {oauthLoading === 'google' ? 'Signing up...' : 'Sign up with Google'}
-                </button>
-              </div>
-
-              <div className="signup-divider">
-                <div className="signup-divider-line" />
-                <span className="signup-divider-text">or continue with email</span>
-                <div className="signup-divider-line" />
-              </div>
-
-              <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
-                <div className="field-group">
-                  <label htmlFor={emailId} className="signup-label">
-                    Email address <span className="signup-label-required">*</span>
-                  </label>
-                  <input
-                    id={emailId}
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                    className="signup-input"
-                  />
-                </div>
-
-                <div className="field-group">
-                  <label htmlFor={passwordId} className="signup-label">
-                    Password <span className="signup-label-required">*</span>
-                  </label>
-                  <input
-                    id={passwordId}
-                    type="password"
-                    placeholder="Min 8 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    className="signup-input"
-                  />
-                  <p className="signup-hint">Must include uppercase, lowercase, and number</p>
-                </div>
-
-                <div className="field-group">
-                  <label htmlFor={confirmPasswordId} className="signup-label">
-                    Confirm Password <span className="signup-label-required">*</span>
-                  </label>
-                  <input
-                    id={confirmPasswordId}
-                    type="password"
-                    placeholder="Re-enter your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                    className="signup-input"
-                  />
-                </div>
-
-                <div className="field-group">
+                <div className="field-group" style={{ textAlign: 'left' }}>
                   <label htmlFor={dobId} className="signup-label">
                     Date of Birth <span className="signup-label-required">*</span>
                   </label>
@@ -724,46 +736,179 @@ export default function SignupPage() {
                     id={dobId}
                     type="date"
                     value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    required
+                    onChange={(e) => { setDob(e.target.value); setAgeError(''); }}
                     className="signup-input"
                     style={{ colorScheme: 'dark', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
                   />
-                  <p className="signup-hint">You must be 18 or older to sign up.</p>
-                </div>
-
-                <div className="field-group" style={{ marginBottom: '24px' }}>
-                  <label htmlFor={termsId} className="signup-checkbox-wrap">
-                    <span className="signup-checkbox-container">
-                      <input
-                        id={termsId}
-                        type="checkbox"
-                        checked={agreed}
-                        onChange={(e) => setAgreed(e.target.checked)}
-                        required
-                        className="signup-checkbox"
-                      />
-                    </span>
-                    <span className="signup-checkbox-text">
-                      I agree to the{' '}
-                      <Link href="/terms">Terms of Service</Link>,{' '}
-                      <Link href="/privacy">Privacy Policy</Link>, and{' '}
-                      <Link href="/guidelines">Community Guidelines</Link>
-                    </span>
-                  </label>
                 </div>
 
                 <motion.button
-                  type="submit"
-                  disabled={loading}
-                  className="signup-submit"
+                  type="button"
+                  onClick={handleAgeCheck}
+                  className="age-gate-btn"
                   whileTap={{ scale: 0.98 }}
                 >
-                  {loading ? 'Creating Account...' : 'Create Account'}
+                  Verify &amp; Continue
                 </motion.button>
-              </form>
 
-            </motion.div>
+                <p className="age-gate-note">
+                  By continuing, you confirm you are 18 years or older and agree to our{' '}
+                  <Link href="/terms">Terms</Link>,{' '}
+                  <Link href="/privacy">Privacy Policy</Link> &amp;{' '}
+                  <Link href="/guidelines">Guidelines</Link>.
+                </p>
+              </motion.div>
+            ) : (
+              /* ── STEP 2: Signup Form ── */
+              <motion.div
+                className="signup-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <h1 className="signup-title">Create Account</h1>
+                <p className="signup-subtitle">Join the community</p>
+
+                {error && (
+                  <motion.div
+                    className="signup-error"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    role="alert"
+                    id={errorId}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <div className="signup-oauth" style={{ marginBottom: '0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignup('apple')}
+                    disabled={loading || oauthLoading !== null}
+                    className="signup-oauth-btn"
+                    style={{
+                      background: '#000',
+                      color: '#fff',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      fontWeight: 500,
+                      width: '100%',
+                    }}
+                  >
+                    <AppleIcon />
+                    {oauthLoading === 'apple' ? 'Signing up...' : 'Sign up with Apple'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleOAuthSignup('google')}
+                    disabled={loading || oauthLoading !== null}
+                    className="signup-oauth-btn"
+                    style={{
+                      background: '#fff',
+                      color: '#333',
+                      border: '1px solid rgba(0, 0, 0, 0.1)',
+                      fontWeight: 500,
+                      width: '100%',
+                    }}
+                  >
+                    <GoogleIcon />
+                    {oauthLoading === 'google' ? 'Signing up...' : 'Sign up with Google'}
+                  </button>
+                </div>
+
+                <div className="signup-divider">
+                  <div className="signup-divider-line" />
+                  <span className="signup-divider-text">or continue with email</span>
+                  <div className="signup-divider-line" />
+                </div>
+
+                <form onSubmit={handleSubmit} aria-describedby={error ? errorId : undefined}>
+                  <div className="field-group">
+                    <label htmlFor={emailId} className="signup-label">
+                      Email address <span className="signup-label-required">*</span>
+                    </label>
+                    <input
+                      id={emailId}
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                      className="signup-input"
+                    />
+                  </div>
+
+                  <div className="field-group">
+                    <label htmlFor={passwordId} className="signup-label">
+                      Password <span className="signup-label-required">*</span>
+                    </label>
+                    <input
+                      id={passwordId}
+                      type="password"
+                      placeholder="Min 8 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                      className="signup-input"
+                    />
+                    <p className="signup-hint">Must include uppercase, lowercase, and number</p>
+                  </div>
+
+                  <div className="field-group">
+                    <label htmlFor={confirmPasswordId} className="signup-label">
+                      Confirm Password <span className="signup-label-required">*</span>
+                    </label>
+                    <input
+                      id={confirmPasswordId}
+                      type="password"
+                      placeholder="Re-enter your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      autoComplete="new-password"
+                      className="signup-input"
+                    />
+                  </div>
+
+                  {/* DOB is hidden since already collected in age gate, but still sent with form */}
+                  <input type="hidden" name="dob" value={dob} />
+
+                  <div className="field-group" style={{ marginBottom: '24px' }}>
+                    <label htmlFor={termsId} className="signup-checkbox-wrap">
+                      <span className="signup-checkbox-container">
+                        <input
+                          id={termsId}
+                          type="checkbox"
+                          checked={agreed}
+                          onChange={(e) => setAgreed(e.target.checked)}
+                          required
+                          className="signup-checkbox"
+                        />
+                      </span>
+                      <span className="signup-checkbox-text">
+                        I confirm I am 18+ and agree to the{' '}
+                        <Link href="/terms">Terms of Service</Link>,{' '}
+                        <Link href="/privacy">Privacy Policy</Link>, and{' '}
+                        <Link href="/guidelines">Community Guidelines</Link>
+                      </span>
+                    </label>
+                  </div>
+
+                  <motion.button
+                    type="submit"
+                    disabled={loading}
+                    className="signup-submit"
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                  </motion.button>
+                </form>
+
+              </motion.div>
+            )}
           </main>
 
           <footer className="signup-footer">

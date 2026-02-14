@@ -911,8 +911,9 @@ export default function ConversationPage() {
   const handleReportUser = async (reason: string) => {
     const { error: reportError } = await supabase.from('reports').insert({
       reporter_id: currentUserId,
-      reported_id: otherUserId,
+      reported_user_id: otherUserId,
       reason,
+      status: 'pending',
     });
 
     if (reportError) {

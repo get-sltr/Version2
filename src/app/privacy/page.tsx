@@ -17,7 +17,7 @@ export default function PrivacyPolicy() {
           <p><strong>Profile:</strong> Photos, bio, physical attributes, gender identity, orientation</p>
           <p><strong>Location:</strong> Precise geolocation when enabled (required for core features)</p>
           <p><strong>Usage:</strong> Device info, pages viewed, features used, crash reports</p>
-          <p><strong>Payments:</strong> Purchase history, subscription status (processed by Apple/Google via RevenueCat)</p>
+          <p><strong>Payments:</strong> Purchase history, subscription status (processed by Apple/Google via RevenueCat). All subscription payments are processed exclusively through Apple&apos;s App Store or Google Play Store. We do not collect, store, or have access to your credit card, banking, or payment card information. Refund requests must be submitted directly to Apple or Google, as they control all payment processing. Apple&apos;s and Google&apos;s respective privacy policies govern the handling of your payment information.</p>
         </Section>
         <Section title="2. How We Use Your Information">
           <p>Create and manage your account. Display your profile to other users based on proximity. Enable messaging, voice, and video calls. Detect and prevent fraud and abuse. Verify age compliance (18+). Process and manage subscriptions. Send service-related notifications.</p>

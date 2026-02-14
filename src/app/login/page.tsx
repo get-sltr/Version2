@@ -41,9 +41,16 @@ export default function LoginPage() {
   const passwordId = useId();
   const errorId = useId();
 
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!ageConfirmed || !termsAccepted) {
+      setError('Please confirm you are 18+ and accept the terms to continue.');
+      return;
+    }
 
     setLoading(true);
 
@@ -479,6 +486,51 @@ export default function LoginPage() {
         .otp-change-number:hover {
           color: #FF6B35;
         }
+
+        .login-checkbox-section {
+          margin-top: 20px;
+          margin-bottom: 24px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .login-checkbox-wrap {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          cursor: pointer;
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
+        .login-checkbox-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+          min-height: 44px;
+          flex-shrink: 0;
+        }
+
+        .login-checkbox {
+          width: 20px;
+          height: 20px;
+          accent-color: #FF6B35;
+        }
+
+        .login-checkbox-text {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-checkbox-text a {
+          color: #FF6B35;
+          text-decoration: none;
+        }
+
+        .login-checkbox-text a:hover {
+          text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+        }
       `}</style>
 
       <div className="login-container">
@@ -524,11 +576,44 @@ export default function LoginPage() {
                 </motion.div>
               )}
 
+              <div className="login-checkbox-section" style={{ marginTop: '0', marginBottom: '20px' }}>
+                <label className="login-checkbox-wrap">
+                  <span className="login-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={ageConfirmed}
+                      onChange={(e) => setAgeConfirmed(e.target.checked)}
+                      className="login-checkbox"
+                    />
+                  </span>
+                  <span className="login-checkbox-text">
+                    I confirm I am <strong style={{ color: '#FF6B35' }}>18 years or older</strong>
+                  </span>
+                </label>
+
+                <label className="login-checkbox-wrap">
+                  <span className="login-checkbox-container">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="login-checkbox"
+                    />
+                  </span>
+                  <span className="login-checkbox-text">
+                    I agree to the{' '}
+                    <Link href="/terms">Terms of Service</Link>,{' '}
+                    <Link href="/privacy">Privacy Policy</Link> &amp;{' '}
+                    <Link href="/guidelines">Guidelines</Link>
+                  </span>
+                </label>
+              </div>
+
               <div className="login-oauth" style={{ marginBottom: '0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <button
                   type="button"
                   onClick={() => handleOAuthLogin('apple')}
-                  disabled={loading || oauthLoading !== null}
+                  disabled={loading || oauthLoading !== null || !ageConfirmed || !termsAccepted}
                   className="login-oauth-btn"
                   style={{
                     background: '#000',
@@ -544,7 +629,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => handleOAuthLogin('google')}
-                  disabled={loading || oauthLoading !== null}
+                  disabled={loading || oauthLoading !== null || !ageConfirmed || !termsAccepted}
                   className="login-oauth-btn"
                   style={{
                     background: '#fff',
@@ -606,7 +691,7 @@ export default function LoginPage() {
 
                   <motion.button
                     type="submit"
-                    disabled={loading || oauthLoading !== null}
+                    disabled={loading || oauthLoading !== null || !ageConfirmed || !termsAccepted}
                     className="login-submit"
                     whileTap={{ scale: 0.98 }}
                   >
