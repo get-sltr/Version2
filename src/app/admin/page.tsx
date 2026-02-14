@@ -21,6 +21,11 @@ interface DashboardStats {
     groups: number;
     activeGroups: number;
   };
+  moderation: {
+    pendingPhotos: number;
+    pendingUserReports: number;
+    pendingCruisingReports: number;
+  };
   signupsByDay: { date: string; count: number }[];
   generatedAt: string;
 }
@@ -140,6 +145,74 @@ export default function AdminDashboard() {
           Last updated: {new Date(stats.generatedAt).toLocaleTimeString()}
         </div>
       </div>
+
+      {/* Moderation Alerts */}
+      {stats.moderation && (stats.moderation.pendingPhotos > 0 || stats.moderation.pendingUserReports > 0 || stats.moderation.pendingCruisingReports > 0) && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          marginBottom: '24px',
+        }}>
+          {stats.moderation.pendingPhotos > 0 && (
+            <a href="/admin/photos" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '14px 18px',
+              background: 'rgba(255, 152, 0, 0.12)',
+              border: '1px solid rgba(255, 152, 0, 0.3)',
+              borderRadius: '12px',
+              color: '#FF9800',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+            }}>
+              <span style={{ fontSize: '20px' }}>📸</span>
+              <span><strong>{stats.moderation.pendingPhotos}</strong> photo{stats.moderation.pendingPhotos !== 1 ? 's' : ''} need review</span>
+              <span style={{ marginLeft: 'auto', fontSize: '13px', color: '#888' }}>Review →</span>
+            </a>
+          )}
+          {stats.moderation.pendingUserReports > 0 && (
+            <a href="/admin/user-reports" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '14px 18px',
+              background: 'rgba(244, 67, 54, 0.12)',
+              border: '1px solid rgba(244, 67, 54, 0.3)',
+              borderRadius: '12px',
+              color: '#F44336',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+            }}>
+              <span style={{ fontSize: '20px' }}>🚨</span>
+              <span><strong>{stats.moderation.pendingUserReports}</strong> user report{stats.moderation.pendingUserReports !== 1 ? 's' : ''} pending</span>
+              <span style={{ marginLeft: 'auto', fontSize: '13px', color: '#888' }}>Review →</span>
+            </a>
+          )}
+          {stats.moderation.pendingCruisingReports > 0 && (
+            <a href="/admin/reports" style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '14px 18px',
+              background: 'rgba(255, 107, 53, 0.12)',
+              border: '1px solid rgba(255, 107, 53, 0.3)',
+              borderRadius: '12px',
+              color: '#FF6B35',
+              textDecoration: 'none',
+              fontSize: '14px',
+              fontWeight: 500,
+            }}>
+              <span style={{ fontSize: '20px' }}>🚩</span>
+              <span><strong>{stats.moderation.pendingCruisingReports}</strong> cruising report{stats.moderation.pendingCruisingReports !== 1 ? 's' : ''} pending</span>
+              <span style={{ marginLeft: 'auto', fontSize: '13px', color: '#888' }}>Review →</span>
+            </a>
+          )}
+        </div>
+      )}
 
       {/* User Stats */}
       <h2 style={{ fontSize: '16px', color: '#888', marginBottom: '16px', fontWeight: 600 }}>
@@ -319,6 +392,8 @@ export default function AdminDashboard() {
       }}>
         {[
           { label: 'View All Users', href: '/admin/users', icon: '👥' },
+          { label: 'Photo Moderation', href: '/admin/photos', icon: '📸' },
+          { label: 'User Reports', href: '/admin/user-reports', icon: '🚨' },
           { label: 'Cruising Reports', href: '/admin/reports', icon: '🚩' },
           { label: 'View Payments', href: '/admin/payments', icon: '💰' },
           { label: 'View Errors', href: '/admin/errors', icon: '🐛' },
