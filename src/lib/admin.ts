@@ -18,9 +18,9 @@ const ROLE_HIERARCHY: Record<AdminRole, number> = {
   support: 20,     // Can view and help users
 };
 
-// Founder email - loaded from environment variable for security
-// Set FOUNDER_EMAIL in your .env.local file
-export const FOUNDER_EMAIL = process.env.FOUNDER_EMAIL || '';
+// Founder email - loaded from environment variable
+// Set NEXT_PUBLIC_FOUNDER_EMAIL in your .env.local file
+export const FOUNDER_EMAIL = process.env.NEXT_PUBLIC_FOUNDER_EMAIL || '';
 
 // Additional admin emails from environment (comma-separated)
 // Format: ADMIN_EMAILS="admin@example.com:admin,mod@example.com:moderator"

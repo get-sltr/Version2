@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     // Simple admin check — adjust based on your admin system
-    const ADMIN_EMAILS = [process.env.FOUNDER_EMAIL, 'admin@primalgay.com'];
+    const ADMIN_EMAILS = [process.env.NEXT_PUBLIC_FOUNDER_EMAIL, 'admin@primalgay.com'];
     if (!adminProfile?.email || !ADMIN_EMAILS.includes(adminProfile.email)) {
       return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 });
     }
