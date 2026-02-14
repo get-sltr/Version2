@@ -67,6 +67,35 @@ function ReportPageContent() {
     setError(null);
 
     try {
+      // Check for existing pending report from this user against same person
+      const { data: existingReport } = await supabase
+        .from('reports')
+        .select('id, created_at')
+        .eq('reporter_id', currentUserId)
+        .eq('reported_user_id', reportedUserId)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existingReport) {
+        setError('You already have a pending report for this user. Our team is reviewing it.');
+        setLoading(false);
+        return;
+      }
+
+      // Rate limit: max 5 reports per hour from same reporter
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count: recentCount } = await supabase
+        .from('reports')
+        .select('id', { count: 'exact', head: true })
+        .eq('reporter_id', currentUserId)
+        .gte('created_at', oneHourAgo);
+
+      if (recentCount !== null && recentCount >= 5) {
+        setError('You\'ve submitted too many reports recently. Please wait before submitting another.');
+        setLoading(false);
+        return;
+      }
+
       // Save report to database
       const { error: insertError } = await supabase.from('reports').insert({
         reporter_id: currentUserId,

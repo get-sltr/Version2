@@ -909,6 +909,21 @@ export default function ConversationPage() {
   };
 
   const handleReportUser = async (reason: string) => {
+    // Check for existing pending report from this user
+    const { data: existingReport } = await supabase
+      .from('reports')
+      .select('id')
+      .eq('reporter_id', currentUserId)
+      .eq('reported_user_id', otherUserId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (existingReport) {
+      setShowReportModal(false);
+      alert('You already have a pending report for this user. Our team is reviewing it.');
+      return;
+    }
+
     const { error: reportError } = await supabase.from('reports').insert({
       reporter_id: currentUserId,
       reported_user_id: otherUserId,
