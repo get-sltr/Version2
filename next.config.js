@@ -55,11 +55,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://fonts.googleapis.com https://api.mapbox.com https://us.i.posthog.com https://us-assets.i.posthog.com https://onesignal.com https://*.onesignal.com https://api.revenuecat.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://fonts.googleapis.com https://api.mapbox.com https://us.i.posthog.com https://us-assets.i.posthog.com https://onesignal.com https://*.onesignal.com https://api.revenuecat.com https://www.googletagmanager.com https://www.google-analytics.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://api.mapbox.com",
               "img-src 'self' data: blob: https: http:",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://us.i.posthog.com https://us-assets.i.posthog.com https://onesignal.com https://*.onesignal.com https://api.revenuecat.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.livekit.cloud wss://*.livekit.cloud https://api.daily.co https://*.daily.co wss://*.daily.co https://api.foursquare.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.mapbox.com https://events.mapbox.com https://us.i.posthog.com https://us-assets.i.posthog.com https://onesignal.com https://*.onesignal.com https://api.revenuecat.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.livekit.cloud wss://*.livekit.cloud https://api.daily.co https://*.daily.co wss://*.daily.co https://api.foursquare.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com",
               "media-src 'self' blob: https:",
               "worker-src 'self' blob:",
               "frame-src 'self' https://*.daily.co https://*.livekit.cloud",

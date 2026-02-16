@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { DM_Sans, Orbitron, Cormorant_Garamond, Space_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '../contexts/ThemeContext';
@@ -72,6 +73,18 @@ export default function RootLayout({ children }: { readonly children: React.Reac
   return (
     <html lang="en" className={`${dmSans.variable} ${orbitron.variable} ${cormorantGaramond.variable} ${spaceMono.variable}`}>
       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-7JWP4C2KS4"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7JWP4C2KS4');
+          `}
+        </Script>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
