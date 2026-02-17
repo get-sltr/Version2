@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-export const revalidate = 300; // ISR: revalidate every 5 minutes
+export const revalidate = 60; // ISR: revalidate every 60s (webhook also triggers instant revalidation)
 
 export const metadata: Metadata = {
   title: 'Blog | Primal',

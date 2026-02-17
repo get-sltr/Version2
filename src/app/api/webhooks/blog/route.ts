@@ -13,6 +13,7 @@
  */
 
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getSupabaseAdmin } from '@/lib/admin';
 import {
   checkUpstashRateLimit,
@@ -170,6 +171,15 @@ export async function POST(request: Request) {
 
   // ── Mark event as processed ────────────────────────────────────────────
   await updateBlogWebhookLog(supabaseAdmin, eventId, true, null, result.postId);
+
+  // ── Revalidate blog pages instantly ──────────────────────────────────
+  try {
+    revalidatePath('/blog');
+    revalidatePath(`/blog/${result.slug}`);
+    revalidatePath('/sitemap.xml');
+  } catch (err) {
+    console.error('[Blog Webhook] Revalidation error:', err);
+  }
 
   console.log(
     `[Blog Webhook] Post saved: id=${result.postId}, slug=${result.slug}`
