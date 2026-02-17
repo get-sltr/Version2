@@ -37,6 +37,7 @@ const PUBLIC_ROUTES = [
   '/cookies',
   '/dmca',
   '/premium',
+  '/settings/help',
 ];
 
 // API routes that have their own auth handling
@@ -153,7 +154,7 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!user;
 
   // Handle protected routes - redirect to login if not authenticated
-  if (isProtectedRoute(pathname) && !isAuthenticated) {
+  if (isProtectedRoute(pathname) && !isPublicRoute(pathname) && !isAuthenticated) {
     const loginUrl = new URL('/login', request.url);
     // Store the intended destination for redirect after login
     loginUrl.searchParams.set('redirect', pathname);
