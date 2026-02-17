@@ -148,6 +148,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json(
     { status: 'ok', post_id: result.postId, slug: result.slug },
-    { status: 201, headers: rateLimitHeaders(rateLimitResult) }
+    { status: 200, headers: rateLimitHeaders(rateLimitResult) }
   );
 }
