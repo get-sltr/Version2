@@ -71,7 +71,10 @@ export async function POST(request: Request) {
   // ── Parse JSON body ────────────────────────────────────────────────────
   let payload: BlogWebhookPayload;
   try {
-    payload = (await request.json()) as BlogWebhookPayload;
+    const rawBody = await request.json();
+    console.log('[Blog Webhook] Raw payload keys:', Object.keys(rawBody));
+    console.log('[Blog Webhook] Raw payload:', JSON.stringify(rawBody).slice(0, 2000));
+    payload = rawBody as BlogWebhookPayload;
   } catch {
     return NextResponse.json(
       { error: 'Invalid JSON body' },
