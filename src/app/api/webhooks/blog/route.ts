@@ -79,9 +79,26 @@ export async function POST(request: Request) {
     );
   }
 
+  // ── Normalize field names ────────────────────────────────────────────
+  // BabyLoveGrowth.ai may send content under different field names
+  const raw = payload as Record<string, unknown>;
+  if (!raw.content && (raw.body || raw.html || raw.article_content || raw.html_content || raw.article)) {
+    payload.content = (raw.body || raw.html || raw.article_content || raw.html_content || raw.article) as string;
+  }
+  if (!raw.title && (raw.headline || raw.article_title || raw.name)) {
+    payload.title = (raw.headline || raw.article_title || raw.name) as string;
+  }
+  if (!raw.excerpt && (raw.summary || raw.description || raw.meta_description)) {
+    payload.excerpt = (raw.summary || raw.description || raw.meta_description) as string;
+  }
+  if (!raw.featured_image_url && (raw.image || raw.image_url || raw.thumbnail || raw.cover_image)) {
+    payload.featured_image_url = (raw.image || raw.image_url || raw.thumbnail || raw.cover_image) as string;
+  }
+
   // ── Validate payload ───────────────────────────────────────────────────
   const validationError = validatePayload(payload);
   if (validationError) {
+    console.error('[Blog Webhook] Validation failed:', validationError, 'Raw keys:', Object.keys(raw));
     return NextResponse.json(
       { error: validationError },
       { status: 400, headers: rateLimitHeaders(rateLimitResult) }
