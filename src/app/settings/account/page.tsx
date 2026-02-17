@@ -577,7 +577,7 @@ export default function AccountSettingsPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <button
-              onClick={() => showToast('Preparing your data download...')}
+              onClick={() => router.push('/settings/account/export')}
               style={{
                 width: '100%',
                 background: '#2c2c2e',
@@ -599,7 +599,7 @@ export default function AccountSettingsPage() {
             </button>
 
             <button
-              onClick={() => router.push('/settings/privacy')}
+              onClick={() => router.push('/privacy')}
               style={{
                 width: '100%',
                 background: '#2c2c2e',
@@ -620,27 +620,6 @@ export default function AccountSettingsPage() {
               <span style={{ color: '#aaa' }}>→</span>
             </button>
 
-            <button
-              onClick={() => showToast('Cookie preferences updated')}
-              style={{
-                width: '100%',
-                background: '#2c2c2e',
-                border: '1px solid #444',
-                borderRadius: '8px',
-                padding: '14px',
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                textAlign: 'left',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <span>🍪 Cookie Preferences</span>
-              <span style={{ color: '#aaa' }}>→</span>
-            </button>
           </div>
         </div>
 
