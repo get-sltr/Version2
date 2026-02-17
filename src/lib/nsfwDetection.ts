@@ -10,8 +10,11 @@
  * - Hentai (cartoon porn) is blocked
  */
 
-import * as tf from '@tensorflow/tfjs';
-import * as nsfwjs from 'nsfwjs';
+import { Capacitor } from '@capacitor/core';
+
+// Dynamic imports — TensorFlow.js is only loaded on web, never on native
+let tf: typeof import('@tensorflow/tfjs') | null = null;
+let nsfwjs: typeof import('nsfwjs') | null = null;
 
 // NSFWJS prediction categories
 export type NSFWCategory = 'Drawing' | 'Hentai' | 'Neutral' | 'Porn' | 'Sexy';
@@ -47,15 +50,55 @@ const BLOCK_MESSAGES: Record<string, string> = {
 };
 
 // Singleton model instance
-let model: nsfwjs.NSFWJS | null = null;
-let modelLoading: Promise<nsfwjs.NSFWJS> | null = null;
+let model: any | null = null;
+let modelLoading: Promise<any> | null = null;
 let modelLoadFailed = false;
 
 /**
- * Load the NSFWJS model (singleton pattern)
- * Model is loaded once and cached for the session
+ * Check if we're running inside Capacitor native shell (iOS/Android).
+ * TensorFlow.js + NSFWJS should NEVER load on native — it causes
+ * WKWebView memory pressure and crashes, especially on iPad.
+ * On native, photos go through server-side moderation instead.
  */
-export async function loadNSFWModel(): Promise<nsfwjs.NSFWJS | null> {
+function isNative(): boolean {
+  try {
+    return Capacitor.isNativePlatform();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Dynamically import TensorFlow.js and NSFWJS (web only)
+ */
+async function loadDeps(): Promise<boolean> {
+  if (tf && nsfwjs) return true;
+  try {
+    const [tfModule, nsfwModule] = await Promise.all([
+      import('@tensorflow/tfjs'),
+      import('nsfwjs'),
+    ]);
+    tf = tfModule;
+    nsfwjs = nsfwModule;
+    return true;
+  } catch (error) {
+    console.error('[NSFW] Failed to load TF.js dependencies:', error);
+    return false;
+  }
+}
+
+/**
+ * Load the NSFWJS model (singleton pattern)
+ * Model is loaded once and cached for the session.
+ * Returns null on native platforms — photos use server-side moderation instead.
+ */
+export async function loadNSFWModel(): Promise<any | null> {
+  // NEVER load TF.js on native — causes WKWebView crashes on iPad
+  if (isNative()) {
+    console.log('[NSFW] Skipping model load on native platform');
+    return null;
+  }
+
   // Return cached model if available
   if (model) {
     return model;
@@ -78,6 +121,12 @@ export async function loadNSFWModel(): Promise<nsfwjs.NSFWJS | null> {
   // Start loading
   modelLoading = (async () => {
     try {
+      // Dynamically import TF.js (never bundled on native)
+      const depsLoaded = await loadDeps();
+      if (!depsLoaded || !tf || !nsfwjs) {
+        throw new Error('TF.js dependencies not available');
+      }
+
       // Ensure TensorFlow.js backend is ready
       await tf.ready();
 
@@ -229,9 +278,13 @@ export async function scanImage(file: File): Promise<NSFWScanResult> {
 
 /**
  * Preload the NSFW model on app startup
- * Call this early in app initialization to avoid delay on first photo upload
+ * Call this early in app initialization to avoid delay on first photo upload.
+ * Skips entirely on native platforms to prevent WKWebView memory pressure.
  */
 export function preloadNSFWModel(): void {
+  // Skip on native — TF.js causes crashes in WKWebView
+  if (isNative()) return;
+
   // Fire and forget - load in background
   loadNSFWModel().catch(() => {
     // Silently handle - modelLoadFailed flag is set internally

@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
 import { AnimatedLogo } from '@/components/AnimatedLogo';
 
-// Particle configuration
-const PARTICLE_COUNT = 80;
-const WHIRLPOOL_DURATION = 4000; // ms
+// Reduce particle count on native to prevent GPU memory pressure in WKWebView
+const IS_NATIVE = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+const PARTICLE_COUNT = IS_NATIVE ? 20 : 80;
+const WHIRLPOOL_DURATION = IS_NATIVE ? 2500 : 4000; // ms — shorter on native
 const FLASH_DELAY = WHIRLPOOL_DURATION - 200;
 const REVEAL_DELAY = WHIRLPOOL_DURATION + 300;
 
@@ -60,7 +62,8 @@ export default function LandingPage() {
       // Force play — muted videos can autoplay without user gesture
       video.muted = true;
       video.play().catch(() => {});
-      const fallback = setTimeout(() => setVideoLoaded(true), 2000);
+      // Longer fallback on native — WKWebView may be slower to load video
+      const fallback = setTimeout(() => setVideoLoaded(true), IS_NATIVE ? 5000 : 2000);
       return () => {
         video.removeEventListener('canplay', handleCanPlay);
         clearTimeout(fallback);
@@ -73,7 +76,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="landing-container" onClick={handleSkip}>
+    <div className={`landing-container${IS_NATIVE ? ' native-mode' : ''}`} onClick={handleSkip}>
       {/* Video Background - hidden during whirlpool */}
       <div className={`video-wrapper ${phase === 'reveal' ? 'visible' : ''}`}>
         <video
@@ -699,6 +702,21 @@ export default function LandingPage() {
           .flash-overlay.active {
             animation: none;
           }
+        }
+
+        /* Native Capacitor WKWebView optimizations — reduce GPU pressure */
+        .native-mode .sparkle {
+          filter: none;
+          box-shadow: none;
+          background: rgba(255, 255, 255, 0.8);
+        }
+
+        .native-mode .center-glow {
+          filter: blur(8px);
+        }
+
+        .native-mode .forming-logo img {
+          filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
         }
       `}</style>
     </div>

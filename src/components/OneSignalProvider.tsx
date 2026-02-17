@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import OneSignal from 'react-onesignal';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/lib/supabase';
 
 /**
- * OneSignalProvider - Initializes OneSignal push notifications
- * Should be added to the root layout
+ * OneSignalProvider - Initializes OneSignal web push notifications
+ * Should be added to the root layout.
+ *
+ * IMPORTANT: Skipped on native platforms (iOS/Android via Capacitor).
+ * Native push is handled by Capacitor PushNotifications plugin.
+ * Loading the OneSignal web SDK in WKWebView causes conflicts and crashes.
  */
 export function OneSignalProvider() {
   const [initialized, setInitialized] = useState(false);
@@ -15,6 +20,12 @@ export function OneSignalProvider() {
     const initOneSignal = async () => {
       if (initialized) return;
       if (typeof window === 'undefined') return;
+
+      // Skip on native — Capacitor PushNotifications handles native push
+      if (Capacitor.isNativePlatform()) {
+        console.log('OneSignal: Skipping on native platform (using Capacitor Push)');
+        return;
+      }
 
       // Skip on localhost - OneSignal only works on production domain
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
