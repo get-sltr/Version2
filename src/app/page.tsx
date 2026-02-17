@@ -172,6 +172,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className={`landing-footer ${phase === 'reveal' ? 'visible' : ''}`}>
         <div className="footer-links">
+          <Link href="/blog">Blog</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/about">About</Link>
