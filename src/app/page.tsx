@@ -124,8 +124,33 @@ export default function LandingPage() {
         </div>
       </div>
 
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'Primal',
+          url: 'https://primalgay.com',
+          description: 'Dating app built for gay and bisexual men. Real connections, built-in video calls, group rooms, and zero bots.',
+          applicationCategory: 'SocialNetworkingApplication',
+          operatingSystem: 'Web',
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+          },
+          creator: {
+            '@type': 'Organization',
+            name: 'SLTR Digital LLC',
+            url: 'https://primalgay.com',
+          },
+        }) }}
+      />
+
       {/* Main Content */}
       <main className={`main-content ${phase === 'reveal' ? 'visible' : ''}`}>
+        <h1 className="sr-only">Primal — Dating App for Gay & Bisexual Men</h1>
         <div className="logo-composition">
           <AnimatedLogo size="large" href={undefined} showText={true} />
         </div>

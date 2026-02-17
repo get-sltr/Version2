@@ -40,8 +40,25 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Primal Men - Your Burning Desire, Unleashed.',
-  description: 'Dating app for gay and bisexual men',
+  metadataBase: new URL('https://primalgay.com'),
+  title: 'Primal - Dating App for Gay & Bisexual Men',
+  description: 'Primal is a dating app built for gay and bisexual men. Real connections, built-in video calls, group rooms, and zero bots. No paywalls on the basics. Rules don\'t apply.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Primal - Dating App for Gay & Bisexual Men',
+    description: 'Real connections, built-in video calls, group rooms, and zero bots. No paywalls on the basics. Rules don\'t apply.',
+    type: 'website',
+    url: 'https://primalgay.com',
+    siteName: 'Primal',
+    images: [{ url: '/icons/icon-512x512.png', width: 512, height: 512, alt: 'Primal' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Primal - Dating App for Gay & Bisexual Men',
+    description: 'Real connections, built-in video calls, group rooms, and zero bots. Rules don\'t apply.',
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

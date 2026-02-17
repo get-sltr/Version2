@@ -137,7 +137,9 @@ export async function POST(req: NextRequest) {
         reviewed_by: admin.id,
         review_decision: 'rejected',
       })
-      .catch((err: any) => console.error('[Admin] Failed to log moderation:', err));
+      .then(({ error: logErr }) => {
+        if (logErr) console.error('[Admin] Failed to log moderation:', logErr);
+      });
 
     return NextResponse.json({
       success: true,
