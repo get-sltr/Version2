@@ -82,20 +82,29 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Normalize field names ────────────────────────────────────────────
-  // BabyLoveGrowth.ai may send content under different field names
+  // ── Normalize BabyLoveGrowth.ai field names ─────────────────────────
   const raw = payload as Record<string, unknown>;
-  if (!raw.content && (raw.body || raw.html || raw.article_content || raw.html_content || raw.article)) {
-    payload.content = (raw.body || raw.html || raw.article_content || raw.html_content || raw.article) as string;
+  // Content: content_html → content
+  if (!raw.content && raw.content_html) {
+    payload.content = raw.content_html as string;
   }
-  if (!raw.title && (raw.headline || raw.article_title || raw.name)) {
-    payload.title = (raw.headline || raw.article_title || raw.name) as string;
+  // Meta description: metaDescription → meta_description
+  if (!raw.meta_description && raw.metaDescription) {
+    payload.meta_description = raw.metaDescription as string;
+    payload.excerpt = raw.metaDescription as string;
   }
-  if (!raw.excerpt && (raw.summary || raw.description || raw.meta_description)) {
-    payload.excerpt = (raw.summary || raw.description || raw.meta_description) as string;
+  // Featured image: heroImageUrl → featured_image_url
+  if (!raw.featured_image_url && raw.heroImageUrl) {
+    payload.featured_image_url = raw.heroImageUrl as string;
   }
-  if (!raw.featured_image_url && (raw.image || raw.image_url || raw.thumbnail || raw.cover_image)) {
-    payload.featured_image_url = (raw.image || raw.image_url || raw.thumbnail || raw.cover_image) as string;
+  // Tags from keywords
+  if (!raw.tags && raw.keywords) {
+    const kw = raw.keywords as string;
+    payload.tags = kw.split(',').map((t: string) => t.trim()).filter(Boolean);
+  }
+  // Default to published
+  if (!raw.status) {
+    payload.status = 'published';
   }
 
   // ── Validate payload ───────────────────────────────────────────────────
