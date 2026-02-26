@@ -153,7 +153,7 @@ export default function LandingPage() {
 
       {/* Main Content */}
       <main className={`main-content ${phase === 'reveal' ? 'visible' : ''}`}>
-        <h1 className="sr-only">Primal — Dating App for Gay & Bisexual Men</h1>
+        <h1 className="sr-only">Gay & Bisexual Men Dating App for Connections – Primal</h1>
         <div className="logo-composition">
           <AnimatedLogo size="large" href={undefined} showText={true} />
         </div>

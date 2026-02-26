@@ -86,7 +86,7 @@ export async function initializeRevenueCat(userId?: string): Promise<boolean> {
     console.log('[RevenueCat] Purchases module loaded');
 
     const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_API_KEY;
-    console.log('[RevenueCat] API key present:', !!apiKey, apiKey ? `(${apiKey.substring(0, 10)}...)` : '');
+    console.log('[RevenueCat] API key present:', !!apiKey);
 
     if (!apiKey) {
       console.error('[RevenueCat] API key not configured');

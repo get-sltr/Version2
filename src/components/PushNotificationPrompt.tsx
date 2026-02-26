@@ -78,19 +78,6 @@ export function PushNotificationPrompt({ userId, onDismiss }: PushNotificationPr
     checkNotificationStatus();
   }, [userId, onDismiss]);
 
-  const handleDismiss = async () => {
-    try {
-      await supabase
-        .from('profiles')
-        .update({ push_prompt_dismissed_at: new Date().toISOString() })
-        .eq('id', userId);
-    } catch (error) {
-      console.error('Error saving push prompt dismissal:', error);
-    }
-    setIsVisible(false);
-    onDismiss?.();
-  };
-
   const handleEnableNotifications = async () => {
     setEnabling(true);
     try {
@@ -255,19 +242,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'Inter, system-ui, sans-serif',
     boxShadow: '0 4px 14px rgba(255, 107, 53, 0.4)',
     marginBottom: 12,
-  },
-  dismissButton: {
-    backgroundColor: 'transparent',
-    color: 'rgba(255, 255, 255, 0.5)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    borderRadius: 12,
-    padding: '14px 24px',
-    fontSize: 14,
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: 'Inter, system-ui, sans-serif',
-    width: '100%',
-    transition: 'all 0.2s ease',
   },
 };
 

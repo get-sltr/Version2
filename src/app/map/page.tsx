@@ -129,6 +129,31 @@ export default function MapViewPage() {
           onEmptyClick={handleCloseDrawer}
         />
 
+        {/* Empty state hint when no users are live */}
+        {profiles.length === 0 && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10,
+            background: 'rgba(10, 22, 40, 0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '16px',
+            padding: '20px 24px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            textAlign: 'center',
+            maxWidth: '280px',
+            pointerEvents: 'none',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '8px' }}>📍</div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0, lineHeight: 1.5 }}>
+              No one is live nearby right now. Tap <strong style={{ color: '#FF6B35' }}>Go Live</strong> to appear on the map.
+            </p>
+          </div>
+        )}
+
         {/* Cruising FAB */}
         <CruisingFAB onClick={() => setCruisingOpen(true)} />
 

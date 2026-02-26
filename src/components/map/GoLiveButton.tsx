@@ -108,6 +108,20 @@ export function GoLiveButton({ userId }: GoLiveButtonProps) {
     }
   }, [userId]);
 
+  // Clean up on unmount: go offline so user doesn't stay live after leaving map
+  useEffect(() => {
+    return () => {
+      if (userId) {
+        supabase
+          .from('profiles')
+          .update({ map_checked_in_at: null })
+          .eq('id', userId)
+          .then(() => {});
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
   const handleToggle = () => {
     if (isLive) {
       goOffline();

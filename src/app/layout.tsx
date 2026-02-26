@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Gay & Bisexual Men Dating App for Connections – Primal',
-    description: 'Real connections, built-in video calls, group rooms, and zero bots. No paywalls on the basics. Rules don\'t apply.',
+    description: 'Real connections, built-in video calls, group rooms, and zero bots. Rules don\'t apply.',
     type: 'website',
     url: 'https://primalgay.com',
     siteName: 'Primal',

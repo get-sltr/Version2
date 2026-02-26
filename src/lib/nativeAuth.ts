@@ -11,6 +11,39 @@ import { Capacitor } from '@capacitor/core';
 import { supabase } from './supabase';
 
 /**
+ * After native signInWithIdToken, check if the user has a profile.
+ * New users get redirected to onboarding; existing users go to dashboard.
+ */
+async function redirectAfterNativeAuth(): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    window.location.href = '/dashboard';
+    return;
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, display_name')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile) {
+    // New user — create skeleton profile and send to onboarding
+    const metadata = user.user_metadata;
+    await supabase.from('profiles').insert({
+      id: user.id,
+      display_name: metadata?.full_name || metadata?.name || null,
+      photo_url: metadata?.avatar_url || metadata?.picture || null,
+      created_at: new Date().toISOString(),
+      last_seen: new Date().toISOString(),
+    });
+    window.location.href = '/onboarding';
+  } else {
+    window.location.href = '/dashboard';
+  }
+}
+
+/**
  * Sign in with Google using native SDK on iOS/Android,
  * or OAuth redirect on web.
  */
@@ -18,6 +51,9 @@ export async function nativeGoogleSignIn(): Promise<{ error: Error | null }> {
   if (Capacitor.isNativePlatform()) {
     try {
       const { GoogleSignIn } = await import('@capawesome/capacitor-google-sign-in');
+      await GoogleSignIn.initialize({
+        clientId: '696145455871-vlcfa3jpic51csrjen8boel26bfkack8.apps.googleusercontent.com',
+      });
       const result = await GoogleSignIn.signIn();
 
       if (!result.idToken) {
@@ -30,6 +66,7 @@ export async function nativeGoogleSignIn(): Promise<{ error: Error | null }> {
       });
 
       if (error) return { error };
+      await redirectAfterNativeAuth();
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error('Google Sign-In failed') };
@@ -71,6 +108,7 @@ export async function nativeAppleSignIn(): Promise<{ error: Error | null }> {
       });
 
       if (error) return { error };
+      await redirectAfterNativeAuth();
       return { error: null };
     } catch (err) {
       return { error: err instanceof Error ? err : new Error('Apple Sign-In failed') };

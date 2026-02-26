@@ -156,12 +156,8 @@ export default function SignupPage() {
 
       if (error) throw error;
 
-      // On native, signInWithIdToken completes immediately — redirect
-      const { Capacitor } = await import('@capacitor/core');
-      if (Capacitor.isNativePlatform()) {
-        window.location.href = '/dashboard';
-      }
-      // On web, OAuth redirect handles navigation automatically
+      // On native, nativeAuth handles redirect (onboarding vs dashboard).
+      // On web, OAuth redirect handles navigation automatically.
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Sign up with ${provider} failed`;
       setError(errorMessage);
