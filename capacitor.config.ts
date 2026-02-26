@@ -35,8 +35,7 @@ const config: CapacitorConfig = {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
     GoogleSignIn: {
-      clientId: '696145455871-vlcfa3jpic51csrjen8boel26bfkack8.apps.googleusercontent.com',
-      serverClientId: '696145455871-h57ar2uvvkk6ksrgf4f3nd7og0f4ueaj.apps.googleusercontent.com',
+      clientId: '696145455871-h57ar2uvvkk6ksrgf4f3nd7og0f4ueaj.apps.googleusercontent.com',
     },
   },
   ios: {

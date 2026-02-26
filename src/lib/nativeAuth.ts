@@ -10,8 +10,8 @@
 import { Capacitor } from '@capacitor/core';
 import { supabase } from './supabase';
 
-// Google OAuth client IDs
-const GOOGLE_IOS_CLIENT_ID = '696145455871-vlcfa3jpic51csrjen8boel26bfkack8.apps.googleusercontent.com';
+// Google Web client ID — the @capawesome plugin requires the WEB client ID
+// in initialize(). The iOS client ID is read from Info.plist (GIDClientID).
 const GOOGLE_WEB_CLIENT_ID = '696145455871-h57ar2uvvkk6ksrgf4f3nd7og0f4ueaj.apps.googleusercontent.com';
 
 /**
@@ -79,22 +79,20 @@ export async function nativeGoogleSignIn(): Promise<{ error: Error | null }> {
   if (Capacitor.isNativePlatform()) {
     try {
       const { GoogleSignIn } = await import('@capawesome/capacitor-google-sign-in');
+      // clientId MUST be the Web client ID per plugin docs.
+      // The iOS client ID is read from Info.plist GIDClientID automatically.
       await GoogleSignIn.initialize({
-        clientId: GOOGLE_IOS_CLIENT_ID,
-        serverClientId: GOOGLE_WEB_CLIENT_ID,
+        clientId: GOOGLE_WEB_CLIENT_ID,
       });
       const result = await GoogleSignIn.signIn();
 
-      // Use serverIdToken (audience = Web client ID) which Supabase expects.
-      // Falls back to idToken if serverIdToken isn't available.
-      const idToken = result.serverIdToken || result.idToken;
-      if (!idToken) {
+      if (!result.idToken) {
         return { error: new Error('No ID token returned from Google Sign-In') };
       }
 
       const { error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
-        token: idToken,
+        token: result.idToken,
       });
 
       if (error) return { error };
