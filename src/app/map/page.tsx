@@ -23,6 +23,7 @@ import {
   ProfileDrawer,
   GroupDrawer,
 } from '@/components/map';
+import { GoLiveButton } from '@/components/map/GoLiveButton';
 import type { MapViewMode, MapProfile, MapGroup, Coordinates } from '@/types/map';
 
 export default function MapViewPage() {
@@ -130,6 +131,9 @@ export default function MapViewPage() {
 
         {/* Cruising FAB */}
         <CruisingFAB onClick={() => setCruisingOpen(true)} />
+
+        {/* Go Live Button - manual map check-in */}
+        <GoLiveButton userId={currentUser?.id ?? null} />
       </div>
 
       {/* Profile Drawer */}

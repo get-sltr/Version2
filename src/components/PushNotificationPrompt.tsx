@@ -158,17 +158,13 @@ export function PushNotificationPrompt({ userId, onDismiss }: PushNotificationPr
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Button */}
           <button
             onClick={handleEnableNotifications}
             style={styles.enableButton}
             disabled={enabling}
           >
             {enabling ? 'Enabling...' : 'Enable Notifications'}
-          </button>
-
-          <button onClick={handleDismiss} style={styles.dismissButton}>
-            Not Now
           </button>
         </motion.div>
       </motion.div>

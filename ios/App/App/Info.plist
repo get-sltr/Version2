@@ -25,9 +25,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Primal Men needs camera access for video calls and Pulse rooms</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Primal Men uses your location to show nearby users and cruising spots on the map.</string>
+	<string>Primal Men uses your location to show nearby users. Your location is only visible on the map when you manually check in.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Primal Men uses your location to show nearby people on the map</string>
+	<string>Primal Men uses your location to show nearby users. Your location is only visible on the map when you manually check in.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Primal Men needs microphone access for voice and video calls</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -55,5 +55,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.$(GOOGLE_REVERSED_CLIENT_ID)</string>
+			</array>
+			<key>CFBundleURLName</key>
+			<string>Google Sign-In</string>
+		</dict>
+	</array>
 </dict>
 </plist>

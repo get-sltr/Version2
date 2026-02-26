@@ -84,7 +84,7 @@ export async function POST(request: Request) {
   }
 
   // ── Normalize BabyLoveGrowth.ai field names ─────────────────────────
-  const raw = payload as Record<string, unknown>;
+  const raw = payload as unknown as Record<string, unknown>;
   // Content: content_html → content
   if (!raw.content && raw.content_html) {
     payload.content = raw.content_html as string;
