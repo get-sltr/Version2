@@ -14,29 +14,6 @@ import { supabase } from './supabase';
 // in initialize(). The iOS client ID is read from Info.plist (GIDClientID).
 const GOOGLE_WEB_CLIENT_ID = '696145455871-h57ar2uvvkk6ksrgf4f3nd7og0f4ueaj.apps.googleusercontent.com';
 
-/**
- * Generate a random nonce string for Apple Sign-In
- */
-function generateNonce(length = 32): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const values = crypto.getRandomValues(new Uint8Array(length));
-  for (const val of values) {
-    result += chars[val % chars.length];
-  }
-  return result;
-}
-
-/**
- * SHA-256 hash a string (for Apple Sign-In nonce)
- */
-async function sha256(plain: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  const bytes = new Uint8Array(hash);
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 /**
  * After native signInWithIdToken, check if the user has a profile.
@@ -123,15 +100,10 @@ export async function nativeAppleSignIn(): Promise<{ error: Error | null }> {
     try {
       const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
 
-      // Generate nonce for Supabase verification
-      const rawNonce = generateNonce();
-      const hashedNonce = await sha256(rawNonce);
-
       const result = await SignInWithApple.authorize({
         clientId: 'com.sltrdigital.primal',
         redirectURI: 'https://primalgay.com/auth/callback',
         scopes: 'email name',
-        nonce: hashedNonce,
       });
 
       if (!result.response.identityToken) {
@@ -141,7 +113,6 @@ export async function nativeAppleSignIn(): Promise<{ error: Error | null }> {
       const { error } = await supabase.auth.signInWithIdToken({
         provider: 'apple',
         token: result.response.identityToken,
-        nonce: rawNonce,
       });
 
       if (error) return { error };
