@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useLocationPresence } from '@/hooks/useLocationPresence';
 import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
@@ -73,6 +73,17 @@ export default function MapViewPage() {
     radius: 8000,
   });
 
+  // Auto-dismiss empty state hint after 5 seconds
+  const [showEmptyHint, setShowEmptyHint] = useState(true);
+  useEffect(() => {
+    if (profiles.length > 0) {
+      setShowEmptyHint(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowEmptyHint(false), 5000);
+    return () => clearTimeout(timer);
+  }, [profiles.length]);
+
   // Handlers
   const handleSelectProfile = useCallback((profile: MapProfile) => {
     setCenterOn({ lat: profile.lat, lng: profile.lng });
@@ -129,8 +140,8 @@ export default function MapViewPage() {
           onEmptyClick={handleCloseDrawer}
         />
 
-        {/* Empty state hint when no users are live */}
-        {profiles.length === 0 && (
+        {/* Empty state hint when no users are live — auto-dismisses after 5s */}
+        {profiles.length === 0 && showEmptyHint && (
           <div style={{
             position: 'absolute',
             top: '50%',
