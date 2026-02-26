@@ -164,9 +164,10 @@ export async function getOfferings(): Promise<PurchasesOfferings | null> {
 
   try {
     console.log('[RevenueCat] Fetching offerings...');
-    const { offerings } = await Purchases.getOfferings();
-    console.log('[RevenueCat] Offerings result:', JSON.stringify(offerings, null, 2));
-    console.log('[RevenueCat] Current offering:', offerings?.current);
+    const result = await Purchases.getOfferings();
+    // RevenueCat Capacitor plugin returns offerings at top level or nested
+    const offerings = result?.offerings ?? result;
+    console.log('[RevenueCat] Current offering:', offerings?.current?.identifier);
     return offerings;
   } catch (error) {
     console.error('[RevenueCat] Failed to get offerings:', error);
