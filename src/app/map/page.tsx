@@ -5,6 +5,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { useLocationPresence } from '@/hooks/useLocationPresence';
 import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
@@ -13,7 +14,7 @@ import { useMapVenues } from '@/hooks/useMapVenues';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import MigrationBanner from '@/components/MigrationBanner';
-import MapboxMap from '@/components/Mapbox/MapboxMap';
+const MapboxMap = dynamic(() => import('@/components/Mapbox/MapboxMap'), { ssr: false });
 import { BottomNavWithBadges } from '@/components/BottomNavWithBadges';
 import {
   MapHeader,
@@ -212,8 +213,6 @@ export default function MapViewPage() {
 
       {/* Global Styles */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
         .mapPageContainer {
           height: 100vh;
           height: 100dvh;
