@@ -782,6 +782,79 @@ export default function Dashboard() {
             <span style={{ position: 'relative', zIndex: 1 }}>Map</span>
           </a>
         </div>
+
+        {/* PULSE — full-width liquid glass lime green banner */}
+        <a href="/pulse" style={{
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '10px',
+          width: '100%',
+          padding: '14px 20px',
+          marginBottom: '12px',
+          background: 'linear-gradient(135deg, rgba(0,255,100,0.12) 0%, rgba(57,255,20,0.08) 30%, rgba(0,255,80,0.14) 70%, rgba(57,255,20,0.10) 100%)',
+          backdropFilter: 'blur(20px) saturate(200%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+          border: '1px solid rgba(57,255,20,0.35)',
+          borderRadius: '14px',
+          textDecoration: 'none',
+          boxShadow: '0 0 24px rgba(57,255,20,0.15), 0 0 8px rgba(57,255,20,0.10), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(57,255,20,0.10)',
+        }}>
+          {/* Glass top gloss */}
+          <span style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '50%',
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0.18), transparent)',
+            borderRadius: '14px 14px 0 0',
+            pointerEvents: 'none',
+          }} />
+          {/* Reflective shine sweep */}
+          <span style={{
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '200%',
+            height: '100%',
+            background: 'linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.25) 38%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.25) 62%, transparent 80%)',
+            animation: 'pulseGlassShine 3s ease-in-out infinite',
+          }} />
+          {/* Pulsing dot */}
+          <span style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: '#39FF14',
+            boxShadow: '0 0 8px rgba(57,255,20,0.9), 0 0 24px rgba(57,255,20,0.4)',
+            animation: 'pulseDot 1.5s ease-in-out infinite',
+            position: 'relative',
+            zIndex: 10,
+            flexShrink: 0,
+          }} />
+          <span style={{
+            position: 'relative',
+            zIndex: 10,
+            fontSize: '13px',
+            fontWeight: 800,
+            letterSpacing: '2.5px',
+            color: '#39FF14',
+            textShadow: '0 0 12px rgba(57,255,20,0.6), 0 0 30px rgba(57,255,20,0.15)',
+            fontFamily: "'Orbitron', sans-serif",
+          }}>PULSE</span>
+          <span style={{
+            position: 'relative',
+            zIndex: 10,
+            fontSize: '11px',
+            color: 'rgba(57,255,20,0.55)',
+            fontWeight: 500,
+            letterSpacing: '0.5px',
+          }}>LIVE</span>
+        </a>
+
         {searchedLocation && (
           <div style={{
             background: 'rgba(255,107,53,0.1)',
@@ -1761,6 +1834,16 @@ export default function Dashboard() {
         @keyframes buttonShine {
           0% { left: -100%; }
           50%, 100% { left: 150%; }
+        }
+
+        @keyframes pulseGlassShine {
+          0% { left: -100%; }
+          40%, 100% { left: 150%; }
+        }
+
+        @keyframes pulseDot {
+          0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px rgba(57,255,20,0.9), 0 0 24px rgba(57,255,20,0.4); }
+          50% { opacity: 0.6; transform: scale(0.75); box-shadow: 0 0 4px rgba(57,255,20,0.5), 0 0 12px rgba(57,255,20,0.2); }
         }
 
         @keyframes hostingPulse {
