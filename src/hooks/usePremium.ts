@@ -65,6 +65,15 @@ export function usePremium(): PremiumStatus {
       const currentPlatform = getPlatform();
       setPlatform(currentPlatform);
 
+      // FREE ACCESS FOR ALL — paywall disabled until CCBill approved
+      // TODO: Remove this block and uncomment native check below when payments are live
+      setIsPremium(true);
+      setPremiumUntil(null);
+      setIsLoading(false);
+      cachedResult = { isPremium: true, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
+      return;
+
+      /* --- PAYWALLED MODE (re-enable when CCBill is approved) ---
       // Web users get free premium access
       if (!isNativePlatform()) {
         setIsPremium(true);
@@ -118,12 +127,13 @@ export function usePremium(): PremiumStatus {
       setIsPremium(isCurrentlyPremium);
       setPremiumUntil(premiumExpiry);
       cachedResult = { isPremium: isCurrentlyPremium, premiumUntil: premiumExpiry, platform: currentPlatform, timestamp: Date.now() };
+      --- END PAYWALLED MODE --- */
 
     } catch (err) {
       console.error('[usePremium] Error:', err);
       setError('Failed to verify subscription');
-      // On error, default to no premium on native
-      setIsPremium(!isNativePlatform());
+      // On error, default to free access (paywall disabled)
+      setIsPremium(true);
     } finally {
       setIsLoading(false);
     }
