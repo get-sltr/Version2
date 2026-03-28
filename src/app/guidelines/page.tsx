@@ -1,5 +1,3 @@
-'use client';
-
 export default function CommunityGuidelines() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#e0e0e0', fontFamily: "var(--font-dm-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }}>

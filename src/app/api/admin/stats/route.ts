@@ -27,144 +27,103 @@ export async function GET() {
   try {
     const admin = getSupabaseAdmin();
 
-    // Get total users count
-    const { count: totalUsers } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true });
-
-    // Get users created today
+    // Pre-compute date boundaries
+    const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const { count: todaySignups } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', today.toISOString());
 
-    // Get users created this week
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const { count: weekSignups } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', weekAgo.toISOString());
 
-    // Get users created this month
     const monthAgo = new Date();
     monthAgo.setDate(monthAgo.getDate() - 30);
-    const { count: monthSignups } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', monthAgo.toISOString());
 
-    // Get premium users count
-    const { count: premiumUsers } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_premium', true);
-
-    // Get active premium (not expired)
-    const { count: activePremium } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_premium', true)
-      .gte('premium_until', new Date().toISOString());
-
-    // Get online users (active in last 15 minutes)
     const fifteenMinutesAgo = new Date();
     fifteenMinutesAgo.setMinutes(fifteenMinutesAgo.getMinutes() - 15);
-    const { count: onlineUsers } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .gte('last_seen', fifteenMinutesAgo.toISOString());
 
-    // Get verified users
-    const { count: verifiedUsers } = await admin
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_verified', true);
+    // Run ALL queries in parallel instead of sequentially
+    const [
+      totalUsersRes,
+      todaySignupsRes,
+      weekSignupsRes,
+      monthSignupsRes,
+      premiumUsersRes,
+      activePremiumRes,
+      onlineUsersRes,
+      verifiedUsersRes,
+      totalMessagesRes,
+      totalGroupsRes,
+      activeGroupsRes,
+      pendingPhotoReviewsRes,
+      pendingUserReportsRes,
+      pendingCruisingReportsRes,
+      // Single query for all signups in last 7 days (replaces 7 separate queries)
+      weekSignupsDataRes,
+    ] = await Promise.all([
+      admin.from('profiles').select('*', { count: 'exact', head: true }),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo.toISOString()),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', monthAgo.toISOString()),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).eq('is_premium', true),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).eq('is_premium', true).gte('premium_until', now.toISOString()),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).gte('last_seen', fifteenMinutesAgo.toISOString()),
+      admin.from('profiles').select('*', { count: 'exact', head: true }).eq('is_verified', true),
+      admin.from('messages').select('*', { count: 'exact', head: true }),
+      admin.from('groups').select('*', { count: 'exact', head: true }),
+      admin.from('groups').select('*', { count: 'exact', head: true }).eq('is_active', true),
+      admin.from('photo_moderation_log').select('*', { count: 'exact', head: true }).eq('requires_manual_review', true).is('review_decision', null),
+      admin.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      admin.from('cruising_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      // Fetch just created_at for last 7 days, bucket in JS
+      admin.from('profiles').select('created_at').gte('created_at', weekAgo.toISOString()),
+    ]);
 
-    // Get message count (total)
-    const { count: totalMessages } = await admin
-      .from('messages')
-      .select('*', { count: 'exact', head: true });
+    const totalUsers = totalUsersRes.count || 0;
+    const premiumUsers = premiumUsersRes.count || 0;
 
-    // Get groups count
-    const { count: totalGroups } = await admin
-      .from('groups')
-      .select('*', { count: 'exact', head: true });
-
-    // Get active groups
-    const { count: activeGroups } = await admin
-      .from('groups')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true);
-
-    // Calculate conversion rate
-    const conversionRate = totalUsers && totalUsers > 0
-      ? ((premiumUsers || 0) / totalUsers * 100).toFixed(2)
-      : '0';
-
-    // Get signups by day for the last 7 days
+    // Bucket signups by day in JS (replaces 7 separate DB queries)
     const signupsByDay: { date: string; count: number }[] = [];
+    const dayCounts = new Map<string, number>();
+    if (weekSignupsDataRes.data) {
+      for (const row of weekSignupsDataRes.data) {
+        const dateKey = new Date(row.created_at).toISOString().split('T')[0];
+        dayCounts.set(dateKey, (dayCounts.get(dateKey) || 0) + 1);
+      }
+    }
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-      const nextDate = new Date(date);
-      nextDate.setDate(nextDate.getDate() + 1);
-
-      const { count } = await admin
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', date.toISOString())
-        .lt('created_at', nextDate.toISOString());
-
-      signupsByDay.push({
-        date: date.toISOString().split('T')[0],
-        count: count || 0,
-      });
+      const dateKey = date.toISOString().split('T')[0];
+      signupsByDay.push({ date: dateKey, count: dayCounts.get(dateKey) || 0 });
     }
 
-    // Get pending moderation counts for alert banners
-    const { count: pendingPhotoReviews } = await admin
-      .from('photo_moderation_log')
-      .select('*', { count: 'exact', head: true })
-      .eq('requires_manual_review', true)
-      .is('review_decision', null);
-
-    const { count: pendingUserReports } = await admin
-      .from('reports')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
-
-    const { count: pendingCruisingReports } = await admin
-      .from('cruising_reports')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
+    const conversionRate = totalUsers > 0
+      ? (premiumUsers / totalUsers * 100).toFixed(2)
+      : '0';
 
     return NextResponse.json({
       users: {
-        total: totalUsers || 0,
-        today: todaySignups || 0,
-        thisWeek: weekSignups || 0,
-        thisMonth: monthSignups || 0,
-        online: onlineUsers || 0,
-        verified: verifiedUsers || 0,
+        total: totalUsers,
+        today: todaySignupsRes.count || 0,
+        thisWeek: weekSignupsRes.count || 0,
+        thisMonth: monthSignupsRes.count || 0,
+        online: onlineUsersRes.count || 0,
+        verified: verifiedUsersRes.count || 0,
       },
       premium: {
-        total: premiumUsers || 0,
-        active: activePremium || 0,
+        total: premiumUsers,
+        active: activePremiumRes.count || 0,
         conversionRate: `${conversionRate}%`,
       },
       content: {
-        messages: totalMessages || 0,
-        groups: totalGroups || 0,
-        activeGroups: activeGroups || 0,
+        messages: totalMessagesRes.count || 0,
+        groups: totalGroupsRes.count || 0,
+        activeGroups: activeGroupsRes.count || 0,
       },
       moderation: {
-        pendingPhotos: pendingPhotoReviews || 0,
-        pendingUserReports: pendingUserReports || 0,
-        pendingCruisingReports: pendingCruisingReports || 0,
+        pendingPhotos: pendingPhotoReviewsRes.count || 0,
+        pendingUserReports: pendingUserReportsRes.count || 0,
+        pendingCruisingReports: pendingCruisingReportsRes.count || 0,
       },
       signupsByDay,
       generatedAt: new Date().toISOString(),

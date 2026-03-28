@@ -11,8 +11,9 @@ import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { getReceivedTaps } from '@/lib/api/taps';
 import { getProfileViews } from '@/lib/api/views';
 import { getCruisingUpdates } from '@/lib/api/cruisingUpdates';
+import dynamic from 'next/dynamic';
 import { PremiumPromo } from '@/components/PremiumPromo';
-import MapboxMap from '@/components/Mapbox/MapboxMap';
+const MapboxMap = dynamic(() => import('@/components/Mapbox/MapboxMap'), { ssr: false });
 import ProBadge from '@/components/ProBadge';
 import { glassCard, glassBottomNav } from '@/styles/design-tokens';
 import type { ProfilePreview } from '@/types/database';
@@ -771,7 +772,7 @@ export default function MissionControlPage() {
         justifyContent: 'center',
         background: 'linear-gradient(90deg, #555, #8a8a8a, #d4d4d4, #f5f5f5, #fff, #f5f5f5, #d4d4d4, #8a8a8a, #555)',
         backgroundSize: '300% 100%',
-        animation: 'mc-chrome-sweep 3s ease-in-out infinite',
+        animation: 'mc-chrome-sweep 12s ease-in-out infinite',
         position: 'relative',
         overflow: 'hidden',
         borderTop: '1px solid rgba(255,107,53,0.3)',
@@ -787,7 +788,7 @@ export default function MissionControlPage() {
           textShadow: '0 1px 0 rgba(255,255,255,0.6), 0 0 10px rgba(255,255,255,0.3)',
           zIndex: 1,
         }}>
-          PRIMAL MEN
+          PRIMAL MEN<sup style={{ fontSize: '6px', verticalAlign: 'super', marginLeft: '2px', fontWeight: 400 }}>™</sup>
         </span>
       </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { colors, radius, typography } from '../../../tokens';
 import { Badge } from '../../atoms/Badge';
 
@@ -11,7 +11,7 @@ export interface ProfileCardProps {
   onClick?: () => void;
 }
 
-export const ProfileCard: React.FC<ProfileCardProps> = ({
+export const ProfileCard = memo<ProfileCardProps>(function ProfileCard({
   name,
   age,
   distance,
@@ -66,4 +66,4 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
       </div>
     </button>
   );
-};
+});

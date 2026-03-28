@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { colors, effects } from '../../../tokens';
 import { AvatarProps } from './Avatar.types';
 
 const sizeMap = { xs: 24, sm: 32, md: 48, lg: 64, xl: 96 };
 
-export const Avatar: React.FC<AvatarProps> = ({
+export const Avatar = memo<AvatarProps>(function Avatar({
   src,
   alt = 'Avatar',
   size = 'md',
@@ -25,4 +25,4 @@ export const Avatar: React.FC<AvatarProps> = ({
       )}
     </div>
   );
-};
+});

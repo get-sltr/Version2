@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { colors, typography } from '../../../tokens';
 
 export interface BadgeProps {
@@ -6,7 +6,7 @@ export interface BadgeProps {
   children: React.ReactNode;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ variant = 'default', children }) => {
+export const Badge = memo<BadgeProps>(function Badge({ variant = 'default', children }) {
   const variantStyles: Record<string, React.CSSProperties> = {
     default: { backgroundColor: colors.neutral.gray800, color: colors.neutral.white },
     online: { backgroundColor: colors.semantic.online, color: colors.neutral.black },
@@ -19,4 +19,4 @@ export const Badge: React.FC<BadgeProps> = ({ variant = 'default', children }) =
       {children}
     </span>
   );
-};
+});

@@ -504,8 +504,6 @@ export default function PulseLobbyPage() {
 
       {/* Keyframes */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
         @keyframes pulseGlow {
           0%, 100% { opacity: 0.3; }
           50% { opacity: 0.7; }

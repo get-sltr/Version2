@@ -779,8 +779,7 @@ export default function Dashboard() {
               background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%)',
               animation: 'buttonShine 2.5s ease-in-out infinite',
             }} />
-            <IconMap size={14} />
-            <span style={{ position: 'relative', zIndex: 1 }}>MAP</span>
+            <span style={{ position: 'relative', zIndex: 1 }}>Map</span>
           </a>
         </div>
         {searchedLocation && (
@@ -836,7 +835,6 @@ export default function Dashboard() {
             gap: '6px',
             fontFamily: 'inherit',
           }}>
-            <IconStar size={14} />
             Faves
           </a>
           {filters.map(filter => {
@@ -1759,7 +1757,6 @@ export default function Dashboard() {
 
       {/* Global Styles for animations */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap');
 
         @keyframes buttonShine {
           0% { left: -100%; }

@@ -167,8 +167,6 @@ export default function SignupPage() {
   return (
     <>
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
-
         .signup-container {
           min-height: 100vh;
           background: #0a0a0f;

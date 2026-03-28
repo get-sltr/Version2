@@ -146,10 +146,7 @@ export function PrimalStarSplash({ onComplete }: PrimalStarSplashProps) {
         <p style={styles.tagline}>YOUR BURNING DESIRE, UNLEASHED.</p>
       </motion.div>
 
-      {/* Fonts */}
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&display=swap');
-      `}</style>
+      {/* Fonts loaded in root layout */}
     </div>
   );
 }

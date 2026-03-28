@@ -442,8 +442,6 @@ export default function PulseSplashPage() {
       </div>
 
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
         @keyframes pulse {
           0%, 100% {
             transform: translate(-50%, -50%) scale(1);
