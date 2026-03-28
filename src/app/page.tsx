@@ -1,21 +1,69 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
 import { AnimatedLogo } from '@/components/AnimatedLogo';
 
+// Reduce particle count on native to prevent GPU memory pressure in WKWebView
+const IS_NATIVE = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+const PARTICLE_COUNT = IS_NATIVE ? 20 : 80;
+const WHIRLPOOL_DURATION = IS_NATIVE ? 2500 : 4000; // ms — shorter on native
+const FLASH_DELAY = WHIRLPOOL_DURATION - 200;
+const REVEAL_DELAY = WHIRLPOOL_DURATION + 300;
+
+interface Particle {
+  id: number;
+  startX: number;
+  startY: number;
+  size: number;
+  delay: number;
+  duration: number;
+  brightness: number;
+}
+
 export default function LandingPage() {
+  const [phase, setPhase] = useState<'whirlpool' | 'flash' | 'reveal'>('whirlpool');
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Generate particles once
+  const particles = useMemo<Particle[]>(() => {
+    return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 30 + Math.random() * 70; // Start from edges
+      return {
+        id: i,
+        startX: 50 + Math.cos(angle) * distance,
+        startY: 50 + Math.sin(angle) * distance,
+        size: 2 + Math.random() * 4,
+        delay: Math.random() * 0.8,
+        duration: 2.5 + Math.random() * 1.5,
+        brightness: 0.5 + Math.random() * 0.5,
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    const flashTimer = setTimeout(() => setPhase('flash'), FLASH_DELAY);
+    const revealTimer = setTimeout(() => setPhase('reveal'), REVEAL_DELAY);
+
+    return () => {
+      clearTimeout(flashTimer);
+      clearTimeout(revealTimer);
+    };
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
       const handleCanPlay = () => setVideoLoaded(true);
       video.addEventListener('canplay', handleCanPlay);
+      // Force play — muted videos can autoplay without user gesture
       video.muted = true;
       video.play().catch(() => {});
-      const fallback = setTimeout(() => setVideoLoaded(true), 2000);
+      // Longer fallback on native — WKWebView may be slower to load video
+      const fallback = setTimeout(() => setVideoLoaded(true), IS_NATIVE ? 5000 : 2000);
       return () => {
         video.removeEventListener('canplay', handleCanPlay);
         clearTimeout(fallback);
@@ -23,10 +71,14 @@ export default function LandingPage() {
     }
   }, []);
 
+  const handleSkip = () => {
+    if (phase !== 'reveal') setPhase('reveal');
+  };
+
   return (
-    <div className="landing-container">
-      {/* Video Background */}
-      <div className="video-wrapper">
+    <div className={`landing-container${IS_NATIVE ? ' native-mode' : ''}`} onClick={handleSkip}>
+      {/* Video Background - hidden during whirlpool */}
+      <div className={`video-wrapper ${phase === 'reveal' ? 'visible' : ''}`}>
         <video
           ref={videoRef}
           className={`bg-video ${videoLoaded ? 'loaded' : ''}`}
@@ -45,8 +97,63 @@ export default function LandingPage() {
         <div className="video-overlay" />
       </div>
 
-      {/* Main Content — visible immediately */}
-      <main className="main-content visible">
+      {/* Flash Overlay */}
+      <div className={`flash-overlay ${phase === 'flash' ? 'active' : ''}`} />
+
+      {/* Whirlpool Particle Animation */}
+      <div className={`whirlpool-stage ${phase !== 'whirlpool' ? 'hidden' : ''}`}>
+        {/* Particles */}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="sparkle"
+            style={{
+              '--start-x': `${p.startX}%`,
+              '--start-y': `${p.startY}%`,
+              '--size': `${p.size}px`,
+              '--delay': `${p.delay}s`,
+              '--duration': `${p.duration}s`,
+              '--brightness': p.brightness,
+            } as React.CSSProperties}
+          />
+        ))}
+
+        {/* Center glow that builds up */}
+        <div className="center-glow" />
+
+        {/* Logo silhouette that fades in */}
+        <div className="forming-logo">
+          <AnimatedLogo size="large" href={undefined} showText={false} />
+        </div>
+      </div>
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'Primal',
+          url: 'https://primalgay.com',
+          description: 'Dating app built for gay and bisexual men. Real connections, built-in video calls, group rooms, and zero bots.',
+          applicationCategory: 'SocialNetworkingApplication',
+          operatingSystem: 'Web',
+          offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+          },
+          creator: {
+            '@type': 'Organization',
+            name: 'SLTR Digital LLC',
+            url: 'https://primalgay.com',
+          },
+        }) }}
+      />
+
+      {/* Main Content */}
+      <main className={`main-content ${phase === 'reveal' ? 'visible' : ''}`}>
+        <h1 className="sr-only">Gay & Bisexual Men Dating App for Connections – Primal</h1>
         <div className="logo-composition">
           <AnimatedLogo size="large" href={undefined} showText={true} />
         </div>
@@ -63,8 +170,9 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="landing-footer visible">
+      <footer className={`landing-footer ${phase === 'reveal' ? 'visible' : ''}`}>
         <div className="footer-links">
+          <Link href="/blog">Blog</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/about">About</Link>
@@ -76,6 +184,8 @@ export default function LandingPage() {
       </footer>
 
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; overflow: hidden; }
 
@@ -83,8 +193,9 @@ export default function LandingPage() {
           position: fixed;
           inset: 0;
           background: #000;
-          font-family: var(--font-orbitron, 'Audiowide', sans-serif);
+          font-family: 'Audiowide', sans-serif;
           overflow: hidden;
+          cursor: pointer;
         }
 
         /* ===========================================
@@ -94,7 +205,11 @@ export default function LandingPage() {
           position: absolute;
           inset: 0;
           overflow: hidden;
+          opacity: 0;
+          transition: opacity 1s ease;
         }
+
+        .video-wrapper.visible { opacity: 1; }
 
         .bg-video {
           position: absolute;
@@ -112,15 +227,26 @@ export default function LandingPage() {
 
         .bg-video.loaded { opacity: 1; }
 
-        /* Hide ALL native video controls */
-        .bg-video::-webkit-media-controls,
-        .bg-video::-webkit-media-controls-start-playback-button,
-        .bg-video::-webkit-media-controls-panel,
-        .bg-video::-webkit-media-controls-play-button,
-        .bg-video::-webkit-media-controls-overlay-play-button,
-        .bg-video::-internal-media-controls-overlay-cast-button {
+        /* Hide ALL native video controls and play button */
+        .bg-video::-webkit-media-controls {
           display: none !important;
           -webkit-appearance: none;
+        }
+        .bg-video::-webkit-media-controls-start-playback-button {
+          display: none !important;
+          -webkit-appearance: none;
+        }
+        .bg-video::-webkit-media-controls-panel {
+          display: none !important;
+        }
+        .bg-video::-webkit-media-controls-play-button {
+          display: none !important;
+        }
+        .bg-video::-webkit-media-controls-overlay-play-button {
+          display: none !important;
+        }
+        .bg-video::-internal-media-controls-overlay-cast-button {
+          display: none !important;
         }
 
         .video-overlay {
@@ -137,6 +263,156 @@ export default function LandingPage() {
         }
 
         /* ===========================================
+           FLASH OVERLAY
+           =========================================== */
+        .flash-overlay {
+          position: fixed;
+          inset: 0;
+          background: white;
+          z-index: 1000;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .flash-overlay.active {
+          animation: flash-burst 0.8s ease-out forwards;
+        }
+
+        @keyframes flash-burst {
+          0% { opacity: 0; }
+          20% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+
+        /* ===========================================
+           WHIRLPOOL PARTICLE ANIMATION
+           =========================================== */
+        .whirlpool-stage {
+          position: fixed;
+          inset: 0;
+          background: #000;
+          z-index: 100;
+          transition: opacity 0.5s ease;
+        }
+
+        .whirlpool-stage.hidden {
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        /* Individual sparkle particles */
+        .sparkle {
+          position: absolute;
+          left: var(--start-x);
+          top: var(--start-y);
+          width: var(--size);
+          height: var(--size);
+          background: radial-gradient(circle,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(200, 220, 255, 0.8) 30%,
+            transparent 70%
+          );
+          border-radius: 50%;
+          filter: blur(0.5px);
+          opacity: 0;
+          animation: whirlpool-spiral var(--duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          animation-delay: var(--delay);
+          box-shadow:
+            0 0 calc(var(--size) * 2) rgba(255, 255, 255, calc(var(--brightness))),
+            0 0 calc(var(--size) * 4) rgba(200, 220, 255, calc(var(--brightness) * 0.5));
+        }
+
+        @keyframes whirlpool-spiral {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) rotate(0deg) scale(0.5);
+          }
+          10% {
+            opacity: 1;
+          }
+          30% {
+            transform: translate(
+              calc(-50% + (50% - var(--start-x)) * 0.3),
+              calc(-50% + (50% - var(--start-y)) * 0.3)
+            ) rotate(180deg) scale(0.8);
+          }
+          60% {
+            transform: translate(
+              calc(-50% + (50% - var(--start-x)) * 0.7),
+              calc(-50% + (50% - var(--start-y)) * 0.7)
+            ) rotate(400deg) scale(1);
+          }
+          85% {
+            opacity: 1;
+            transform: translate(
+              calc(-50% + (50% - var(--start-x)) * 0.95),
+              calc(-50% + (50% - var(--start-y)) * 0.95)
+            ) rotate(600deg) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(
+              calc(-50% + (50% - var(--start-x))),
+              calc(-50% + (50% - var(--start-y)))
+            ) rotate(720deg) scale(0);
+          }
+        }
+
+        /* Center glow that builds up as particles converge */
+        .center-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 150px;
+          height: 150px;
+          background: radial-gradient(circle,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(200, 220, 255, 0.4) 30%,
+            rgba(255, 107, 53, 0.2) 50%,
+            transparent 70%
+          );
+          filter: blur(20px);
+          opacity: 0;
+          animation: center-glow-build 4s ease-in forwards;
+        }
+
+        @keyframes center-glow-build {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2); }
+          50% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.6); }
+          80% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+          95% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+        }
+
+        /* Logo silhouette forming */
+        .forming-logo {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 120px;
+          height: 120px;
+          opacity: 0;
+          animation: logo-form 4s ease-out forwards;
+        }
+
+        .forming-logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.8))
+                 drop-shadow(0 0 60px rgba(200, 220, 255, 0.6));
+        }
+
+        @keyframes logo-form {
+          0%, 60% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+          80% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+          90% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* ===========================================
            MAIN CONTENT
            =========================================== */
         .main-content {
@@ -147,7 +423,14 @@ export default function LandingPage() {
           flex-direction: column;
           align-items: center;
           justify-content: center;
+          opacity: 0;
+          transform: scale(0.9);
+          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .main-content.visible {
           opacity: 1;
+          transform: scale(1);
         }
 
         /* ===========================================
@@ -161,6 +444,7 @@ export default function LandingPage() {
           transform: scale(1.3);
         }
 
+        /* Stack logo vertically on landing page */
         .logo-composition > div {
           flex-direction: column !important;
           align-items: center !important;
@@ -173,6 +457,14 @@ export default function LandingPage() {
           display: flex;
           gap: 16px;
           margin-top: 40px;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s;
+        }
+
+        .main-content.visible .cta-container {
+          opacity: 1;
+          transform: translateY(0);
         }
 
         .cta-btn {
@@ -192,7 +484,7 @@ export default function LandingPage() {
           -webkit-backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 16px;
-          font-family: var(--font-orbitron, 'Audiowide', sans-serif);
+          font-family: 'Audiowide', sans-serif;
           font-size: 12px;
           font-weight: 400;
           letter-spacing: 0.15em;
@@ -309,8 +601,12 @@ export default function LandingPage() {
           flex-direction: column;
           align-items: center;
           gap: 12px;
+          opacity: 0;
+          transition: opacity 0.8s ease 1.2s;
           z-index: 60;
         }
+
+        .landing-footer.visible { opacity: 1; }
 
         .footer-links {
           display: flex;
@@ -389,14 +685,42 @@ export default function LandingPage() {
           .cta-btn {
             width: 100%;
           }
+
+          .forming-logo {
+            transform: translate(-50%, -50%) scale(0.8);
+          }
         }
 
+        /* Reduce motion */
         @media (prefers-reduced-motion: reduce) {
+          .sparkle,
+          .center-glow,
+          .forming-logo,
           .btn-shine {
             animation: none;
           }
+
+          .flash-overlay.active {
+            animation: none;
+          }
+        }
+
+        /* Native Capacitor WKWebView optimizations — reduce GPU pressure */
+        .native-mode .sparkle {
+          filter: none;
+          box-shadow: none;
+          background: rgba(255, 255, 255, 0.8);
+        }
+
+        .native-mode .center-glow {
+          filter: blur(8px);
+        }
+
+        .native-mode .forming-logo img {
+          filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6));
         }
       `}</style>
     </div>
   );
 }
+

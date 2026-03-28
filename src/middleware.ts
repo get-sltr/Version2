@@ -25,9 +25,6 @@ const PROTECTED_ROUTES = [
 // Routes that should redirect to dashboard if already authenticated
 const AUTH_ROUTES = ['/login', '/signup', '/forgot-password'];
 
-// Routes that are temporarily hidden (under construction / pending approval)
-const HIDDEN_ROUTES = ['/premium'];
-
 // Public routes that don't need any checks
 const PUBLIC_ROUTES = [
   '/',
@@ -39,6 +36,8 @@ const PUBLIC_ROUTES = [
   '/security',
   '/cookies',
   '/dmca',
+  '/premium',
+  '/settings/help',
 ];
 
 // API routes that have their own auth handling
@@ -116,11 +115,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Block hidden routes (paywall pending CCBill approval)
-  if (HIDDEN_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
   // Create a response that we can modify
   let response = NextResponse.next({
     request: {
@@ -160,7 +154,7 @@ export async function middleware(request: NextRequest) {
   const isAuthenticated = !!user;
 
   // Handle protected routes - redirect to login if not authenticated
-  if (isProtectedRoute(pathname) && !isAuthenticated) {
+  if (isProtectedRoute(pathname) && !isPublicRoute(pathname) && !isAuthenticated) {
     const loginUrl = new URL('/login', request.url);
     // Store the intended destination for redirect after login
     loginUrl.searchParams.set('redirect', pathname);

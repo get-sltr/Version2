@@ -34,6 +34,9 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },
+    GoogleSignIn: {
+      clientId: '696145455871-h57ar2uvvkk6ksrgf4f3nd7og0f4ueaj.apps.googleusercontent.com',
+    },
   },
   ios: {
     contentInset: 'automatic',

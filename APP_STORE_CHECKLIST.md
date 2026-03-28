@@ -70,9 +70,15 @@
 
 ## Review Information
 
-### Demo Account
+### Demo Accounts
+
+**Active Subscription:**
 - **Email:** reviewer@primalgay.com
 - **Password:** PrimalReview2026!
+
+**Expired Subscription (for testing IAP purchase flow):**
+- **Email:** reviewer-expired@primalgay.com
+- **Password:** PrimalExpired2026!
 
 ### Review Notes
 Copy from: `APP_STORE_REVIEW_NOTES.md`
@@ -139,6 +145,9 @@ npx cap open ios
 | 3.1.1 In-App Purchase | No restore purchases | ✅ Implemented |
 | 1.2 User Generated Content | No report/block | ✅ Implemented |
 | 2.1 App Completeness | Crashes/bugs | Test thoroughly |
+| 2.1 App Completeness | Reviewer can't test IAP | Expired account + clear navigation steps |
+| 5.1.1 Data Collection | ATT pre-prompt dismiss | No "Not Now" button on permission prompts |
+| 5.1.2 Usage Data | Auto map location | Manual "Go Live" check-in required |
 
 ---
 
@@ -146,7 +155,7 @@ npx cap open ios
 
 Before clicking "Submit for Review":
 
-1. [ ] Demo account works and has profile photo
+1. [ ] Both demo accounts work and have profile photos
 2. [ ] App doesn't crash on launch
 3. [ ] All IAP products are "Ready to Submit"
 4. [ ] Screenshots uploaded for all required sizes

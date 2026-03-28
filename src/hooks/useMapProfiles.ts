@@ -94,13 +94,19 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+      // Only show users who manually checked in within the last hour
+      const oneHourAgo = new Date();
+      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
       const { data, error: fetchError } = await supabase
         .from('profiles')
-        .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito, is_online')
+        .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito, is_online, map_checked_in_at')
         .gte('last_seen', sevenDaysAgo.toISOString())
         .neq('is_incognito', true)  // Allow null (same as dashboard)
         .not('lat', 'is', null)
         .not('lng', 'is', null)
+        .not('map_checked_in_at', 'is', null)
+        .gte('map_checked_in_at', oneHourAgo.toISOString())
         // Photo not required - will use placeholder if missing
         .limit(500);
 

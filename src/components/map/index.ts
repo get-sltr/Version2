@@ -13,6 +13,7 @@ export { CruisingPanel } from './CruisingPanel';
 export { MenuPanel } from './MenuPanel';
 export { ProfileDrawer } from './ProfileDrawer';
 export { GroupDrawer } from './GroupDrawer';
+export { GoLiveButton } from './GoLiveButton';
 
 // Types
 export type {

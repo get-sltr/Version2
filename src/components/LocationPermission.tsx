@@ -8,13 +8,11 @@ const STORAGE_KEY = 'primal_location_state';
 
 interface LocationState {
   granted: boolean;
-  dismissedUntil: number | null; // timestamp when dismiss expires
 }
 
 /**
  * Persist location permission state to localStorage
  * - granted: user has allowed location access
- * - dismissedUntil: user dismissed prompt, don't ask until this timestamp
  */
 function getStoredState(): LocationState {
   try {
@@ -25,7 +23,7 @@ function getStoredState(): LocationState {
   } catch {
     // Ignore parse errors
   }
-  return { granted: false, dismissedUntil: null };
+  return { granted: false };
 }
 
 function saveState(state: Partial<LocationState>) {
@@ -43,8 +41,8 @@ function saveState(state: Partial<LocationState>) {
  * Logic:
  * 1. If already granted (localStorage), silently update location
  * 2. If browser permission is 'granted', mark as granted and update
- * 3. If browser permission is 'prompt' and not dismissed, show our prompt
- * 4. If user dismisses, don't ask again for 24 hours
+ * 3. If browser permission is 'prompt', show our pre-prompt (no dismiss option)
+ * 4. User must tap "Enable Location" to trigger the system permission dialog
  */
 export function LocationPermission() {
   const [showPrompt, setShowPrompt] = useState(false);
@@ -115,11 +113,6 @@ export function LocationPermission() {
         return;
       }
 
-      // Recently dismissed - don't show prompt
-      if (state.dismissedUntil && Date.now() < state.dismissedUntil) {
-        return;
-      }
-
       // Check browser permission state
       if ('permissions' in navigator) {
         try {
@@ -156,12 +149,6 @@ export function LocationPermission() {
 
   const handleEnable = () => {
     requestLocation();
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    // Dismiss for 24 hours
-    saveState({ dismissedUntil: Date.now() + 24 * 60 * 60 * 1000 });
   };
 
   if (!user || !showPrompt) return null;
@@ -215,39 +202,22 @@ export function LocationPermission() {
           Your exact location is never shared with other users.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button
-            onClick={handleEnable}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'linear-gradient(135deg, #FF6B35, #ff8c5a)',
-              border: 'none',
-              borderRadius: '12px',
-              color: '#fff',
-              fontSize: '16px',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Enable Location
-          </button>
-          <button
-            onClick={handleDismiss}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '12px',
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: '16px',
-              cursor: 'pointer',
-            }}
-          >
-            Not Now
-          </button>
-        </div>
+        <button
+          onClick={handleEnable}
+          style={{
+            width: '100%',
+            padding: '16px',
+            background: 'linear-gradient(135deg, #FF6B35, #ff8c5a)',
+            border: 'none',
+            borderRadius: '12px',
+            color: '#fff',
+            fontSize: '16px',
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          Enable Location
+        </button>
 
         <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '20px' }}>
           You can change this later in Settings

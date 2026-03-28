@@ -274,6 +274,9 @@ export default function SettingsPage() {
         <a href="/guidelines" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
           <MenuItem label="Community Guidelines" hasArrow />
         </a>
+        <a href="/blog" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+          <MenuItem label="Blog" hasArrow />
+        </a>
       </Section>
 
       {/* App Info */}

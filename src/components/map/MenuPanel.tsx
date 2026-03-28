@@ -94,6 +94,38 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const BlogIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M4 4H20V18H6L4 20V4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 9H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M8 13H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const TermsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M6 2H14L20 8V22H6V2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M10 13H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <path d="M10 17H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const PrivacyIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M12 2L4 6V12C4 17.52 7.48 22.74 12 24C16.52 22.74 20 17.52 20 12V6L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const GuidelinesIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22Z" stroke="currentColor" strokeWidth="2" />
+    <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    <circle cx="12" cy="16" r="1" fill="currentColor" />
+  </svg>
+);
+
 export function MenuPanel({
   isOpen,
   onClose,
@@ -173,6 +205,34 @@ export function MenuPanel({
             <SettingsIcon />
           </span>
           Settings
+        </Link>
+
+        <Link href="/blog" className={styles.menuItem}>
+          <span className={styles.menuItemIcon}>
+            <BlogIcon />
+          </span>
+          Blog
+        </Link>
+
+        <Link href="/terms" className={styles.menuItem}>
+          <span className={styles.menuItemIcon}>
+            <TermsIcon />
+          </span>
+          Terms of Service
+        </Link>
+
+        <Link href="/privacy" className={styles.menuItem}>
+          <span className={styles.menuItemIcon}>
+            <PrivacyIcon />
+          </span>
+          Privacy Policy
+        </Link>
+
+        <Link href="/guidelines" className={styles.menuItem}>
+          <span className={styles.menuItemIcon}>
+            <GuidelinesIcon />
+          </span>
+          Community Guidelines
         </Link>
       </div>
     </div>

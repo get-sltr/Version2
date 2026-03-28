@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { DM_Sans, Orbitron, Cormorant_Garamond, Space_Mono } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { ThemeProvider } from '../contexts/ThemeContext';
@@ -39,8 +40,25 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Primal Men - Your Burning Desire, Unleashed.',
-  description: 'Dating app for gay and bisexual men',
+  metadataBase: new URL('https://primalgay.com'),
+  title: 'Gay & Bisexual Men Dating App for Connections – Primal',
+  description: 'Primal – dating app for gay and bisexual men. Real connections, built-in video calls, group rooms, and zero bots. Rules don\'t apply.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'Gay & Bisexual Men Dating App for Connections – Primal',
+    description: 'Real connections, built-in video calls, group rooms, and zero bots. Rules don\'t apply.',
+    type: 'website',
+    url: 'https://primalgay.com',
+    siteName: 'Primal',
+    images: [{ url: '/icons/icon-512x512.png', width: 512, height: 512, alt: 'Primal' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Gay & Bisexual Men Dating App for Connections – Primal',
+    description: 'Real connections, built-in video calls, group rooms, and zero bots. Rules don\'t apply.',
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -72,6 +90,18 @@ export default function RootLayout({ children }: { readonly children: React.Reac
   return (
     <html lang="en" className={`${dmSans.variable} ${orbitron.variable} ${cormorantGaramond.variable} ${spaceMono.variable}`}>
       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-7JWP4C2KS4"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-7JWP4C2KS4');
+          `}
+        </Script>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

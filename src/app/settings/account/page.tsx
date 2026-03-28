@@ -16,10 +16,7 @@ export default function AccountSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
@@ -90,36 +87,10 @@ export default function AccountSettingsPage() {
     showToast('Password changed successfully!');
   };
 
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmText.toLowerCase() !== 'delete') {
-      showToast('Please type "DELETE" to confirm account deletion', 'error');
-      return;
-    }
-
-    setDeleteLoading(true);
-    try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        showToast('Not authenticated', 'error');
-        return;
-      }
-
-      // Delete user profile data first
-      await supabase.from('profiles').delete().eq('id', user.id);
-      await supabase.from('messages').delete().or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`);
-      await supabase.from('taps').delete().or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`);
-
-      // Sign out and redirect
-      await supabase.auth.signOut();
-      localStorage.clear();
-      router.push('/');
-    } catch (err) {
-      console.error('Delete account error:', err);
-      showToast('Failed to delete account. Please contact support.', 'error');
-    } finally {
-      setDeleteLoading(false);
-    }
+  const handleDeleteAccount = () => {
+    // Redirect to the proper full account deletion page which uses
+    // the server-side /api/account/delete endpoint to delete auth user + data
+    router.push('/settings/account/delete');
   };
 
   return (
@@ -577,7 +548,7 @@ export default function AccountSettingsPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <button
-              onClick={() => showToast('Preparing your data download...')}
+              onClick={() => router.push('/settings/account/export')}
               style={{
                 width: '100%',
                 background: '#2c2c2e',
@@ -599,7 +570,7 @@ export default function AccountSettingsPage() {
             </button>
 
             <button
-              onClick={() => router.push('/settings/privacy')}
+              onClick={() => router.push('/privacy')}
               style={{
                 width: '100%',
                 background: '#2c2c2e',
@@ -620,27 +591,6 @@ export default function AccountSettingsPage() {
               <span style={{ color: '#aaa' }}>→</span>
             </button>
 
-            <button
-              onClick={() => showToast('Cookie preferences updated')}
-              style={{
-                width: '100%',
-                background: '#2c2c2e',
-                border: '1px solid #444',
-                borderRadius: '8px',
-                padding: '14px',
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                textAlign: 'left',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
-            >
-              <span>🍪 Cookie Preferences</span>
-              <span style={{ color: '#aaa' }}>→</span>
-            </button>
           </div>
         </div>
 
@@ -658,85 +608,22 @@ export default function AccountSettingsPage() {
             Once you delete your account, there is no going back. Please be certain.
           </p>
 
-          {!showDeleteConfirm ? (
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              style={{
-                width: '100%',
-                background: 'rgba(244,67,54,0.2)',
-                border: '1px solid rgba(244,67,54,0.5)',
-                borderRadius: '8px',
-                padding: '12px',
-                color: '#f44336',
-                fontSize: '14px',
-                fontWeight: 700,
-                cursor: 'pointer'
-              }}
-            >
-              Delete Account
-            </button>
-          ) : (
-            <div>
-              <p style={{ fontSize: '13px', color: '#f44336', marginBottom: '12px' }}>
-                Type <strong>DELETE</strong> to confirm account deletion:
-              </p>
-              <input
-                type="text"
-                value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="Type DELETE"
-                style={{
-                  width: '100%',
-                  background: '#2c2c2e',
-                  border: '1px solid rgba(244,67,54,0.5)',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  color: '#fff',
-                  fontSize: '16px',
-                  marginBottom: '12px'
-                }}
-              />
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteConfirmText('');
-                  }}
-                  style={{
-                    flex: 1,
-                    background: '#333',
-                    border: '1px solid #555',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleteLoading}
-                  style={{
-                    flex: 1,
-                    background: '#f44336',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    cursor: deleteLoading ? 'not-allowed' : 'pointer',
-                    opacity: deleteLoading ? 0.6 : 1,
-                  }}
-                >
-                  {deleteLoading ? 'Deleting...' : 'Confirm Delete'}
-                </button>
-              </div>
-            </div>
-          )}
+          <button
+            onClick={handleDeleteAccount}
+            style={{
+              width: '100%',
+              background: 'rgba(244,67,54,0.2)',
+              border: '1px solid rgba(244,67,54,0.5)',
+              borderRadius: '8px',
+              padding: '12px',
+              color: '#f44336',
+              fontSize: '14px',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Delete Account
+          </button>
         </div>
       </div>
     </div>

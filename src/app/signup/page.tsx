@@ -9,6 +9,7 @@ import { supabase } from '../../lib/supabase';
 import { isValidAge, validatePassword, isValidEmail, calculateAge } from '../../lib/validation';
 import posthog from 'posthog-js';
 import { AnimatedLogo } from '../../components/AnimatedLogo';
+import { nativeGoogleSignIn, nativeAppleSignIn } from '../../lib/nativeAuth';
 
 // OAuth Icons
 function AppleIcon() {
@@ -149,14 +150,14 @@ export default function SignupPage() {
     setOauthLoading(provider);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      const { error } = provider === 'google'
+        ? await nativeGoogleSignIn()
+        : await nativeAppleSignIn();
 
       if (error) throw error;
+
+      // On native, nativeAuth handles redirect (onboarding vs dashboard).
+      // On web, OAuth redirect handles navigation automatically.
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : `Sign up with ${provider} failed`;
       setError(errorMessage);

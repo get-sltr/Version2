@@ -1,7 +1,8 @@
 # Primal Men - App Store Review Notes
 
-## Demo Account for Testing
+## Demo Accounts for Testing
 
+### Active Subscription Account
 **Email:** reviewer@primalgay.com
 **Password:** PrimalReview2026!
 
@@ -10,6 +11,16 @@ This account has been pre-configured with:
 - Location set to Los Angeles, CA
 - Sample messages from test users
 - Active subscription (sandbox)
+
+### Expired Subscription Account
+**Email:** reviewer-expired@primalgay.com
+**Password:** PrimalExpired2026!
+
+This account has been pre-configured with:
+- Profile photo uploaded
+- Location set to Los Angeles, CA
+- Expired subscription (premium features are gated)
+- Use this account to test the full subscription purchase flow
 
 ---
 
@@ -89,10 +100,12 @@ Primal Men is a dating app exclusively for gay and bisexual men aged 18+. The ap
 
 ## Technical Notes
 
-- Location permission required for core functionality (showing nearby users)
+- Location permission required for core functionality (showing nearby users on the grid)
+- **Map visibility is opt-in:** Users must manually tap "Go Live" on the map to appear as a marker to other users. Check-in expires after 1 hour and there is no automatic check-in option.
 - Camera permission required for profile photos
 - Push notifications optional (for messages and matches)
 - All photos processed on-device using AI - no photos sent to external servers for scanning
+- Sign in with Apple and Google Sign-In use native SDKs (no external browser)
 
 ---
 
@@ -104,11 +117,14 @@ Primal Men is a dating app exclusively for gay and bisexual men aged 18+. The ap
 3. Tap the message icon
 4. Send a message
 
-### To Test Subscription:
-1. Go to the "PRO" tab in bottom navigation
-2. View subscription options
-3. Use sandbox account to test purchase
-4. "Restore Purchases" button available at bottom
+### To Test Subscription (In-App Purchases):
+1. Log in with the **Expired Subscription Account** above
+2. Tap the **"PRO"** button — this is the leftmost icon in the bottom navigation bar
+3. The Premium page will load showing subscription options
+4. Tap **"SUBSCRIBE"** to initiate the in-app purchase
+5. Complete the purchase using the sandbox test account
+6. **"Restore Purchases"** button is available at the bottom of the Premium page
+7. Note: In-app purchases are only available on native iOS (not web)
 
 ### To Test Account Deletion:
 1. Go to Settings (gear icon in menu)

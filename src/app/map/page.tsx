@@ -4,8 +4,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, useCallback, useEffect } from 'react';
 import { useLocationPresence } from '@/hooks/useLocationPresence';
 import { useCurrentUserProfile } from '@/hooks/useCurrentUserProfile';
 import { useMapProfiles } from '@/hooks/useMapProfiles';
@@ -14,7 +13,7 @@ import { useMapVenues } from '@/hooks/useMapVenues';
 import { useBlockedUsers } from '@/hooks/useBlockedUsers';
 import { postCruisingUpdate } from '@/lib/api/cruisingUpdates';
 import MigrationBanner from '@/components/MigrationBanner';
-const MapboxMap = dynamic(() => import('@/components/Mapbox/MapboxMap'), { ssr: false });
+import MapboxMap from '@/components/Mapbox/MapboxMap';
 import { BottomNavWithBadges } from '@/components/BottomNavWithBadges';
 import {
   MapHeader,
@@ -24,6 +23,7 @@ import {
   ProfileDrawer,
   GroupDrawer,
 } from '@/components/map';
+import { GoLiveButton } from '@/components/map/GoLiveButton';
 import type { MapViewMode, MapProfile, MapGroup, Coordinates } from '@/types/map';
 
 export default function MapViewPage() {
@@ -72,6 +72,17 @@ export default function MapViewPage() {
     enabled: true,
     radius: 8000,
   });
+
+  // Auto-dismiss empty state hint after 5 seconds
+  const [showEmptyHint, setShowEmptyHint] = useState(true);
+  useEffect(() => {
+    if (profiles.length > 0) {
+      setShowEmptyHint(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowEmptyHint(false), 5000);
+    return () => clearTimeout(timer);
+  }, [profiles.length]);
 
   // Handlers
   const handleSelectProfile = useCallback((profile: MapProfile) => {
@@ -129,8 +140,36 @@ export default function MapViewPage() {
           onEmptyClick={handleCloseDrawer}
         />
 
+        {/* Empty state hint when no users are live — auto-dismisses after 5s */}
+        {profiles.length === 0 && showEmptyHint && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 10,
+            background: 'rgba(10, 22, 40, 0.85)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: '16px',
+            padding: '20px 24px',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            textAlign: 'center',
+            maxWidth: '280px',
+            pointerEvents: 'none',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '8px' }}>📍</div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px', margin: 0, lineHeight: 1.5 }}>
+              No one is live nearby right now. Tap <strong style={{ color: '#FF6B35' }}>Go Live</strong> to appear on the map.
+            </p>
+          </div>
+        )}
+
         {/* Cruising FAB */}
         <CruisingFAB onClick={() => setCruisingOpen(true)} />
+
+        {/* Go Live Button - manual map check-in */}
+        <GoLiveButton userId={currentUser?.id ?? null} />
       </div>
 
       {/* Profile Drawer */}
@@ -173,6 +212,8 @@ export default function MapViewPage() {
 
       {/* Global Styles */}
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
         .mapPageContainer {
           height: 100vh;
           height: 100dvh;

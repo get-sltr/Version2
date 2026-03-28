@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     // Get unique user IDs to fetch profile info
-    const userIds = [...new Set((photos || []).map((p: any) => p.user_id).filter(Boolean))];
+    const userIds = Array.from(new Set((photos || []).map((p: any) => p.user_id).filter(Boolean)));
 
     let userProfiles: Record<string, any> = {};
     if (userIds.length > 0) {

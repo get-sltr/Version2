@@ -694,7 +694,7 @@ export default function MissionControlPage() {
             WebkitTextFillColor: 'transparent',
             filter: 'drop-shadow(0 0 6px rgba(255,107,53,0.4))',
           }}>
-            MISSION CONTROL
+            MISSION CONTROL™
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

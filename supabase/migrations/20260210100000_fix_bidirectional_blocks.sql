@@ -3,11 +3,19 @@
 
 -- 1. Add policy to allow users to see if they've been blocked
 -- This allows querying blocks where blocked_user_id = current_user
-CREATE POLICY "Users can see if they are blocked"
-  ON public.blocks
-  FOR SELECT
-  TO authenticated
-  USING (blocked_user_id = auth.uid());
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE policyname = 'Users can see if they are blocked' AND tablename = 'blocks'
+  ) THEN
+    CREATE POLICY "Users can see if they are blocked"
+      ON public.blocks
+      FOR SELECT
+      TO authenticated
+      USING (blocked_user_id = auth.uid());
+  END IF;
+END
+$$;
 
 -- 2. Create a function to get all blocked user IDs (both directions)
 -- This is more efficient than two separate queries
@@ -38,9 +46,17 @@ CREATE INDEX IF NOT EXISTS idx_blocks_blocked_user_id
   ON public.blocks(blocked_user_id);
 
 -- 4. Add unique constraint to prevent duplicate blocks
-ALTER TABLE public.blocks
-  ADD CONSTRAINT blocks_unique_pair
-  UNIQUE (user_id, blocked_user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'blocks_unique_pair'
+  ) THEN
+    ALTER TABLE public.blocks
+      ADD CONSTRAINT blocks_unique_pair
+      UNIQUE (user_id, blocked_user_id);
+  END IF;
+END
+$$;
 
 -- Comment for documentation
 COMMENT ON FUNCTION public.get_all_blocked_ids() IS

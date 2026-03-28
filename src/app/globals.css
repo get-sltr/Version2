@@ -321,6 +321,19 @@ html {
   z-index: 9999;
 }
 
+/* Screen-reader only (visually hidden but accessible) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .skip-to-content:focus {
   position: fixed;
   top: 10px;
@@ -410,4 +423,135 @@ a img, button img, [role="button"] img {
 .toast-notification.toast-success {
   border-color: rgba(76, 175, 80, 0.5);
   color: #81c784;
+}
+
+/* =============================================================================
+   Blog Content Styles
+   Scoped styles for HTML content rendered via dangerouslySetInnerHTML
+   on blog post pages. Dark theme with orange accents.
+   ============================================================================= */
+
+.blog-content {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.8;
+  font-size: 17px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4,
+.blog-content h5,
+.blog-content h6 {
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+.blog-content h1 { font-size: 2em; }
+.blog-content h2 { font-size: 1.5em; }
+.blog-content h3 { font-size: 1.25em; }
+.blog-content h4 { font-size: 1.1em; }
+
+.blog-content p {
+  margin-bottom: 1.25em;
+}
+
+.blog-content a {
+  color: #FF6B35;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.blog-content a:hover {
+  color: #ff8a5c;
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 1.5em 0;
+  pointer-events: auto;
+}
+
+.blog-content blockquote {
+  border-left: 3px solid #FF6B35;
+  padding: 16px 20px;
+  margin: 1.5em 0;
+  background: rgba(255, 107, 53, 0.06);
+  border-radius: 0 8px 8px 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+.blog-content ul,
+.blog-content ol {
+  padding-left: 24px;
+  margin-bottom: 1.25em;
+}
+
+.blog-content li {
+  margin-bottom: 0.5em;
+}
+
+.blog-content li::marker {
+  color: #FF6B35;
+}
+
+.blog-content code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+}
+
+.blog-content pre {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.blog-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.blog-content hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 2em 0;
+}
+
+.blog-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.blog-content th,
+.blog-content td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.blog-content th {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-weight: 600;
+}
+
+.blog-content strong {
+  color: #fff;
+  font-weight: 600;
 }
