@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Capacitor } from '@capacitor/core';
 import { AnimatedLogo } from '@/components/AnimatedLogo';
+import { AgeGate } from '@/components/AgeGate';
 
 const IS_NATIVE = typeof window !== 'undefined' && Capacitor.isNativePlatform();
 
@@ -28,6 +29,7 @@ export default function LandingPage() {
   }, []);
 
   return (
+    <AgeGate>
     <div className="landing-container">
       {/* Video Background */}
       <div className="video-wrapper">
@@ -97,6 +99,7 @@ export default function LandingPage() {
           <Link href="/blog">Blog</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
+          <Link href="/complaints">Complaints</Link>
           <Link href="/about">About</Link>
         </div>
         <div className="footer-brand">
@@ -440,5 +443,6 @@ export default function LandingPage() {
         }
       `}</style>
     </div>
+    </AgeGate>
   );
 }

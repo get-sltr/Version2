@@ -73,12 +73,12 @@
 ### Demo Accounts
 
 **Active Subscription:**
-- **Email:** reviewer@primalgay.com
-- **Password:** PrimalReview2026!
+- **Email:** (provided separately — not stored in version control)
+- **Password:** (provided separately — not stored in version control)
 
 **Expired Subscription (for testing IAP purchase flow):**
-- **Email:** reviewer-expired@primalgay.com
-- **Password:** PrimalExpired2026!
+- **Email:** (provided separately — not stored in version control)
+- **Password:** (provided separately — not stored in version control)
 
 ### Review Notes
 Copy from: `APP_STORE_REVIEW_NOTES.md`

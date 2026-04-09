@@ -435,6 +435,17 @@ export default function EditProfilePage() {
       const url = await uploadAvatar(compressed);
       setProfilePhoto(url);
       markAsChanged();
+
+      // If scan was skipped, hold photo from public display until admin reviews
+      if (scanResult.requiresManualReview) {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+          await supabase
+            .from('profiles')
+            .update({ photo_approved: false })
+            .eq('id', currentUser.id);
+        }
+      }
     } catch (error: any) {
       console.error('Upload error:', error);
       alert(error.message || 'Failed to upload photo');

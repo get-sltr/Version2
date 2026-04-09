@@ -3,8 +3,8 @@
 ## Demo Accounts for Testing
 
 ### Active Subscription Account
-**Email:** reviewer@primalgay.com
-**Password:** PrimalReview2026!
+**Email:** (provided separately — not stored in version control)
+**Password:** (provided separately — not stored in version control)
 
 This account has been pre-configured with:
 - Profile photo uploaded
@@ -13,8 +13,8 @@ This account has been pre-configured with:
 - Active subscription (sandbox)
 
 ### Expired Subscription Account
-**Email:** reviewer-expired@primalgay.com
-**Password:** PrimalExpired2026!
+**Email:** (provided separately — not stored in version control)
+**Password:** (provided separately — not stored in version control)
 
 This account has been pre-configured with:
 - Profile photo uploaded

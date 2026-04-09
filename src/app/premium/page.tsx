@@ -541,87 +541,156 @@ export default function PremiumPage() {
           </div>
         </motion.div>
 
-        {/* Price Card */}
+        {/* Price Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           style={{
-            position: 'relative',
-            padding: '28px 24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
             marginBottom: '20px',
-            background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 140, 90, 0.06) 100%)',
-            border: '1px solid rgba(255, 107, 53, 0.4)',
-            borderRadius: '16px',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 0 30px rgba(255, 107, 53, 0.15)',
-            textAlign: 'center',
-            overflow: 'hidden',
           }}
         >
-          {/* Top shine line */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '10%',
-            right: '10%',
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
-          }} />
-
-          <div style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            letterSpacing: '3px',
-            textTransform: 'uppercase',
-            color: '#FF6B35',
-            marginBottom: '12px',
-          }}>
-            PRIMAL PRO
+          {/* Monthly */}
+          <div
+            style={{
+              position: 'relative',
+              padding: '22px 24px',
+              background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 140, 90, 0.06) 100%)',
+              border: '1px solid rgba(255, 107, 53, 0.4)',
+              borderRadius: '16px',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 0 30px rgba(255, 107, 53, 0.15)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#fff',
+                marginBottom: '2px',
+              }}>
+                Monthly
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.4)',
+              }}>
+                Cancel anytime
+              </div>
+            </div>
+            <div style={{ position: 'relative', zIndex: 1, textAlign: 'right' }}>
+              <span style={{
+                fontSize: '28px',
+                fontWeight: 700,
+                color: '#fff',
+              }}>
+                $12.99
+              </span>
+              <span style={{
+                fontSize: '14px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontWeight: 400,
+              }}>
+                /mo
+              </span>
+            </div>
+            {/* Shine animation */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
+              animation: 'shine 4s ease-in-out infinite',
+              pointerEvents: 'none',
+            }} />
           </div>
 
-          <div style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'center',
-            gap: '4px',
-            marginBottom: '8px',
-          }}>
-            <span style={{
-              fontSize: '36px',
+          {/* Yearly */}
+          <div
+            style={{
+              position: 'relative',
+              padding: '22px 24px',
+              background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.18) 0%, rgba(255, 140, 90, 0.08) 100%)',
+              border: '2px solid rgba(255, 107, 53, 0.6)',
+              borderRadius: '16px',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 0 40px rgba(255, 107, 53, 0.2)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Save badge */}
+            <div style={{
+              position: 'absolute',
+              top: '-1px',
+              right: '16px',
+              background: 'linear-gradient(135deg, #34C759 0%, #30D158 100%)',
+              borderRadius: '0 0 8px 8px',
+              padding: '3px 10px',
+              fontSize: '11px',
               fontWeight: 700,
+              letterSpacing: '0.5px',
               color: '#fff',
-              lineHeight: 1,
+              zIndex: 2,
             }}>
-              $12.99
-            </span>
-            <span style={{
-              fontSize: '14px',
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontWeight: 400,
-            }}>
-              /month
-            </span>
+              SAVE 36%
+            </div>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{
+                fontSize: '16px',
+                fontWeight: 600,
+                color: '#fff',
+                marginBottom: '2px',
+              }}>
+                Yearly
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: '#34C759',
+                fontWeight: 600,
+              }}>
+                $8.33/mo
+              </div>
+            </div>
+            <div style={{ position: 'relative', zIndex: 1, textAlign: 'right' }}>
+              <span style={{
+                fontSize: '28px',
+                fontWeight: 700,
+                color: '#fff',
+              }}>
+                $99.99
+              </span>
+              <span style={{
+                fontSize: '14px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontWeight: 400,
+              }}>
+                /yr
+              </span>
+            </div>
+            {/* Shine animation */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '200%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
+              animation: 'shine 4s ease-in-out infinite',
+              pointerEvents: 'none',
+            }} />
           </div>
-
-          <div style={{
-            fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.4)',
-          }}>
-            Cancel anytime
-          </div>
-
-          {/* Shine animation */}
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '-100%',
-            width: '200%',
-            height: '100%',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
-            animation: 'shine 4s ease-in-out infinite',
-            pointerEvents: 'none',
-          }} />
         </motion.div>
 
         {/* Error */}
@@ -813,7 +882,7 @@ export default function PremiumPage() {
             textAlign: 'center',
           }}>
             <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 500 }}>Auto-Renewal:</span>{' '}
-            Subscription automatically renews at $12.99/month unless cancelled.
+            Subscription automatically renews at $12.99/month or $99.99/year unless cancelled.
             <span style={{ display: 'block', marginTop: '8px' }}>
               Payment will be charged to your Apple ID account at confirmation of purchase.
               Subscription automatically renews unless auto-renew is turned off at least

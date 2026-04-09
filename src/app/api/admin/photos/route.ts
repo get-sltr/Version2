@@ -134,6 +134,13 @@ export async function PATCH(request: NextRequest) {
 
     const admin = getSupabaseAdmin();
 
+    // Get the moderation log entry to find the user_id
+    const { data: logEntry } = await admin
+      .from('photo_moderation_log')
+      .select('user_id')
+      .eq('id', logId)
+      .single();
+
     const { error } = await admin
       .from('photo_moderation_log')
       .update({
@@ -144,6 +151,14 @@ export async function PATCH(request: NextRequest) {
       .eq('id', logId);
 
     if (error) throw error;
+
+    // When approved, make the profile photo publicly visible again
+    if (decision === 'approved' && logEntry?.user_id) {
+      await admin
+        .from('profiles')
+        .update({ photo_approved: true })
+        .eq('id', logEntry.user_id);
+    }
 
     return NextResponse.json({ success: true, decision, logId });
   } catch (error) {

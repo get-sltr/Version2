@@ -50,6 +50,8 @@ export default function DMCAPolicy() {
           <a href="/privacy" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Privacy Policy</a>
           <a href="/terms" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Terms of Service</a>
           <a href="/guidelines" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Community Guidelines</a>
+          <a href="/complaints" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Complaints</a>
+          <a href="/2257" style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>18 U.S.C. 2257</a>
         </div>
         <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)' }}>© 2025–2026 Primal Men. All rights reserved.</p>
       </footer>

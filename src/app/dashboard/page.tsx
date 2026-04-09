@@ -203,7 +203,8 @@ export default function Dashboard() {
     let query = supabase
       .from('profiles')
       .select('*')
-      .neq('is_incognito', true);  // Only exclude explicitly incognito users (allows null)
+      .neq('is_incognito', true)  // Only exclude explicitly incognito users (allows null)
+      .neq('photo_approved', false);  // Hide profiles with photos pending moderation review
 
     // Apply filters based on activeFilter
     if (activeFilter === 'online') {
@@ -433,7 +434,8 @@ export default function Dashboard() {
         .from('profiles')
         .select('*')
         .not('lat', 'is', null)
-        .not('lng', 'is', null);
+        .not('lng', 'is', null)
+        .neq('photo_approved', false);  // Hide profiles pending moderation
 
       if (error) throw error;
 
@@ -681,6 +683,19 @@ export default function Dashboard() {
           }}>
             {!currentUser?.photo_url && <IconUser size={20} />}
           </a>
+          {currentUser?.photo_approved === false && (
+            <div style={{
+              background: 'rgba(255,165,0,0.15)',
+              border: '1px solid rgba(255,165,0,0.4)',
+              borderRadius: '8px',
+              padding: '6px 10px',
+              fontSize: '11px',
+              color: '#ffaa33',
+              lineHeight: 1.3,
+            }}>
+              Photo under review — your profile is hidden until approved
+            </div>
+          )}
           <div style={{ flex: 1, position: 'relative' }}>
             <input
               type="text"

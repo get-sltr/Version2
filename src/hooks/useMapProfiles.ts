@@ -103,6 +103,7 @@ export function useMapProfiles(options: UseMapProfilesOptions): UseMapProfilesRe
         .select('id, display_name, age, position, photo_url, lat, lng, last_seen, is_incognito, is_online, map_checked_in_at')
         .gte('last_seen', sevenDaysAgo.toISOString())
         .neq('is_incognito', true)  // Allow null (same as dashboard)
+        .neq('photo_approved', false)  // Hide profiles pending moderation
         .not('lat', 'is', null)
         .not('lng', 'is', null)
         .not('map_checked_in_at', 'is', null)

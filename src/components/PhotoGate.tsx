@@ -92,6 +92,19 @@ export function PhotoGate({ children }: { children: React.ReactNode }) {
 
       // Upload the photo
       await uploadAvatar(compressed);
+
+      // If scan was skipped (native platform / model unavailable),
+      // hold the photo from public display until admin reviews it
+      if (scanResult.requiresManualReview) {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (currentUser) {
+          await supabase
+            .from('profiles')
+            .update({ photo_approved: false })
+            .eq('id', currentUser.id);
+        }
+      }
+
       setState('pass');
     } catch (err: any) {
       console.error('PhotoGate upload error:', err);

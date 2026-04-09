@@ -40,6 +40,11 @@ const PUBLIC_ROUTES = [
   '/cookies',
   '/dmca',
   '/blog',
+  '/pricing',
+  '/complaints',
+  '/anti-trafficking',
+  '/2257',
+  '/appeals',
   '/settings/help',
 ];
 

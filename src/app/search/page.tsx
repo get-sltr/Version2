@@ -41,6 +41,7 @@ export default function SearchPage() {
         const { data, error } = await supabase
           .from('profiles')
           .select('id, display_name, photo_url, age, position, tribes, is_online')
+          .neq('photo_approved', false)
           .limit(50);
 
         if (error) {

@@ -130,12 +130,22 @@ export function PremiumPromo({ feature, onClose, fullPage = false }: PremiumProm
         marginBottom: '24px',
         border: '1px solid rgba(255,107,53,0.3)'
       }}>
-        <div style={{ fontSize: '14px', color: '#888', marginBottom: '4px' }}>Starting at just</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
-          <span style={{ fontSize: '36px', fontWeight: 800, color: '#FF6B35' }}>$5.99</span>
-          <span style={{ fontSize: '16px', color: '#888' }}>/month</span>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+          <div style={{ flex: 1, padding: '12px', background: '#1c1c1e', borderRadius: '12px', border: '1px solid rgba(255,107,53,0.3)' }}>
+            <div style={{ fontSize: '12px', color: '#888', marginBottom: '4px' }}>Monthly</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: '#FF6B35' }}>$12.99</span>
+              <span style={{ fontSize: '12px', color: '#888' }}>/mo</span>
+            </div>
+          </div>
+          <div style={{ flex: 1, padding: '12px', background: '#1c1c1e', borderRadius: '12px', border: '1px solid rgba(52,199,89,0.4)' }}>
+            <div style={{ fontSize: '12px', color: '#34C759', fontWeight: 600, marginBottom: '4px' }}>Yearly &middot; Save 36%</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
+              <span style={{ fontSize: '24px', fontWeight: 800, color: '#FF6B35' }}>$99.99</span>
+              <span style={{ fontSize: '12px', color: '#888' }}>/yr</span>
+            </div>
+          </div>
         </div>
-        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>with 6-month plan</div>
       </div>
 
       {/* CTA Button */}

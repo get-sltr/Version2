@@ -26,7 +26,7 @@ BEGIN
       gen_random_uuid(),
       '00000000-0000-0000-0000-000000000000',
       'reviewer-expired@primalgay.com',
-      crypt('PrimalExpired2026!', gen_salt('bf')),
+      crypt(current_setting('app.reviewer_expired_password', true), gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}',
       '{"dob":"1990-06-15","age":35,"age_verified":true}',

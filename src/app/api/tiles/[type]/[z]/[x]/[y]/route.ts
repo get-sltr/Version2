@@ -42,6 +42,7 @@ function getProfilesTileSQL(): string {
       SELECT id, name, age, image, ST_Transform(geom, 3857) AS g3857
       FROM profiles
       WHERE geom && (SELECT geom FROM tile)
+        AND (photo_approved IS DISTINCT FROM false)
     ),
     clusters AS (
       SELECT *, ST_ClusterDBSCAN(g3857, eps := 100, minpoints := 2) OVER () AS cluster_id
