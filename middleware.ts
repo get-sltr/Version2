@@ -12,6 +12,12 @@ const PROTECTED_ROUTES = [
   '/map',
   '/favorites',
   '/premium',
+  '/admin',
+  '/notifications',
+  '/groups',
+  '/search',
+  '/onboarding',
+  '/pulse',
 ];
 
 // Routes that should redirect to dashboard if already authenticated
@@ -33,6 +39,9 @@ export async function middleware(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
+    if (isProtectedRoute) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
     return NextResponse.next();
   }
 
@@ -68,6 +77,12 @@ export const config = {
     '/map/:path*',
     '/favorites/:path*',
     '/premium/:path*',
+    '/admin/:path*',
+    '/notifications/:path*',
+    '/groups/:path*',
+    '/search/:path*',
+    '/onboarding/:path*',
+    '/pulse/:path*',
     '/login',
     '/signup',
   ],

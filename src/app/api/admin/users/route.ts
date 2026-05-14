@@ -229,8 +229,9 @@ export async function PATCH(request: NextRequest) {
         if (!hasPermission(user.email, 'EDIT_USER')) {
           return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
+        const months = Math.min(Math.max(1, parseInt(data?.months) || 1), 24);
         const premiumUntil = new Date();
-        premiumUntil.setMonth(premiumUntil.getMonth() + (data?.months || 1));
+        premiumUntil.setMonth(premiumUntil.getMonth() + months);
         await admin
           .from('profiles')
           .update({

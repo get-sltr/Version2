@@ -23,9 +23,12 @@ const DATABASE_VARS: EnvVar[] = [
   { name: 'DATABASE_URL', required: true, description: 'PostgreSQL connection string for vector tiles' },
 ];
 
-// RevenueCat payment configuration (for native apps)
-const REVENUECAT_VARS: EnvVar[] = [
-  { name: 'NEXT_PUBLIC_REVENUECAT_API_KEY', required: false, description: 'RevenueCat public API key for subscriptions' },
+// CCBill payment configuration
+const CCBILL_VARS: EnvVar[] = [
+  { name: 'CCBILL_WEBHOOK_SALT', required: false, description: 'CCBill webhook digest verification salt' },
+  { name: 'NEXT_PUBLIC_CCBILL_FLEX_FORM_ID', required: false, description: 'CCBill FlexForms payment form ID' },
+  { name: 'CCBILL_CLIENT_ACCNUM', required: false, description: 'CCBill client account number' },
+  { name: 'CCBILL_CLIENT_SUBACC', required: false, description: 'CCBill client sub-account number' },
 ];
 
 // LiveKit video/audio configuration
@@ -72,7 +75,7 @@ const APPLE_VARS: EnvVar[] = [
 const ALL_ENV_VARS = {
   supabase: SUPABASE_VARS,
   database: DATABASE_VARS,
-  revenuecat: REVENUECAT_VARS,
+  ccbill: CCBILL_VARS,
   apple: APPLE_VARS,
   livekit: LIVEKIT_VARS,
   daily: DAILY_VARS,

@@ -1,13 +1,12 @@
 // =============================================================================
 // usePremium - Check user's premium subscription status
 // =============================================================================
-// On web: Always returns isPremium: true (free access)
-// On native: Checks RevenueCat for subscription status
+// Checks Supabase profiles table for premium status (set by CCBill webhooks).
+// Free users see gated features with lock/upgrade prompts.
 // =============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { checkEntitlement, isNativePlatform, getPlatform } from '@/lib/revenuecat';
 
 interface PremiumStatus {
   isPremium: boolean;
@@ -16,12 +15,12 @@ interface PremiumStatus {
   error: string | null;
   messagesRemaining: number;
   platform: 'web' | 'ios' | 'android';
-  // Refresh function
   refresh: () => Promise<void>;
 }
 
-// Module-level cache so all hook instances share the same result
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const FREE_MESSAGE_LIMIT = 10;
+
 let cachedResult: {
   isPremium: boolean;
   premiumUntil: Date | null;
@@ -36,17 +35,24 @@ function getCachedResult() {
   return null;
 }
 
+function detectPlatform(): 'web' | 'ios' | 'android' {
+  if (typeof window === 'undefined') return 'web';
+  const ua = navigator.userAgent.toLowerCase();
+  if (ua.includes('android')) return 'android';
+  if (ua.includes('iphone') || ua.includes('ipad')) return 'ios';
+  return 'web';
+}
+
 export function usePremium(): PremiumStatus {
   const cached = getCachedResult();
   const [isPremium, setIsPremium] = useState(cached?.isPremium ?? false);
   const [premiumUntil, setPremiumUntil] = useState<Date | null>(cached?.premiumUntil ?? null);
   const [isLoading, setIsLoading] = useState(!cached);
   const [error, setError] = useState<string | null>(null);
-  const [messagesRemaining, setMessagesRemaining] = useState(Infinity);
+  const [messagesRemaining, setMessagesRemaining] = useState(FREE_MESSAGE_LIMIT);
   const [platform, setPlatform] = useState<'web' | 'ios' | 'android'>(cached?.platform ?? 'web');
 
   const checkPremiumStatus = useCallback(async (bypassCache = false) => {
-    // Return cached result if available and not bypassing
     if (!bypassCache) {
       const cached = getCachedResult();
       if (cached) {
@@ -54,6 +60,7 @@ export function usePremium(): PremiumStatus {
         setPremiumUntil(cached.premiumUntil);
         setPlatform(cached.platform);
         setIsLoading(false);
+        if (cached.isPremium) setMessagesRemaining(Infinity);
         return;
       }
     }
@@ -62,47 +69,18 @@ export function usePremium(): PremiumStatus {
       setIsLoading(true);
       setError(null);
 
-      const currentPlatform = getPlatform();
+      const currentPlatform = detectPlatform();
       setPlatform(currentPlatform);
 
-      // FREE ACCESS FOR ALL — paywall disabled until CCBill approved
-      // TODO: Remove this block and uncomment native check below when payments are live
-      setIsPremium(true);
-      setPremiumUntil(null);
-      setIsLoading(false);
-      cachedResult = { isPremium: true, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
-      return;
-
-      /* --- PAYWALLED MODE (re-enable when CCBill is approved) ---
-      // Web users get free premium access
-      if (!isNativePlatform()) {
-        setIsPremium(true);
-        setPremiumUntil(null);
-        setIsLoading(false);
-        cachedResult = { isPremium: true, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
-        return;
-      }
-
-      // For native platforms, check RevenueCat first
-      const hasRevenueCatPremium = await checkEntitlement('Primal Pro');
-
-      if (hasRevenueCatPremium) {
-        setIsPremium(true);
-        setIsLoading(false);
-        cachedResult = { isPremium: true, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
-        return;
-      }
-
-      // Fallback: Check Supabase database for legacy premium status
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsPremium(false);
+        setMessagesRemaining(0);
         setIsLoading(false);
         cachedResult = { isPremium: false, premiumUntil: null, platform: currentPlatform, timestamp: Date.now() };
         return;
       }
 
-      // Get profile with premium status
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('is_premium, premium_until')
@@ -117,23 +95,20 @@ export function usePremium(): PremiumStatus {
         return;
       }
 
-      // Check if premium is still valid
       const now = new Date();
       const premiumExpiry = profile.premium_until ? new Date(profile.premium_until) : null;
-
       const isCurrentlyPremium = profile.is_premium === true &&
         (premiumExpiry === null || premiumExpiry > now);
 
       setIsPremium(isCurrentlyPremium);
       setPremiumUntil(premiumExpiry);
+      setMessagesRemaining(isCurrentlyPremium ? Infinity : FREE_MESSAGE_LIMIT);
       cachedResult = { isPremium: isCurrentlyPremium, premiumUntil: premiumExpiry, platform: currentPlatform, timestamp: Date.now() };
-      --- END PAYWALLED MODE --- */
 
     } catch (err) {
       console.error('[usePremium] Error:', err);
       setError('Failed to verify subscription');
-      // On error, default to free access (paywall disabled)
-      setIsPremium(true);
+      setIsPremium(false);
     } finally {
       setIsLoading(false);
     }
@@ -158,13 +133,10 @@ export function usePremium(): PremiumStatus {
   };
 }
 
-// Utility to check if user can send a message
-// For now, always returns true (no daily limits enforced)
 export async function useMessage(): Promise<boolean> {
   return true;
 }
 
-// Check if a specific feature is available
 export function canAccessFeature(isPremium: boolean, feature:
   'video_call' |
   'viewed_me' |
@@ -176,7 +148,6 @@ export function canAccessFeature(isPremium: boolean, feature:
   'unlimited_messages' |
   'unlimited_filters'
 ): boolean {
-  // These features are premium-only
   const premiumOnlyFeatures = [
     'video_call',
     'viewed_me',

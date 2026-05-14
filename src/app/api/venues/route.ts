@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServerClient } from '@/lib/supabaseServer';
+import {
+  checkUpstashRateLimit,
+  getClientIdentifier,
+  rateLimitHeaders,
+} from '@/lib/upstash-rate-limit';
 
 const CLIENT_ID = process.env.FOURSQUARE_CLIENT_ID;
 const CLIENT_SECRET = process.env.FOURSQUARE_CLIENT_SECRET;
 const BASE_URL = 'https://api.foursquare.com/v2/venues';
 
-// Category IDs for bars/clubs (v2 format)
 const VENUE_CATEGORIES = [
   '4bf58dd8d48988d116941735', // Bar
   '4bf58dd8d48988d11f941735', // Nightclub
@@ -14,15 +19,46 @@ const VENUE_CATEGORIES = [
   '4bf58dd8d48988d1d8941735', // Gay Bar
 ];
 
+const MAX_RADIUS = 50000;
+
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const clientId = getClientIdentifier(request);
+  const rateLimitResult = await checkUpstashRateLimit(clientId, 'venues');
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
+
+  // Auth
+  const supabase = await getSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401, headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get('lat');
   const lng = searchParams.get('lng');
-  const radius = searchParams.get('radius') || '8000';
+  const rawRadius = searchParams.get('radius') || '8000';
 
   if (!lat || !lng) {
     return NextResponse.json({ error: 'Missing lat/lng' }, { status: 400 });
   }
+
+  const latNum = parseFloat(lat);
+  const lngNum = parseFloat(lng);
+  if (isNaN(latNum) || isNaN(lngNum) || latNum < -90 || latNum > 90 || lngNum < -180 || lngNum > 180) {
+    return NextResponse.json({ error: 'Invalid lat/lng values' }, { status: 400 });
+  }
+
+  const radius = String(Math.min(Math.max(1, parseInt(rawRadius) || 8000), MAX_RADIUS));
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
     console.error('Foursquare credentials not configured');

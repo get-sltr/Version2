@@ -190,10 +190,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // Additional validation could verify that:
-    // - The user owns the album being shared (for album_share)
-    // - The user is the host of the group (for group_invite)
-    // This would require additional database lookups based on relatedEntityId
+    // Verify ownership of the related entity
+    if ((payload as UserEmailRequest).relatedEntityId) {
+      const entityId = (payload as UserEmailRequest).relatedEntityId;
+      const supabaseForCheck = await getSupabaseServerClient();
+
+      if (payload.emailType === 'album_share') {
+        const { data: album } = await supabaseForCheck
+          .from('profile_albums')
+          .select('user_id')
+          .eq('id', entityId)
+          .single();
+        if (!album || album.user_id !== authenticatedUser.id) {
+          return NextResponse.json(
+            { error: 'You do not own this album' },
+            { status: 403, headers: rateLimitHeaders(rateLimitResult) }
+          );
+        }
+      } else if (payload.emailType === 'group_invite') {
+        const { data: membership } = await supabaseForCheck
+          .from('group_members')
+          .select('role')
+          .eq('group_id', entityId)
+          .eq('user_id', authenticatedUser.id)
+          .single();
+        if (!membership || !['host', 'admin'].includes(membership.role)) {
+          return NextResponse.json(
+            { error: 'You are not the host of this group' },
+            { status: 403, headers: rateLimitHeaders(rateLimitResult) }
+          );
+        }
+      }
+    }
   }
 
   const lines = Array.isArray(payload.messageLines)

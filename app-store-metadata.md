@@ -64,7 +64,7 @@ NATIVE CAPABILITIES:
 - Camera & photo library access
 - Haptic feedback
 - Real-time geolocation with proximity matching
-- In-app purchases via StoreKit/RevenueCat
+- In-app purchases via CCBill
 - Offline state handling
 
 DEMO ACCOUNT:
@@ -133,7 +133,7 @@ Fill out each section below in App Store Connect under "App Privacy."
 #### 7. Purchases
 | Data Type | Collection Purpose | Linked to Identity |
 |-----------|-------------------|-------------------|
-| Purchase History | App Functionality (subscription status via RevenueCat) | Yes |
+| Purchase History | App Functionality (subscription status via CCBill) | Yes |
 
 ### Data NOT Collected
 - Financial Info (payments handled by Apple/StoreKit)

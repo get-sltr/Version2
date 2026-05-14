@@ -33,7 +33,6 @@
     "@livekit/components-react": "^2.6.7",
     "@livekit/components-styles": "^1.1.4",
     "@react-email/components": "^1.0.1",
-    "@revenuecat/purchases-capacitor": "^11.3.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
     "@tensorflow/tfjs": "^4.22.0",

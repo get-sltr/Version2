@@ -13,7 +13,7 @@
 - **UI**: Liquid glass effects, glossy buttons, dark navy theme
 - **Backend**: Supabase (Postgres, Auth, Realtime, Storage, Edge Functions)
 - **Hosting**: Vercel
-- **Payments**: Stripe (subscriptions)
+- **Payments**: CCBill (subscriptions via FlexForms + webhooks)
 - **Maps**: Mapbox GL JS
 - **Video**: WebRTC for video calls
 - **PWA**: Service worker, manifest, installable
@@ -41,7 +41,7 @@
 5. **Video Calls** — WebRTC peer-to-peer
 6. **Map View** — Mapbox showing nearby users
 7. **Filters** — Age, distance, preferences, online status
-8. **Subscriptions** — Free tier + Premium tiers via Stripe
+8. **Subscriptions** — Free tier + Premium via CCBill
 9. **Push Notifications** — Web push for messages
 10. **Discreet Mode** — Hide from grid, incognito browsing
 
@@ -54,7 +54,7 @@
 - `messages` — Individual messages
 - `blocks` — Blocked users
 - `reports` — User reports for moderation
-- `subscriptions` — Stripe subscription status
+- `apple_subscriptions` — Subscription status (synced by CCBill webhooks)
 - `locations` — User location data (encrypted)
 
 ### RLS Rules
@@ -74,7 +74,7 @@
   /features       → Grid, chat, profile components
 /lib
   /supabase       → Client, server, types
-  /stripe         → Payment helpers
+  /ccbill-webhook → CCBill webhook helpers
   /mapbox         → Map utilities
 /hooks            → Custom React hooks
 /types            → TypeScript definitions
@@ -86,7 +86,7 @@
 
 ## API Routes
 - `/api/auth/*` — Auth callbacks
-- `/api/stripe/*` — Webhook, checkout, portal
+- `/api/webhooks/ccbill` — CCBill subscription webhooks
 - `/api/moderation/*` — Photo/report review
 
 ## Environment Variables Required
@@ -95,9 +95,10 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_MAPBOX_TOKEN=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+CCBILL_WEBHOOK_SALT=
+NEXT_PUBLIC_CCBILL_FLEX_FORM_ID=
+CCBILL_CLIENT_ACCNUM=
+CCBILL_CLIENT_SUBACC=
 ```
 
 ## Commands
@@ -141,7 +142,7 @@ vercel --prod
 - [ ] Domain connected (primalgay.com)
 - [ ] SSL active
 - [ ] Email routing configured
-- [ ] Stripe webhooks verified
+- [ ] CCBill webhooks verified
 - [ ] PWA manifest complete
 - [ ] App icons all sizes
 - [ ] Privacy policy page

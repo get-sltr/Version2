@@ -123,7 +123,20 @@ export const rateLimiters = {
     : null,
 
   /**
-   * Webhook endpoints (RevenueCat, etc.) - generous limit for retries
+   * Venue search proxy
+   * 30 requests per minute
+   */
+  venues: redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, '1 m'),
+        prefix: 'ratelimit:venues',
+        analytics: true,
+      })
+    : null,
+
+  /**
+   * Webhook endpoints (CCBill, etc.) - generous limit for retries
    * 100 requests per minute
    */
   webhook: redis

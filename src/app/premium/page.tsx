@@ -4,12 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
-import {
-  getOfferings,
-  purchasePackage,
-  restorePurchases,
-  isNativePlatform,
-} from '@/lib/revenuecat';
 import posthog from 'posthog-js';
 import {
   IconInfinity,
@@ -43,16 +37,11 @@ import {
 export default function PremiumPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [restoring, setRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [isNative, setIsNative] = useState(false);
-
-  useEffect(() => {
-    setIsNative(isNativePlatform());
-  }, []);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -60,6 +49,7 @@ export default function PremiumPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           setIsAuthenticated(true);
+          setUserId(user.id);
         } else {
           router.push('/login?redirect=/premium');
         }
@@ -72,83 +62,30 @@ export default function PremiumPage() {
     checkAuth();
   }, [router]);
 
-  const handleSubscribe = async () => {
-    if (!isAuthenticated) {
+  const handleSubscribe = (plan: 'monthly' | 'yearly') => {
+    if (!isAuthenticated || !userId) {
       router.push('/login?redirect=/premium');
-      return;
-    }
-
-    if (!isNative) {
       return;
     }
 
     setLoading(true);
     setError(null);
 
-    try {
-      posthog.capture('premium_subscribe_tapped', { plan: 'primal_pro_monthly' });
-
-      const offerings = await getOfferings();
-      console.log('[Premium] Offerings received:', JSON.stringify(offerings, null, 2));
-      if (!offerings?.current) {
-        setError(`Unable to load subscription. Offerings: ${offerings ? 'exists but no current' : 'null'}`);
-        setLoading(false);
-        return;
-      }
-
-      // Get the monthly package from the current offering
-      const monthlyPackage = offerings.current.monthly
-        ?? offerings.current.availablePackages?.[0];
-
-      if (!monthlyPackage) {
-        setError('Subscription not available. Please try again later.');
-        setLoading(false);
-        return;
-      }
-
-      const result = await purchasePackage(monthlyPackage);
-
-      if (result.success) {
-        posthog.capture('premium_subscribed', { plan: 'primal_pro_monthly' });
-        setSuccess('Welcome to Primal Pro!');
-        setTimeout(() => router.push('/dashboard'), 1500);
-      } else if (result.error === 'Purchase cancelled') {
-        // User cancelled — do nothing
-      } else {
-        setError(result.error || 'Purchase failed. Please try again.');
-      }
-    } catch {
-      setError('Something went wrong. Please try again.');
-    } finally {
+    const flexFormId = process.env.NEXT_PUBLIC_CCBILL_FLEX_FORM_ID;
+    if (!flexFormId) {
+      setError('Payment system is not configured yet. Check back soon.');
       setLoading(false);
+      return;
     }
-  };
 
-  const handleRestore = async () => {
-    setRestoring(true);
-    setError(null);
+    posthog.capture('premium_subscribe_tapped', { plan });
 
-    try {
-      posthog.capture('premium_restore_tapped');
-      const result = await restorePurchases();
+    // CCBill FlexForms URL with pass-through user ID
+    const ccbillUrl = new URL(`https://api.ccbill.com/wap-frontflex/flexforms/${flexFormId}`);
+    ccbillUrl.searchParams.set('X-userId', userId);
+    ccbillUrl.searchParams.set('X-plan', plan);
 
-      if (result.success && result.customerInfo) {
-        const hasActive = Object.keys(result.customerInfo.entitlements.active).length > 0;
-        if (hasActive) {
-          posthog.capture('premium_restored');
-          setSuccess('Purchases restored! Welcome back.');
-          setTimeout(() => router.push('/dashboard'), 1500);
-        } else {
-          setError('No active subscriptions found.');
-        }
-      } else {
-        setError(result.error || 'Could not restore purchases.');
-      }
-    } catch {
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setRestoring(false);
-    }
+    window.location.href = ccbillUrl.toString();
   };
 
   // Highlighted features with icons
@@ -733,18 +670,20 @@ export default function PremiumPage() {
           </motion.div>
         )}
 
-        {/* CTA Button — Native: Subscribe / Web: Download prompt */}
-        {isNative ? (
+        {/* CTA Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}
+        >
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
             whileHover={{
               scale: 1.03,
               boxShadow: '0 0 60px rgba(255, 107, 53, 0.6), 0 0 100px rgba(255, 140, 90, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
             }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleSubscribe}
+            onClick={() => handleSubscribe('monthly')}
             disabled={loading}
             style={{
               width: '100%',
@@ -764,11 +703,9 @@ export default function PremiumPage() {
               backdropFilter: 'blur(15px)',
               boxShadow: '0 0 40px rgba(255, 107, 53, 0.35), 0 0 80px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.2)',
               overflow: 'hidden',
-              marginBottom: '12px',
               textShadow: '0 0 15px rgba(255, 255, 255, 0.5)',
             }}
           >
-            {/* Top bright edge */}
             <div style={{
               position: 'absolute',
               top: 0,
@@ -777,22 +714,9 @@ export default function PremiumPage() {
               height: '1px',
               background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 25%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.6) 75%, transparent 100%)',
             }} />
-
-            {/* Bottom orange glow edge */}
-            <div style={{
-              position: 'absolute',
-              bottom: 0,
-              left: '10%',
-              right: '10%',
-              height: '1px',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 107, 53, 0.6) 50%, transparent 100%)',
-            }} />
-
             <span style={{ position: 'relative', zIndex: 1 }}>
-              {loading ? 'PROCESSING...' : 'SUBSCRIBE'}
+              {loading ? 'REDIRECTING...' : 'SUBSCRIBE MONTHLY — $12.99/MO'}
             </span>
-
-            {/* Shine animation */}
             {!loading && (
               <div style={{
                 position: 'absolute',
@@ -806,63 +730,39 @@ export default function PremiumPage() {
               }} />
             )}
           </motion.button>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            style={{
-              width: '100%',
-              padding: '20px',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '16px',
-              textAlign: 'center',
-              marginBottom: '12px',
-            }}
-          >
-            <div style={{
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#fff',
-              marginBottom: '6px',
-            }}>
-              Download the app to subscribe
-            </div>
-            <div style={{
-              fontSize: '12px',
-              color: 'rgba(255, 255, 255, 0.4)',
-            }}>
-              Primal Pro is available via in-app purchase on iOS
-            </div>
-          </motion.div>
-        )}
 
-        {/* Restore Purchases — native only */}
-        {isNative && (
           <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.5 }}
-            onClick={handleRestore}
-            disabled={restoring}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: '0 0 60px rgba(52, 199, 89, 0.4)',
+            }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => handleSubscribe('yearly')}
+            disabled={loading}
             style={{
               width: '100%',
-              padding: '14px',
-              background: 'transparent',
-              border: 'none',
-              color: 'rgba(255, 255, 255, 0.5)',
-              fontSize: '13px',
-              fontWeight: 500,
-              cursor: restoring ? 'not-allowed' : 'pointer',
-              marginBottom: '24px',
+              position: 'relative',
+              padding: '20px',
+              background: 'linear-gradient(135deg, rgba(52, 199, 89, 0.15) 0%, rgba(52, 199, 89, 0.08) 100%)',
+              border: '1px solid rgba(52, 199, 89, 0.5)',
+              borderRadius: '16px',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 700,
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              backdropFilter: 'blur(15px)',
+              overflow: 'hidden',
             }}
           >
-            {restoring ? 'Restoring...' : 'Restore Purchases'}
+            <span style={{ position: 'relative', zIndex: 1 }}>
+              SUBSCRIBE YEARLY — $99.99/YR
+            </span>
           </motion.button>
-        )}
+        </motion.div>
 
-        {/* Disclaimer — Apple Schedule 2 required language */}
+        {/* Disclaimer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -884,10 +784,8 @@ export default function PremiumPage() {
             <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 500 }}>Auto-Renewal:</span>{' '}
             Subscription automatically renews at $12.99/month or $99.99/year unless cancelled.
             <span style={{ display: 'block', marginTop: '8px' }}>
-              Payment will be charged to your Apple ID account at confirmation of purchase.
-              Subscription automatically renews unless auto-renew is turned off at least
-              24 hours before the end of the current period. Your account will be charged
-              for renewal within 24 hours prior to the end of the current period.
+              You may cancel at any time by contacting support or through your account settings.
+              Cancellation takes effect at the end of the current billing period.
             </span>
           </div>
         </motion.div>
@@ -899,7 +797,7 @@ export default function PremiumPage() {
           textAlign: 'center',
           lineHeight: 1.5,
         }}>
-          Manage and cancel subscriptions in your App Store account settings. By subscribing, you agree to our{' '}
+          By subscribing, you agree to our{' '}
           <a href="/terms" style={{ textDecoration: 'underline', color: 'rgba(255, 255, 255, 0.5)' }}>Terms of Service</a>
           {' & '}
           <a href="/privacy" style={{ textDecoration: 'underline', color: 'rgba(255, 255, 255, 0.5)' }}>Privacy Policy</a>.

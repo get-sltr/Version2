@@ -1,12 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabaseServer';
 import { getSupabaseAdmin, isAdmin, hasPermission } from '@/lib/admin';
+import {
+  checkUpstashRateLimit,
+  getClientIdentifier,
+  rateLimitHeaders,
+} from '@/lib/upstash-rate-limit';
 
 /**
  * GET /api/admin/photos
  * Returns photos needing moderation review
  */
 export async function GET(request: NextRequest) {
+  const clientId = getClientIdentifier(request);
+  const rateLimitResult = await checkUpstashRateLimit(clientId, 'admin');
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -109,6 +123,15 @@ export async function GET(request: NextRequest) {
  * Approve a photo (update review_decision)
  */
 export async function PATCH(request: NextRequest) {
+  const clientId = getClientIdentifier(request);
+  const rateLimitResult = await checkUpstashRateLimit(clientId, 'admin');
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests' },
+      { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   const supabase = await getSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -117,6 +140,10 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (!isAdmin(user.email)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  if (!hasPermission(user.email, 'EDIT_USER')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

@@ -84,6 +84,18 @@ export async function POST(request: Request) {
     );
   }
 
+  // Authorize: user must be a participant in the room
+  // Primal room names follow the pattern "primal-{uid1}-{uid2}-{timestamp}"
+  // or are predefined Pulse rooms
+  const isPulseRoom = roomName in PULSE_ROOMS;
+  const isUserRoom = roomName.includes(user.id);
+  if (!isPulseRoom && !isUserRoom) {
+    return NextResponse.json(
+      { error: 'You are not authorized to join this room' },
+      { status: 403, headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
+
   // Get user profile for metadata
   const { data: profile } = await supabase
     .from('profiles')

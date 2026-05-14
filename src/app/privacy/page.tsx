@@ -52,7 +52,7 @@ export default function PrivacyPolicy() {
           <p><strong>Cookies & Similar Technologies:</strong> We use essential cookies and local storage to maintain your session state and preferences. We do not use third-party advertising cookies.</p>
 
           <SubHead>2.3 Information from Third Parties</SubHead>
-          <p><strong>Payment Processors:</strong> Subscription status and purchase history are received from Apple App Store and Google Play Store via our payment management partner, RevenueCat. We do not receive, process, or store your credit card number, banking details, or other payment card information.</p>
+          <p><strong>Payment Processors:</strong> Subscription payments are processed by CCBill, a PCI-compliant payment processor. We do not receive, process, or store your credit card number, banking details, or other payment card information. CCBill transmits subscription status events to our servers to keep your premium access in sync.</p>
           <p><strong>Authentication Providers:</strong> If you choose to sign in with Google or Apple, we receive your name and email address as authorized by you during the OAuth flow.</p>
         </Section>
 
@@ -90,7 +90,7 @@ export default function PrivacyPolicy() {
           <p>Your public profile is visible to other authenticated users of the Service within your configured distance radius. We share personal information with the following categories of recipients solely to operate the Service:</p>
           <ul style={{ marginTop: '12px', paddingLeft: '20px' }}>
             <li><strong>Supabase, Inc.</strong> &mdash; Database hosting, authentication, and real-time infrastructure</li>
-            <li><strong>RevenueCat, Inc.</strong> &mdash; Subscription lifecycle management (Apple/Google payment processing)</li>
+            <li><strong>CCBill, LLC</strong> &mdash; Subscription payment processing</li>
             <li><strong>Vercel, Inc.</strong> &mdash; Application hosting and content delivery</li>
             <li><strong>OneSignal, Inc.</strong> &mdash; Push notification delivery</li>
             <li><strong>Mapbox, Inc.</strong> &mdash; Location and mapping services</li>
