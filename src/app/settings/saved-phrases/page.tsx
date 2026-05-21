@@ -172,33 +172,7 @@ export default function SavedPhrasesPage() {
           💬 Quick reply templates that appear below your message input. Tap to send instantly.
         </div>
 
-        {/* Limit indicator for free users */}
-        {!isPremium && (
-          <div style={{
-            background: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-            borderRadius: '12px',
-            padding: '14px 16px',
-            marginBottom: '20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <span style={{ fontSize: '14px', color: colors.textSecondary }}>
-              Phrases: {phrases.length}/{FREE_PHRASE_LIMIT}
-            </span>
-            <a
-              href="/premium"
-              style={{
-                color: '#FF6B35',
-                fontSize: '14px',
-                fontWeight: 600,
-                textDecoration: 'none'
-              }}
-            >
-              Upgrade for unlimited →
-            </a>
-          </div>
-        )}
+        {/* Phrase limit removed — all features free */}
 
         {/* Add New Phrase */}
         <div style={{
@@ -393,41 +367,7 @@ export default function SavedPhrasesPage() {
           )}
         </div>
 
-        {/* Premium Upgrade CTA - only show for non-premium */}
-        {!isPremium && (
-          <div style={{
-            background: `linear-gradient(135deg, ${darkMode ? 'rgba(255,107,53,0.2)' : 'rgba(255,107,53,0.1)'} 0%, ${darkMode ? 'rgba(255,107,53,0.05)' : 'rgba(255,107,53,0.02)'} 100%)`,
-            border: `1px solid ${darkMode ? 'rgba(255,107,53,0.3)' : 'rgba(255,107,53,0.2)'}`,
-            borderRadius: '16px',
-            padding: '24px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>⭐</div>
-            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-              Unlock Unlimited Phrases
-            </h4>
-            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px', lineHeight: 1.6 }}>
-              Premium members get unlimited saved phrases to speed up their conversations
-            </p>
-            <a
-              href="/premium"
-              style={{
-                display: 'inline-block',
-                background: '#FF6B35',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '14px 36px',
-                color: '#fff',
-                fontSize: '16px',
-                fontWeight: 600,
-                textDecoration: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              Upgrade to Premium
-            </a>
-          </div>
-        )}
+        {/* Premium upgrade CTA removed — all features free */}
       </div>
     </div>
   );

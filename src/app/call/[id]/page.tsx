@@ -149,10 +149,7 @@ export default function VideoCallPage() {
 
   // NOW CONDITIONAL RETURNS
 
-  // Premium gate - block non-premium users
-  if (!premiumLoading && !isPremium) {
-    return <PremiumPromo feature="Video Calls" fullPage />;
-  }
+  // Premium gate removed — all features free
 
   // Permission prompt screen - requires user tap to trigger iOS permission dialog
   if (mediaStatus === 'idle' || mediaStatus === 'checking' || mediaStatus === 'prompt') {

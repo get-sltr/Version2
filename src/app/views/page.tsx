@@ -196,8 +196,7 @@ export default function ViewsPage() {
         )}
 
         {!loading && !error && views.length > 0 && views.map((view, index) => {
-          // Free users can only see the first profile clearly
-          const isBlurred = !isPremium && !premiumLoading && index > 0;
+          const isBlurred = false;
 
           return (
             <div
@@ -347,42 +346,7 @@ export default function ViewsPage() {
           );
         })}
 
-        {/* Premium Upsell for blurred views */}
-        {!loading && !error && !isPremium && !premiumLoading && views.length > 1 && (
-          <div style={{
-            position: 'relative',
-            margin: '20px',
-            padding: '24px',
-            background: 'linear-gradient(135deg, rgba(255,107,53,0.15) 0%, rgba(255,107,53,0.05) 100%)',
-            border: '1px solid rgba(255,107,53,0.3)',
-            borderRadius: '16px',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>👀</div>
-            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', color: colors.text }}>
-              {views.length - 1} more {views.length - 1 === 1 ? 'person' : 'people'} viewed you
-            </h3>
-            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px' }}>
-              Upgrade to see everyone who's checking out your profile
-            </p>
-            <button
-              onClick={() => router.push('/premium')}
-              style={{
-                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '14px 28px',
-                color: '#fff',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 4px 20px rgba(255,107,53,0.4)'
-              }}
-            >
-              Unlock All Views
-            </button>
-          </div>
-        )}
+        {/* Premium upsell removed — all features free */}
       </div>
 
       {/* Bottom Navigation */}

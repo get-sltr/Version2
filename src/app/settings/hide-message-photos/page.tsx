@@ -96,42 +96,7 @@ export default function HideChatPhotosPage() {
           </p>
         </div>
 
-        {/* Premium Badge - show for non-premium users */}
-        {!premiumLoading && !isPremium && (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(255,107,53,0.2) 0%, rgba(255,107,53,0.05) 100%)',
-            border: '1px solid rgba(255,107,53,0.3)',
-            borderRadius: '16px',
-            padding: '20px',
-            textAlign: 'center',
-            marginBottom: '24px',
-          }}>
-            <div style={{ fontSize: '28px', marginBottom: '12px' }}>⭐</div>
-            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-              Premium Feature
-            </h4>
-            <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px', lineHeight: 1.6 }}>
-              Hide Message Photos is available with Primal Premium
-            </p>
-            <a
-              href="/premium"
-              style={{
-                display: 'inline-block',
-                background: '#FF6B35',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '12px 32px',
-                color: '#fff',
-                fontSize: '15px',
-                fontWeight: 600,
-                textDecoration: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              Upgrade Now
-            </a>
-          </div>
-        )}
+        {/* Premium badge removed — all features free */}
 
         {/* Main Toggle */}
         <div style={{

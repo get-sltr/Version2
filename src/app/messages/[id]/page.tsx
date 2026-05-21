@@ -943,13 +943,6 @@ export default function ConversationPage() {
   const startVideoCall = async () => {
     if (!currentUserId || !otherUserId) return;
 
-    // Premium check for video calls
-    if (!isPremium) {
-      setPremiumFeature('Video Calls');
-      setShowPremiumPromo(true);
-      return;
-    }
-
     setStartingVideoCall(true);
     setError(null);
 

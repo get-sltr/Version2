@@ -288,18 +288,14 @@ export default function PulseLobbyPage() {
   }, []);
 
   useEffect(() => {
-    if (premiumLoading || !isPremium) return;
+    if (premiumLoading) return;
     fetchRooms();
     const interval = setInterval(fetchRooms, 30000);
     return () => clearInterval(interval);
-  }, [premiumLoading, isPremium, fetchRooms]);
+  }, [premiumLoading, fetchRooms]);
 
   const totalOnline = useMemo(() => rooms.reduce((sum, r) => sum + r.participantCount, 0), [rooms]);
   const joinRoom = useCallback((id: string) => router.push(`/pulse/room/${id}`), [router]);
-
-  if (!premiumLoading && !isPremium) {
-    return <PremiumPromo feature="The Pulse" fullPage />;
-  }
 
   return (
     <div style={{

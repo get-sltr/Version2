@@ -101,12 +101,6 @@ export default function CruisingUpdatesPage() {
   const handlePostUpdate = async () => {
     if (!updateText.trim() || posting) return;
 
-    // Check premium status before posting
-    if (!premiumLoading && !isPremium) {
-      setShowPremiumPrompt(true);
-      return;
-    }
-
     setPosting(true);
     try {
       await postCruisingUpdate(updateText, isHosting, userLocation?.lat, userLocation?.lng);
@@ -676,12 +670,7 @@ export default function CruisingUpdatesPage() {
             value={updateText}
             onChange={(e) => setUpdateText(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !posting && handlePostUpdate()}
-            onFocus={() => {
-              if (!premiumLoading && !isPremium) {
-                setShowPremiumPrompt(true);
-              }
-            }}
-            placeholder={!premiumLoading && !isPremium ? "Upgrade to post updates..." : "Post an update..."}
+            placeholder="Post an update..."
             maxLength={200}
             style={{
               flex: 1,
@@ -692,7 +681,7 @@ export default function CruisingUpdatesPage() {
               color: '#fff',
               fontSize: '15px',
               outline: 'none',
-              opacity: !premiumLoading && !isPremium ? 0.6 : 1
+              opacity: 1
             }}
           />
           <button
@@ -718,73 +707,7 @@ export default function CruisingUpdatesPage() {
         </div>
       </div>
 
-      {/* Premium Prompt Modal */}
-      {showPremiumPrompt && (
-        <div
-          onClick={() => setShowPremiumPrompt(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(10px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            zIndex: 1000
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: '#1c1c1e',
-              borderRadius: '24px',
-              padding: '32px 24px',
-              maxWidth: '340px',
-              width: '100%',
-              textAlign: 'center'
-            }}
-          >
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📍</div>
-            <h3 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '12px' }}>
-              Post Cruising Updates
-            </h3>
-            <p style={{ fontSize: '15px', color: '#888', marginBottom: '24px', lineHeight: 1.5 }}>
-              Upgrade to Primal Pro to post updates and let others know where you are
-            </p>
-            <button
-              onClick={() => router.push('/premium')}
-              style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
-                border: 'none',
-                borderRadius: '14px',
-                padding: '16px',
-                color: '#fff',
-                fontSize: '16px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                marginBottom: '12px'
-              }}
-            >
-              Upgrade to Primal Pro
-            </button>
-            <button
-              onClick={() => setShowPremiumPrompt(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#666',
-                fontSize: '14px',
-                cursor: 'pointer',
-                padding: '8px'
-              }}
-            >
-              Maybe Later
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Premium prompt removed — all features free */}
 
       {/* Report Modal */}
       {reportingUpdate && (

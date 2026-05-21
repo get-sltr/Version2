@@ -256,20 +256,7 @@ export default function SearchPage() {
           maxHeight: '60vh',
           overflowY: 'auto'
         }}>
-          {/* Free user warning */}
-          {!premiumLoading && !isPremium && (
-            <div style={{
-              background: 'rgba(255,107,53,0.1)',
-              border: '1px solid rgba(255,107,53,0.3)',
-              borderRadius: '12px',
-              padding: '12px 16px',
-              marginBottom: '20px',
-              fontSize: '13px',
-              color: '#FF6B35'
-            }}>
-              🔒 Free users can use 1 filter type. <span onClick={() => router.push('/premium')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Upgrade</span> for unlimited filters.
-            </div>
-          )}
+          {/* Filter restriction removed — all features free */}
 
           {/* Age Range */}
           <div style={{ marginBottom: '24px', opacity: canUseFilter('age') ? 1 : 0.4 }}>
@@ -604,92 +591,7 @@ export default function SearchPage() {
         )}
       </div>
 
-      {/* Premium Prompt Modal */}
-      {showPremiumPrompt && (
-        <div
-          onClick={() => setShowPremiumPrompt(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.85)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '20px'
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: '#1c1c1e',
-              borderRadius: '20px',
-              padding: '32px 24px',
-              maxWidth: '340px',
-              width: '100%',
-              textAlign: 'center',
-              border: '1px solid rgba(255,107,53,0.3)'
-            }}
-          >
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
-            <h3 style={{
-              fontSize: '22px',
-              fontWeight: 700,
-              marginBottom: '12px',
-              color: '#fff'
-            }}>
-              Multiple Filters
-            </h3>
-            <p style={{
-              fontSize: '15px',
-              color: '#aaa',
-              marginBottom: '24px',
-              lineHeight: 1.5
-            }}>
-              Free users can only use one filter type at a time. Upgrade to Premium for unlimited filters.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button
-                onClick={() => {
-                  setShowPremiumPrompt(false);
-                  router.push('/premium');
-                }}
-                style={{
-                  background: 'linear-gradient(135deg, #FF6B35 0%, #ff8c5a 100%)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '14px',
-                  color: '#fff',
-                  fontSize: '16px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 20px rgba(255,107,53,0.4)'
-                }}
-              >
-                Upgrade to Premium
-              </button>
-              <button
-                onClick={() => setShowPremiumPrompt(false)}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #444',
-                  borderRadius: '12px',
-                  padding: '14px',
-                  color: '#aaa',
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Maybe Later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Premium prompt removed — all features free */}
     </div>
   );
 }

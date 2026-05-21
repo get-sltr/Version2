@@ -17,10 +17,7 @@ export default function TravelModePage() {
   const [showCitySearch, setShowCitySearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Show promo for non-premium users
-  if (!premiumLoading && !isPremium) {
-    return <PremiumPromo feature="Travel Mode" fullPage />;
-  }
+  // Premium gate removed — all features free
 
   const popularCities = [
     { name: 'New York, NY', country: 'USA', icon: '🗽' },

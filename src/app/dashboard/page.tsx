@@ -60,10 +60,10 @@ export default function Dashboard() {
   const [searchedLocation, setSearchedLocation] = useState<{ lat: number; lng: number; name: string } | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Show upgrade banner only for non-premium users
+  // Upgrade banner disabled — all features are free
   useEffect(() => {
-    if (!premiumLoading && !isPremium) setShowAd(true);
-  }, [premiumLoading, isPremium]);
+    setShowAd(false);
+  }, []);
 
   const showToast = (message: string, type: 'success' | 'error' = 'error') => {
     setToast({ message, type });
@@ -497,12 +497,6 @@ export default function Dashboard() {
         // Already selected, deselect and go back to 'online'
         setActiveFilter('online');
       } else {
-        // Check premium status (but only after loading completes)
-        if (!premiumLoading && !isPremium) {
-          router.push('/premium');
-          return;
-        }
-        // If still loading, allow access (will validate on next interaction)
         setActiveFilter('dth');
       }
       setShowPositionDropdown(false);
@@ -1545,73 +1539,21 @@ export default function Dashboard() {
         )}
       </header>
 
-      {showAd && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            margin: '8px 15px',
-            background: 'linear-gradient(135deg, rgba(255,107,53,0.12) 0%, rgba(255,107,53,0.04) 100%)',
-            backdropFilter: 'blur(15px)',
-            WebkitBackdropFilter: 'blur(15px)',
-            borderRadius: '12px',
-            padding: '10px 12px',
-            position: 'relative',
-            border: '1px solid rgba(255, 107, 53, 0.25)',
-            overflow: 'hidden',
-          }}
-        >
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: '-100%',
-            width: '200%',
-            height: '100%',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%)',
-            animation: 'buttonShine 4s ease-in-out infinite',
-          }} />
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', zIndex: 1 }}>
-            <IconCrown size={18} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff' }}>Go Primal+</span>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginLeft: '6px' }}>Unlimited profiles & more</span>
-            </div>
-            <a
-              href="/premium"
-              style={{
-                background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a5c 100%)',
-                color: '#fff',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: 700,
-                textDecoration: 'none',
-                boxShadow: '0 2px 10px rgba(255, 107, 53, 0.4)',
-                fontFamily: 'inherit',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Upgrade
-            </a>
-            <button
-              onClick={() => setShowAd(false)}
-              aria-label="Close"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'rgba(255,255,255,0.3)',
-                cursor: 'pointer',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <IconClose size={12} />
-            </button>
-          </div>
-        </motion.div>
-      )}
+      {/* Free platform banner */}
+      <div
+        style={{
+          margin: '8px 15px',
+          background: 'linear-gradient(135deg, rgba(52,199,89,0.10) 0%, rgba(52,199,89,0.03) 100%)',
+          borderRadius: '12px',
+          padding: '10px 14px',
+          border: '1px solid rgba(52,199,89,0.20)',
+        }}
+      >
+        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+          <span style={{ fontWeight: 700, color: '#34C759' }}>Primal is free</span>
+          {' '}while we grow. No ads, no algorithmic manipulation, no dark patterns, and no tricks.
+        </div>
+      </div>
 
       <main style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px', padding: '3px' }}>
         {profiles.length === 0 ? (

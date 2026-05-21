@@ -657,9 +657,7 @@ export default function MissionControlPage() {
     );
   }
 
-  if (!isPremium) {
-    return <PremiumPromo feature="Mission Control" fullPage />;
-  }
+  // Premium gate removed — all features free
 
   return (
     <div style={{
