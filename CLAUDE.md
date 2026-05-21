@@ -1,150 +1,106 @@
-# Primal — Project Instructions
+# CLAUDE.md
 
-## Overview
-**Primal** is a dating PWA for gay and bisexual men.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project
+
+**Primal** is a dating app for gay and bisexual men, deployed as a PWA and wrapped in Capacitor for iOS/Android.
 - **Domain**: primalgay.com
-- **Tagline**: "Rules Don't Apply"
 - **Parent Company**: SLTR Digital LLC
-
-## Tech Stack
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS
-- **UI**: Liquid glass effects, glossy buttons, dark navy theme
-- **Backend**: Supabase (Postgres, Auth, Realtime, Storage, Edge Functions)
-- **Hosting**: Vercel
-- **Payments**: CCBill (subscriptions via FlexForms + webhooks)
-- **Maps**: Mapbox GL JS
-- **Video**: WebRTC for video calls
-- **PWA**: Service worker, manifest, installable
-
-## Color Palette
-```css
---navy: #0A1628;
---navy-light: #132038;
---orange: #FF6B35;
---orange-dark: #E55A2B;
---lavender: #B8A9C9;
---lavender-glow: #9D8AB8;
---white: #FFFFFF;
-```
-
-## Typography
-- **Logo/Headers**: Russo One (or Orbitron/Audiowide)
-- **Body**: Inter
-
-## Core Features
-1. **Auth** — Email/password, OAuth (Google, Apple)
-2. **Profiles** — Photos, bio, stats, preferences, verification
-3. **Grid View** — Location-based user grid (like Grindr)
-4. **Messaging** — Real-time chat with Supabase Realtime
-5. **Video Calls** — WebRTC peer-to-peer
-6. **Map View** — Mapbox showing nearby users
-7. **Filters** — Age, distance, preferences, online status
-8. **Subscriptions** — Free tier + Premium via CCBill
-9. **Push Notifications** — Web push for messages
-10. **Discreet Mode** — Hide from grid, incognito browsing
-
-## Database Schema (Supabase)
-
-### Key Tables
-- `profiles` — User profiles (linked to auth.users)
-- `photos` — User photos with moderation status
-- `conversations` — Chat threads between users
-- `messages` — Individual messages
-- `blocks` — Blocked users
-- `reports` — User reports for moderation
-- `apple_subscriptions` — Subscription status (synced by CCBill webhooks)
-- `locations` — User location data (encrypted)
-
-### RLS Rules
-- Users can only read/write their own data
-- Blocked users cannot see each other
-- Location data restricted to proximity queries
-- Photos require moderation approval
-
-## File Structure
-```
-/app
-  /(auth)         → Login, signup, forgot password
-  /(main)         → Grid, messages, profile, settings
-  /api            → API routes
-/components
-  /ui             → Buttons, inputs, cards, modals
-  /features       → Grid, chat, profile components
-/lib
-  /supabase       → Client, server, types
-  /ccbill-webhook → CCBill webhook helpers
-  /mapbox         → Map utilities
-/hooks            → Custom React hooks
-/types            → TypeScript definitions
-/public           → Icons, manifest, service worker
-/supabase
-  /migrations     → SQL migrations
-  /seed           → Test data
-```
-
-## API Routes
-- `/api/auth/*` — Auth callbacks
-- `/api/webhooks/ccbill` — CCBill subscription webhooks
-- `/api/moderation/*` — Photo/report review
-
-## Environment Variables Required
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_MAPBOX_TOKEN=
-CCBILL_WEBHOOK_SALT=
-NEXT_PUBLIC_CCBILL_FLEX_FORM_ID=
-CCBILL_CLIENT_ACCNUM=
-CCBILL_CLIENT_SUBACC=
-```
+- **App ID**: com.sltrdigital.primal
 
 ## Commands
+
 ```bash
-# Dev
-npm run dev
-
-# Build
-npm run build
-
-# Supabase
-npx supabase start          # Local dev
-npx supabase db push        # Push migrations
-npx supabase gen types      # Generate TS types
-
-# Deploy
-vercel --prod
+npm run dev          # Start dev server (Next.js)
+npm run build        # Production build — NOTE: typescript.ignoreBuildErrors is true in next.config.js, so builds do NOT catch type errors
+npm run lint         # ESLint via next lint
+npm test             # Jest (jsdom environment)
+npm test -- --watch  # Watch mode
+npm test -- path/to/file.test.ts   # Single test file
 ```
 
-## Git Branches
-- `main` — Production (auto-deploys to Vercel)
-- `develop` — Staging
-- `feature/*` — New features
-- `fix/*` — Bug fixes
+Node 20.x (see `.nvmrc`). Path alias `@/*` maps to `./src/*`.
 
-## Performance Targets
-- Lighthouse: 90+ all categories
-- First Contentful Paint: <1.5s
-- Time to Interactive: <3s
-- Core Web Vitals: All green
+## Architecture
 
-## Security Checklist
-- [ ] RLS enabled on all tables
-- [ ] API routes validate auth
-- [ ] Rate limiting on sensitive endpoints
-- [ ] Input sanitization
-- [ ] CSRF protection
-- [ ] Content Security Policy headers
+**Next.js 15 App Router** with all source under `src/`. No Tailwind — styling is inline styles + CSS modules + design tokens (`src/tokens/`, `src/styles/design-tokens.ts`). Dark-mode only (black background, `#FF6B35` orange accent, `#CCFF00` electric lime). Fonts: DM Sans (body), Orbitron (display).
 
-## Launch Checklist
-- [ ] Domain connected (primalgay.com)
-- [ ] SSL active
-- [ ] Email routing configured
-- [ ] CCBill webhooks verified
-- [ ] PWA manifest complete
-- [ ] App icons all sizes
-- [ ] Privacy policy page
-- [ ] Terms of service page
-- [ ] Age verification gate (18+)
+### Source Layout
+
+- `src/app/` — Next.js App Router pages. Key routes: `/dashboard` (user grid), `/map`, `/messages`, `/pulse` (LiveKit video rooms), `/groups`, `/admin`
+- `src/components/` — Atomic design: `atoms/` (Button, Avatar, Input, etc.), `molecules/` (Header, Modal, ProfileCard, Toast), `map/` (MapPage and related), `LiveKit/` (VideoConference, VoiceChannel), `landing/` (marketing page effects)
+- `src/lib/` — Backend utilities and Supabase clients
+- `src/hooks/` — Custom hooks (barrel-exported from `index.ts`)
+- `src/matching/` — AI-powered match scoring pipeline: builds user features, sends to AI scorer, ranks candidates
+- `src/map/` — Custom WebGL avatar renderer for Mapbox (GLSL shaders, instanced rendering)
+- `src/tokens/` — Design token system (colors, typography, spacing, effects)
+- `src/types/` — TypeScript definitions (`database.ts` for Supabase types)
+- `src/emails/` — React Email templates (sent via Resend)
+- `supabase/migrations/` — SQL migrations (push with `npx supabase db push`)
+
+### Supabase Clients
+
+Two Supabase clients — use the right one:
+- **Browser**: `import { supabase } from '@/lib/supabase'` — uses `createBrowserClient` from `@supabase/ssr`
+- **Server (RSC, API routes)**: `import { getSupabaseServerClient } from '@/lib/supabaseServer'` — uses `createServerClient` with cookie handling
+- **Admin (bypasses RLS)**: `import { getSupabaseAdmin } from '@/lib/admin'` — uses service role key, server-only
+
+### Auth & Middleware
+
+`middleware.ts` (project root) protects routes by checking for Supabase auth cookies. It does NOT validate sessions server-side — just checks cookie presence. Protected routes are listed in `PROTECTED_ROUTES` array. Auth routes (`/login`, `/signup`) redirect authenticated users to `/dashboard`.
+
+### Premium / Subscriptions
+
+CCBill is the payment processor (not Apple IAP or Stripe):
+- Webhook handler: `src/lib/ccbill-webhook.ts` — verifies MD5 digest (tries both `subscriptionId + "0" + salt` and `"1"` variants), maps events to premium status, updates `profiles.is_premium` and `profiles.premium_until`
+- Webhook route: `src/app/api/webhooks/ccbill/route.ts`
+- Client hook: `src/hooks/usePremium.ts` — caches premium status for 5 minutes client-side
+- Gating component: `src/components/PremiumGate.tsx` — wraps premium-only UI
+- Premium-only features defined in `canAccessFeature()` in `usePremium.ts`: video_call, viewed_me, incognito, travel_mode, pulse, map_posting, read_receipts, unlimited_messages, unlimited_filters
+
+### Video / Voice (LiveKit)
+
+Video calls use **LiveKit** (not raw WebRTC). Server config in `src/lib/livekit.ts` defines three room types:
+- `pulse` — large community rooms (up to 400 participants, 5min empty timeout)
+- `channel` — persistent voice channels (100 participants, never times out)
+- `group` — event rooms (50 participants, 10min empty timeout)
+
+API routes: `src/app/api/livekit/token/route.ts` (token generation), `src/app/api/livekit/rooms/route.ts` (room management).
+
+### Admin System
+
+Admin roles are environment-driven (`src/lib/admin.ts`):
+- `FOUNDER_EMAIL` env var gets `founder` role (full access)
+- `ADMIN_EMAILS` env var: comma-separated `email:role` pairs (roles: `admin`, `moderator`, `support`)
+- Admin UI at `/admin` with sub-pages: users, photos, reports, user-reports, payments, errors
+
+### Map System
+
+Mapbox GL JS with a custom WebGL avatar renderer (`src/map/renderers/`) that uses GLSL shaders and instanced rendering for performance. The map has a vector tile API at `src/app/api/tiles/[type]/[z]/[x]/[y]/route.ts` that queries PostGIS directly via `pg`.
+
+### Global Providers (Root Layout)
+
+`src/app/layout.tsx` wraps the app in: `ThemeProvider` → `PhotoGate` (requires profile photo before accessing app) → `AuthListener` + `ServiceWorkerRegistration` + `LocationPermission` + `OneSignalProvider`. Analytics: Vercel Analytics + PostHog (reverse-proxied via `/ingest/*` rewrites) + Google Analytics.
+
+### Native Apps (Capacitor)
+
+The Capacitor shell (`capacitor.config.ts`) points at `https://primalgay.com` — the native apps are web wrappers around the production PWA, not standalone builds. iOS and Android directories exist at project root.
+
+## Environment Variables
+
+See `.env.local.example` for base config. Additional variables used in production:
+- `SUPABASE_SERVICE_ROLE_KEY` — admin Supabase access (server-only)
+- `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `NEXT_PUBLIC_LIVEKIT_URL` — video/voice
+- `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — distributed rate limiting
+- `CCBILL_WEBHOOK_SALT` — webhook verification
+- `FOUNDER_EMAIL`, `ADMIN_EMAILS` — admin role assignment
+- `RESEND_API_KEY` — transactional email
+
+## Key Gotchas
+
+- **TypeScript errors are silent during build** — `next.config.js` sets `typescript.ignoreBuildErrors: true` and `webpack.cache: false`. Run the IDE type checker or `npx tsc --noEmit` to catch type issues.
+- **Rate limiting**: Two implementations exist — in-memory (`src/lib/rate-limit.ts`, does NOT work across serverless instances) and Upstash Redis (`src/lib/upstash-rate-limit.ts`, distributed). Prefer the Upstash version.
+- **NSFW detection**: Client-side TensorFlow.js model (`src/lib/nsfwDetection.ts`) scans photos before upload via `PhotoGate`.
+- **CSP headers** are set in `next.config.js` `headers()` — update them when adding new external services.
+- **Domain redirects**: `vercel.json` redirects `getsltr.com` → `primalgay.com`.
